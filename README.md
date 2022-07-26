@@ -3,4 +3,4 @@
 
 This project is under construction.
 
-Follow me to get notified when we release the beta-test!!
+**Follow me to get notified when we release the beta-test!!**
