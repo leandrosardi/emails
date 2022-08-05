@@ -1,10 +1,10 @@
 BlackStack::Extensions::add ({
     # descriptive name and descriptor
-    :name => 'Content',
-    :description => 'Get paid for your knowledge. Publish online seminars and courses inside a user interface designed to get readers to purchasing.',
+    :name => 'Emails',
+    :description => 'Manage thousands of GMail accounts from one signle dashboard.',
 
     # setup the url of the repository for installation and updates
-    :repo_url => 'https://github.com/leandrosardi/content',
+    :repo_url => 'https://github.com/leandrosardi/emails',
     :repo_branch => 'main',
 
     # define version with format <mayor>.<minor>.<revision>
@@ -16,23 +16,23 @@ BlackStack::Extensions::add ({
     # what is the section to add this extension in either the top-bar, the footer, the dashboard.
     :services_section => 'Services for Marketers',
     # show this extension as a service in the top bar?
-    :show_in_top_bar => false,
+    :show_in_top_bar => true,
     # show this extension as a service in the footer?
-    :show_in_footer => false,
+    :show_in_footer => true,
     # show this extension as a service in the dashboard?
-    :show_in_dashboard => false,
+    :show_in_dashboard => true,
 
     # what are the screens to add in the leftbar
     :leftbar_icons => [
-        { :label => 'paths', :icon => :random, :screen => :paths, },
-        { :label => 'seminars', :icon => :desktop, :screen => :seminars, },
+        { :label => 'campaigns', :icon => :desktop, :screen => :campaigns, },
+        { :label => 'gmails', :icon => :random, :screen => :gmails, },
         #{ :label => 'readers', :icon => :'user', :screen => :readers, },
         #{ :label => 'profits', :icon => :'money', :screen => :'profits', },
     ],
 
     # add a folder to the storage from where user can download the exports.
     :storage_folders => [
-        { :name => 'content.pictures', },
+        { :name => 'emails.pictures', },
     ],
 
     # deployment routines
