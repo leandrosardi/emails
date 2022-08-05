@@ -1,0 +1,1 @@
+require 'extensions/emails/models/skeleton/gmail'

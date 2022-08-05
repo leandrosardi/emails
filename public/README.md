@@ -1,0 +1,1 @@
+_Write here instructions about the structure of the public folder for any extension_
