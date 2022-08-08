@@ -1,7 +1,17 @@
 <%
-OOB_URI = "urn:ietf:wg:oauth:2.0:oob".freeze
-SCOPE = Google::Apis::GmailV1::AUTH_SCOPE #AUTH_GMAIL_READONLY
-url = authorizer.get_authorization_url base_url: OOB_URI
+oob_uri = "urn:ietf:wg:oauth:2.0:oob".freeze
+app_name = "ConnectionSphere".freeze
+credentials_path = BlackStack::Emails.google_api_certificate.freeze
+scope = Google::Apis::GmailV1::AUTH_SCOPE #AUTH_GMAIL_READONLY
+
+token = "token.yaml".freeze
+token_store = Google::Auth::Stores::FileTokenStore.new file: token
+
+client_id = Google::Auth::ClientId.from_file credentials_path
+
+authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
+
+url = authorizer.get_authorization_url base_url: oob_uri
 %>
 
 <!-- NavBar -->
