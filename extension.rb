@@ -41,7 +41,7 @@ BlackStack::Extensions::add ({
         :commands => [{ 
             :command => "
                 gem install google-api-client -v 0.53.0
-                gem install rmail -v 1.1.4
+                gem install mail -v 2.7.1
             ",
             :sudo => true,
         }],

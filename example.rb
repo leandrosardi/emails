@@ -2,7 +2,7 @@ require "google/apis/gmail_v1"
 require "googleauth"
 require "googleauth/stores/file_token_store"
 require "fileutils"
-require 'rmail'
+require 'mail'
 
 OOB_URI = "urn:ietf:wg:oauth:2.0:oob".freeze
 APPLICATION_NAME = "ConnectionSphere".freeze
@@ -54,17 +54,19 @@ puts "No labels found" if result.labels.empty?
 result.labels.each { |label| puts "- #{label.name}"
 =end
 
-=begin
-# send email
-message = RMail::Message.new
-message.header['To'] = 'sardi.leandro.daniel@gmail.com'
-message.header['From'] = 'leandro.sardi@expandedventure.com'
-message.header['Subject'] = 'Test'
-message.body = "This is a <b>test</b>.
+# example of sending email address, with HTML body, and reply_to field.
+body = "This is a <b>test</b>.
 Did you receive it?"
+message = Mail.new(body)
+message.to = 'sardi.leandro.daniel@gmail.com'
+message.from = 'leandro.sardi@expandedventure.com'
+message.reply_to = 'sardi.leandro.daniel.2@gmail.com'
+message.subject = 'Test'
+message.text_part = body
+message.html_part = body
 service.send_user_message(user_id, upload_source: StringIO.new(message.to_s), content_type: 'message/rfc822')
-=end
 
+=begin
 # read emails
 # reference: https://googleapis.dev/ruby/google-api-client/latest/Google/Apis/GmailV1/Message.html
 l = 500
@@ -97,3 +99,4 @@ ids.each_slice(1000) do |ids_array|
         ids_array.each { |id| gm.get_user_message('me', id, &callback) }
     end
 end
+=end
