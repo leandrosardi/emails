@@ -1,117 +1,97 @@
 # default screen
-get "/content", :agent => /(.*)/ do
-    redirect2 "/content/signup", params
+get "/emails", :agent => /(.*)/ do
+    redirect2 "/emails/signup", params
 end
-get "/content/", :agent => /(.*)/ do
-    redirect2 "/content/signup", params
+get "/emails/", :agent => /(.*)/ do
+    redirect2 "/emails/signup", params
 end
 
 # public screens (signup/landing page)
-get "/content/signup", :agent => /(.*)/ do
-    erb :"/extensions/content/views/signup", :layout => :"/views/layouts/public"
+get "/emails/signup", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/signup", :layout => :"/views/layouts/public"
 end
 
 # public screens (login page)
-get "/content/login", :agent => /(.*)/ do
-    erb :"/extensions/content/views/login", :layout => :"/views/layouts/public"
+get "/emails/login", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/login", :layout => :"/views/layouts/public"
 end
 
 # internal app screens
-get "/content/seminars", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/seminars", :layout => :"/views/layouts/core"
+get "/emails/campaigns", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/campaigns", :layout => :"/views/layouts/core"
 end
 
-get "/content/seminars/new", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/new_seminar", :layout => :"/views/layouts/core"
+get "/emails/campaigns/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_campaign", :layout => :"/views/layouts/core"
 end
 
-get "/content/seminars/:sid/view", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/view_seminar", :layout => :"/views/layouts/core"
+get "/emails/campaigns/:gid/edit", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/edit_campaign", :layout => :"/views/layouts/core"
 end
 
-get "/content/seminars/:sid/edit", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/edit_seminar", :layout => :"/views/layouts/core"
+get "/emails/campaigns/:gid/opens", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/opens", :layout => :"/views/layouts/core"
 end
 
-get "/content/seminars/:sid/edit/:tid", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/edit_section", :layout => :"/views/layouts/core"
+get "/emails/campaigns/:gid/clicks", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/clicks", :layout => :"/views/layouts/core"
 end
 
-# public URLs of seminars
-get "/seminars/pub/:path/:name", :agent => /(.*)/ do
-    erb :"/extensions/content/views/public_seminar", :layout => :"/views/layouts/public"
+get "/emails/campaigns/:gid/unsubscribes", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/unsubscribes", :layout => :"/views/layouts/core"
 end
 
-# private URLs of seminars, for the loggedin users
-get "/seminars/:path/:name", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/private_seminar", :layout => :"/views/layouts/core"
+get "/emails/addresses", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/addresses", :layout => :"/views/layouts/core"
 end
 
-# show all the available paths
-get "/seminars/", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/view_paths", :layout => :"/views/layouts/core"
-end
-get "/seminars", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/view_paths", :layout => :"/views/layouts/core"
+get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_addresses", :layout => :"/views/layouts/core"
 end
 
-# show all the available seminars into a path
-get "/seminars/:path/", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/view_seminars", :layout => :"/views/layouts/core"
-end
-get "/seminars/:path", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/content/views/view_seminars", :layout => :"/views/layouts/core"
+get "/emails/addresses/:gid/edit", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/edit_addresses", :layout => :"/views/layouts/core"
 end
 
 # filters
-post "/content/filter_new_seminar", :auth => true do
-    erb :"/extensions/content/views/filter_new_seminar"
+post "/emails/filter_new_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_new_campaign"
 end
 
-post "/content/filter_edit_seminar", :auth => true do
-    erb :"/extensions/content/views/filter_edit_seminar"
+post "/emails/filter_edit_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_edit_campaign"
 end
 
-post "/content/filter_delete_seminar", :auth => true do
-    erb :"/extensions/content/views/filter_delete_seminar"
+post "/emails/filter_launch_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_launch_campaign"
 end
-get "/content/filter_delete_seminar", :auth => true do
-    erb :"/extensions/content/views/filter_delete_seminar"
-end
-
-post "/content/filter_new_version", :auth => true do
-    erb :"/extensions/content/views/filter_new_version"
+get "/emails/filter_launch_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_launch_campaign"
 end
 
-post "/content/filter_new_section", :auth => true do
-    erb :"/extensions/content/views/filter_new_section"
-end
-get "/content/filter_new_section", :auth => true do
-    erb :"/extensions/content/views/filter_new_section"
+post "/emails/filter_new_address", :auth => true do
+    erb :"/extensions/emails/views/filter_new_address"
 end
 
-post "/content/filter_edit_section", :auth => true do
-    erb :"/extensions/content/views/filter_edit_section"
+post "/emails/filter_edit_address", :auth => true do
+    erb :"/extensions/emails/views/filter_edit_address"
 end
-
-post "/content/filter_delete_section", :auth => true do
-    erb :"/extensions/content/views/filter_delete_section"
-end
-get "/content/filter_delete_section", :auth => true do
-    erb :"/extensions/content/views/filter_delete_section"
-end
-
-post "/content/filter_done_section", :auth => true do
-    erb :"/extensions/content/views/filter_done_section"
-end
-get "/content/filter_done_section", :auth => true do
-    erb :"/extensions/content/views/filter_done_section"
+get "/emails/filter_edit_address", :auth => true do
+    erb :"/extensions/emails/views/filter_edit_address"
 end
 
 # AJAX 
-post "/ajax/content/upload_picture.json", :auth => true do
-    erb :"/extensions/content/views/ajax/upload_picture"
-end
+# TODO: Code Me!
 
 # API
-# TODO: Code Me!
+get "/api1.0/emails/open.json", :auth => true do
+    erb :"/extensions/emails/views/api1.0/open"
+end
+
+get "/api1.0/emails/click.json", :auth => true do
+    erb :"/extensions/emails/views/api1.0/click"
+end
+
+get "/api1.0/emails/unsubscribe.json", :auth => true do
+    erb :"/extensions/emails/views/api1.0/unsubscribe"
+end
