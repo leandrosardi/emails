@@ -1,0 +1,84 @@
+<%
+q = "
+    select 
+        a.id, 
+        a.address, 
+        a.share,
+        a.shared_id_account,
+        a.create_time,
+        a.max_emails_per_day
+    from eml_address a
+    join \"user\" u on (
+        u.id_account='#{@login.user.id_account}' 
+        and
+        (
+            -- address is ownd by the logged account
+            (u.id=a.id_user)
+            or
+            -- address is leased to the logged account
+            (a.shared_id_account is not null and u.id_account = a.shared_id_account)
+        )
+    )
+    --where a.delete_time is null
+    order by a.address
+"
+%>
+
+<!-- NavBar -->
+<div class="mynavbar mysticky">
+	<section class="row-fluid">	
+		<div class="span6">
+		    <%=nav2("Emails", "/emails", "Addresses")%>
+		</div>
+		<div class="span6" style='text-align:right;'>
+		    <a class='btn btn-blue' href='/emails/addresses/new'><i class='icon-plus'></i> Add</a>
+		</div>
+	</section>
+</div>
+
+<!-- Single Panel -->
+<section class="row-fluid">
+	<div class="span12 box">
+        <table class="table table-striped" style="table-layout: fixed; width: 100%;">
+            <thead>
+                <th style="width:36px;"><!-- owned, leased --></th>
+                <th style="width:auto;">Address</th>
+                <th style="width:90px;">Creation</th>
+                <th style="width:45px;">Sharing</th>
+                <th style="width:90px;">Owner</th>
+                <th style="width:90px;">Leaser</th>
+                <th style="width:60px;text-align:right;">Emails<br/>Per Day</th>
+                <th style="width:24px;"><!-- delete --></th>
+            </thead>
+            <tbody>
+                <%
+                i = 0
+                DB[q].all do |row|
+                    i += 1
+                    o = BlackStack::Emails::Campaign.where(:id=>row[:id]).first
+                %>
+                <tr>
+                    <td class="fix"><span class='badge badge-blue'>leased</span></td>
+                    <td class="fix" title="<%=row[:address].to_s.encode_html%>"><%=row[:address].to_s.encode_html%></td>
+                    <!--
+                    <td class="fix" style="text-align:right;"><a title='Edit' href='/emails/campaigns/<%=row[:id].to_guid%>/edit'><i class='icon-pencil'></i></a></td>
+                    -->
+                </tr>
+                <%
+                end
+
+                if i==0
+                %>
+                <tr>
+                    <td colspan="8" class="fix" align='center' style='text-align:center;'>
+                        No addresses found.</br>
+                        <a href='/emails/addresses/new'>Register a new address here.</a>
+                    </td>
+                <tr>
+                <%
+                end
+                %>
+            </tbody>
+        </table>
+    </div>
+</section>

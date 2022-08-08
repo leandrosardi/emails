@@ -38,7 +38,7 @@ q = "
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span12 box">
-		<form method='post' action='/content/filter_new_campaign' class="form-horizontal">
+		<form method='post' action='/emails/filter_edit_campaign' class="form-horizontal">
             <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
 
             <div class="control-group">
@@ -87,6 +87,7 @@ q = "
                 <label class="control-label" for="body">Body</label>
                 <div class="controls">
                     <textarea id="body" name='body' placeholder="Body" rows=5 style='width:100%;' maxlength=4000>
+                        <%=body%>
                     </textarea>
                 </div>
             </div>
@@ -116,6 +117,7 @@ q = "
         selector: '#body',
         plugins: "emoticons hr image link lists table", 
         toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup",
+        autosave_restore_when_empty: false,
         toolbar_groups: {
             formatgroup: {
                 icon: 'format',

@@ -71,26 +71,9 @@ q = "
             <div class="control-group">
                 <label class="control-label" for="divbody">Body</label>
                 <div class="controls">
-                    <div contenteditable="true" style='border:1px solid gray;height:200px;' id="divbody" name='divbody' placeholder="Body" rows=5 style='width:100%;' maxlength=4000>
-                        <%=body.to_s%>
-                    </div>
-                    <div class="btn-group">
-                        <a class='btn btn-link btn-bold'><i class='icon-bold'></i></a>
-                        <a class='btn btn-link btn-italic'><i class='icon-italic'></i></a>
-                    </div>
-                    <!--
-                    <div class="btn-group">
-                        <a class='btn btn-link btn-ol'><i class='icon-list-ol'></i></a>
-                        <a class='btn btn-link btn-ul'><i class='icon-list-ul'></i></a>
-                    </div>
-                    -->
-                    <div class="btn-group">
-                        <a class='btn btn-link btn-insert-link'><i class='icon-link'></i></a>
-                        <a class='btn btn-link btn-picture'><i class='icon-picture'></i></a>
-                        <!--
-                        <a class='btn btn-link btn-file'><i class='icon-paper-clip'></i></a>
-                        -->
-                    </div>
+                    <textarea id="body" name='body' placeholder="Body" rows=5 style='width:100%;' maxlength=4000>
+                        <%=body%>
+                    </textarea>
                 </div>
             </div>
 
@@ -100,80 +83,36 @@ q = "
                 </div>
             </div>
 
-            <textarea id="body" name='body' style='display:none'><%=body.to_s.encode_html%></textarea>
         </form>
 	</div>
 </section>
 
 <script> 
-    var range, node;
-
-    $("#divbody").on("keyup mouseup mousedown", function(e) {
-        // buffer the range of selected text
-        range = window.getSelection().getRangeAt(0);
-        node = range.commonAncestorContainer;
-        var parentElem = node.parentNode;
-        /*
-        console.log("selected node: ", node);
-        console.log("selected node value: ", node.nodeValue);
-        console.log("selection chars range: START POS: ", range.startOffset);
-        console.log("selection chars range: END POS: ", range.endOffset);
-        console.log("node.tagName: ", node.tagName);
-        console.log("parentElem.tagName: ", parentElem.tagName);  
-        console.log("parentElem.innerHTML: ", parentElem.innerHTML);        
-        console.log("node.innerHTML: ", node.innerHTML); 
-        */
-
-        // buffer the content
-        txt = document.getElementById("body");
-        div = document.getElementById("divbody");
-        txt.innerHTML = div.innerHTML;
-
-    });
-
-    $('.btn-bold').click(function() {
-        var parentElem = node.parentNode;    
-        let text = parentElem.innerHTML; // node.nodeValue; // because this is text outside any node, I get the nodeValue instead HTTML
-        let a = range.startOffset;
-        let b = range.endOffset;
-        let ntag = document.createElement("b");
-        let x = '';
-        let y = '';
-        let z = '';
-
-        // TODO: if there is already a bold tag inside the text, then I have to remove it
-//        if ( text.includes('<b>') == true ) {
-//            parentElem.innerHTML = text.replace('<b>', '').replace('</b>', '');
-//        } else {
-            // apply the style
-            if (a == b) { // there is not selected text. just the cursor in a specific position
-                // TODO: Code Me! - Create the bold tag and put the curor inside it.
-            } else { // there is selected text.
-                x = text.substring(0, a);
-                y = text.substring(a, b);
-                z = text.substring(b, text.length);
+    tinymce.init({
+        selector: '#body',
+        plugins: "emoticons hr image link lists table", 
+        toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup",
+        autosave_restore_when_empty: false,
+        toolbar_groups: {
+            formatgroup: {
+                icon: 'format',
+                tooltip: 'Formatting',
+                items: 'bold italic underline strikethrough | forecolor backcolor | superscript subscript | removeformat'
+            },
+            paragraphgroup: {
+                icon: 'paragraph',
+                tooltip: 'Paragraph format',
+                items: 'h1 h2 h3 | bullist numlist | alignleft aligncenter alignright | indent outdent'
+            },
+            insertgroup: {
+                icon: 'plus',
+                tooltip: 'Insert',
+                items: 'link image emoticons hr'
             }
-
-            if (typeof node.tagName === 'undefined') {
-                x = '<span>'+x+'</span>';
-                z = '<span>'+z+'</span>';
-            }
-    
-            //
-            ntag.innerHTML = y;
-            parentElem.innerHTML = x;
-            parentElem.appendChild(ntag);
-            parentElem.innerHTML += z;
-
-            // TODO: Code Me! - Select the text where applied the style 
-            //let new_range = document.createRange();
-            //new_range.selectNodeContents(ntag);
-            //var sel = window.getSelection();
-            //sel.removeAllRanges();
-            //sel.addRange(new_range);
-            
-            //
-            $('#divbody').focus();
-//        }
+        },
+        skin: 'outside',
+        toolbar_location: 'bottom',
+        menubar: false,
+        statusbar: false
     });
 </script>

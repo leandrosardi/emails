@@ -46,11 +46,7 @@ get "/emails/addresses", :auth => true, :agent => /(.*)/ do
 end
 
 get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/new_addresses", :layout => :"/views/layouts/core"
-end
-
-get "/emails/addresses/:gid/edit", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/edit_addresses", :layout => :"/views/layouts/core"
+    erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
 end
 
 # filters

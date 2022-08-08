@@ -40,9 +40,9 @@ begin
     o.save
 
     # return
-    redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape('Campaign created.')
+    redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape('Campaign updated.')
 rescue => e
     # return errors
-    redirect "/emails/campaigns/new?err="+ CGI::escape(e.message)
+    redirect "/emails/campaigns/#{params[:gid].to_guid}/edit?err="+ CGI::escape(e.message)
 end
 %>

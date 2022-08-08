@@ -1,0 +1,65 @@
+<%
+OOB_URI = "urn:ietf:wg:oauth:2.0:oob".freeze
+SCOPE = Google::Apis::GmailV1::AUTH_SCOPE #AUTH_GMAIL_READONLY
+url = authorizer.get_authorization_url base_url: OOB_URI
+%>
+
+<!-- NavBar -->
+<div class="mynavbar mysticky">
+	<section class="row-fluid">	
+		<div class="span6">
+		<%=nav3("Emails", "/emails", "Addresses", "/emails/addresses", "New")%>
+		</div>
+	</section>
+</div>
+
+<!-- Single Panel -->
+<section class="row-fluid">
+	<div class="span12 box">            
+            <div class="control-group">
+                <label class="control-label"><b>Step 1:</b></label>
+                <div class="controls">
+                    Get Your API Key
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"></label>
+                <div class="controls">
+                    <button class='btn btn-blue' id='open' name='open'>Access Your GMail</button>  
+                </div>
+            </div>
+
+            <br/>
+
+        <form method='post' action='/emails/filter_new_campaign' class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label"><b>Step 2:</b></label>
+                <div class="controls">
+                    <p>Paste Your API Key</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="replyto">API Key</label>
+                <div class="controls">
+                    <input type="text" id="apikey" name='apikey' placeholder="API Key..." value='' />
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                    <button type="submit" class="btn btn-blue">Create</button>
+                </div>
+            </div>
+
+        </form>
+	</div>
+</section>
+
+<script> 
+$(document).ready(function() {
+    $("#open").click(function() {
+        window.open('http://kanishkkunal.com','popup','width=600,height=600'); 
+        return false;
+    });
+});
+</script>
