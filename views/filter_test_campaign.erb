@@ -3,18 +3,19 @@ err = []
 begin
     # map parameters
     gid = params[:gid]
-    to = @login.user.email
+    acc = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first
 
     # load campaign
-    o = BlackStack::Emails::Campaign.where(:id=>gid).first
+    campaign = BlackStack::Emails::Campaign.where(:id=>gid).first
 
     # choose a random lead
-    l = o.export.leads.sample
+    lead = o.export.fl_export_leads.sample.fl_lead
 
     # choose a random address
+    address = acc.addresses.sample
     
     # send a test email to the logged in user
-    o.send_test_email(o, l, to)
+    address.send_test_email(campaign, lead, @login.user)
 
     # return
     redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape("Test email sent to #{to}.")
