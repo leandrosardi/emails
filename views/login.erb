@@ -7,7 +7,7 @@ msg = params[:msg]
 redirect_on_success = session['redirect_on_success']
 
 # setup default values
-redirect_on_success = '/content/results?service=content' if redirect_on_success.to_s.size == 0
+redirect_on_success = '/content/seminars?service=content' if redirect_on_success.to_s.size == 0
 %>
 <section class='row-fluid  signin-page' style='vertical-align: middle; height: 100%;' height='100%'>
 	<div class='span4 signin-page'>

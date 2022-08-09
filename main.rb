@@ -6,6 +6,26 @@ require 'mail'
 
 module BlackStack
     module Emails
+        @@mergetags = [
+            '{company-name}',
+            '{first-name}',
+            '{last-name}',
+            '{location}',
+            '{industry}',
+            '{email-address}',
+            '{phone-number}',
+            '{linkedin-url}',
+            '{unsubscribe-url}',
+        ]
+
+        def self.set_mergetags(tags)
+            @@mergetags = tags
+        end
+
+        def self.mergetags
+            @@mergetags
+        end
+
         module Google
             # where to find the gmail cartification file for the app.
             @@google_api_certificate = nil

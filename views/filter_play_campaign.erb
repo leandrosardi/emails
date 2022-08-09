@@ -1,0 +1,22 @@
+<%
+err = []
+begin
+    # map parameters
+    gid = params[:gid]
+
+    # load campaign
+    o = BlackStack::Emails::Campaign.where(:id=>gid).first
+
+    # edit
+    o.status = BlackStack::Emails::Campaign::STATUS_ON
+
+    # save
+    o.save
+
+    # return
+    redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape('Campaign created.')
+rescue => e
+    # return errors
+    redirect "/emails/campaigns/#{o.id.to_guid}/edit?err="+ CGI::escape(e.message)
+end
+%>

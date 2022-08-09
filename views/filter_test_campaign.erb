@@ -1,0 +1,25 @@
+<%
+err = []
+begin
+    # map parameters
+    gid = params[:gid]
+    to = @login.user.email
+
+    # load campaign
+    o = BlackStack::Emails::Campaign.where(:id=>gid).first
+
+    # choose a random lead
+    l = o.export.leads.sample
+
+    # choose a random address
+    
+    # send a test email to the logged in user
+    o.send_test_email(o, l, to)
+
+    # return
+    redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape("Test email sent to #{to}.")
+rescue => e
+    # return errors
+    redirect "/emails/campaigns/#{o.id.to_guid}/edit?err="+ CGI::escape(e.message)
+end
+%>

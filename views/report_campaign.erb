@@ -28,7 +28,7 @@ q = "
 		    <%=nav2("Emails", "/emails", "Campaigns")%>
 		</div>
 		<div class="span6" style='text-align:right;'>
-		    <a class='btn btn-blue' href='/emails/campaigns/new'><i class='icon-plus'></i> New</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/new'><i class='icon-plus'></i> Add</a>
 		</div>
 	</section>
 </div>
@@ -43,7 +43,7 @@ q = "
                 <th style="width:90px;">Export</th>
                 <th style="width:auto;">Subject</th>
                 <th style="width:90px;">Created By</th>
-                <th style="width:75px;">Creation</th>
+                <th style="width:45px;">Creation</th>
                 <th style="width:45px;text-align:right;">Sent</th>
                 <th style="width:45px;text-align:right;">Opens</th>
                 <th style="width:45px;text-align:right;">Clicks</th>
@@ -59,11 +59,11 @@ q = "
                 %>
                 <tr>
                     <td class="fix"><span class='badge badge-<%=o.status_color%>'><%=o.status_name%></span></td>
-                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
+                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><%=row[:name].to_s.encode_html%></td>
                     <td class="fix" title="<%=row[:export_filename].to_s.encode_html%>"><%=row[:export_filename].to_s.encode_html%></td>
-                    <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:subject].to_s.encode_html%></a></td>
+                    <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><%=row[:subject].to_s.encode_html%></td>
                     <td class="fix" title="<%=row[:user_name].to_s.encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
-                    <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
+                    <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_sent].to_i.to_label%>">
                         <a href='/email/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sent].to_i.to_label%></a>
                         <br/>

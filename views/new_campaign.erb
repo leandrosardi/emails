@@ -3,6 +3,7 @@
 name = @login.user.preference('emails.campaign.new.name', '', nil)
 subject = @login.user.preference('emails.campaign.new.subject', '', nil)
 replyto = @login.user.preference('emails.campaign.new.replyto', '', @login.user.email)
+fromname = @login.user.preference('emails.campaign.new.fromname', '', @login.user.name)
 body = @login.user.preference('emails.campaign.new.body', '', nil)
 id_export = @login.user.preference('emails.campaign.new.id_export', '', nil)
 %>
@@ -42,6 +43,12 @@ q = "
                 <label class="control-label" for="subject">Subject</label>
                 <div class="controls">
                     <input class='input input-block-level' type="text" id="subject" name='subject' placeholder="subject" value='<%=subject.to_s.encode_html%>' />
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="replyto">From Name</label>
+                <div class="controls">
+                    <input type="text" id="fromname" name='fromname' placeholder="from name..." value='<%=fromname.to_s.encode_html%>' />
                 </div>
             </div>
             <div class="control-group">
@@ -91,7 +98,7 @@ q = "
     tinymce.init({
         selector: '#body',
         plugins: "emoticons hr image link lists table", 
-        toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup",
+        toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup | <%=BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.join(' ')%>",
         autosave_restore_when_empty: false,
         toolbar_groups: {
             formatgroup: {
@@ -113,6 +120,20 @@ q = "
         skin: 'outside',
         toolbar_location: 'bottom',
         menubar: false,
-        statusbar: false
+        statusbar: false,
+        setup: function (editor) {
+            <%
+            BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.each { |tag|
+                %>
+                editor.ui.registry.addButton('<%=tag%>', {
+                    text: '{<%=tag%>}',
+                    onAction: function (_) {
+                        editor.insertContent('{<%=tag%>}');
+                    }
+                });
+                <%
+            }
+            %>
+        },
     });
 </script>

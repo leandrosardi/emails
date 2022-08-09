@@ -6,6 +6,7 @@ begin
     name = params[:name]
     subject = params[:subject]
     replyto = params[:replyto]
+    fromname = params[:fromname]
     id_export = params[:id_export]
     body = params[:body]
 
@@ -17,6 +18,9 @@ begin
 
     # validate: the replyto is not empty
     err << "Reply-To is required." if replyto.empty?
+
+    # validate: the fromname is not empty
+    err << "From Name is required." if fromname.empty?
 
     # validate: the id_export is not empty
     err << "Export is required." if id_export.empty?
@@ -37,6 +41,7 @@ begin
     o.subject = subject
     o.body = body
     o.reply_to = replyto
+    o.from_name = fromname
     o.save
 
     # return

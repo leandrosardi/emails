@@ -5,6 +5,7 @@ o = BlackStack::Emails::Campaign.where(:id=>gid).first
 name = o.name
 subject = o.subject
 replyto = o.reply_to
+fromname = o.from_name
 body = o.body
 id_export = o.id_export
 
@@ -30,7 +31,21 @@ q = "
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span6">
-		<%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", name)%>
+		    <%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", name)%>
+		</div>
+		<div class="span6" style='text-align:right;'>
+            <%
+            if o.can_play?
+                %>
+                <a class="btn btn-green" href='/emails/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
+                <%
+            elsif o.can_pause?
+                %>
+                <a class="btn btn-gray" href='/emails/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Pause</a>
+                <%
+            end
+            %>
+		    <a class='btn btn-blue' href='/emails/campaigns/new'><i class='icon-plus'></i> New</a>
 		</div>
 	</section>
 </div>
@@ -57,6 +72,12 @@ q = "
                 <label class="control-label" for="subject">Subject</label>
                 <div class="controls">
                     <input class='input input-block-level' type="text" id="subject" name='subject' placeholder="subject" value='<%=subject.to_s.encode_html%>' <%=disabled%> />
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="replyto">From Name</label>
+                <div class="controls">
+                    <input type="text" id="fromname" name='fromname' placeholder="from name..." value='<%=fromname.to_s.encode_html%>' <%=disabled%> />
                 </div>
             </div>
             <div class="control-group">
@@ -98,14 +119,15 @@ q = "
                     <%
                     if o.can_play?
                         %>
-                        <a class="btn btn-green" href='/emails/campaigns/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
+                        <a class="btn btn-green" href='/emails/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
                         <%
                     elsif o.can_pause?
                         %>
-                        <a class="btn btn-gray" href='/emails/campaigns/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Play</a>
+                        <a class="btn btn-gray" href='/emails/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Pause</a>
                         <%
                     end
                     %>
+                    <a class="btn btn-gray" href='/emails/filter_test_campaign?gid=<%=gid%>' title='You will receive a test email in your inbox <%=@login.user.email.encode_html%>'><i class='icon-envelope'></i> Send Test Email to Me</a>
                 </div>
             </div>
         </form>
@@ -116,7 +138,7 @@ q = "
     tinymce.init({
         selector: '#body',
         plugins: "emoticons hr image link lists table", 
-        toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup",
+        toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup | <%=BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.join(' ')%>",
         autosave_restore_when_empty: false,
         toolbar_groups: {
             formatgroup: {
@@ -138,6 +160,20 @@ q = "
         skin: 'outside',
         toolbar_location: 'bottom',
         menubar: false,
-        statusbar: false
+        statusbar: false,
+        setup: function (editor) {
+            <%
+            BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.each { |tag|
+                %>
+                editor.ui.registry.addButton('<%=tag%>', {
+                    text: '{<%=tag%>}',
+                    onAction: function (_) {
+                        editor.insertContent('{<%=tag%>}');
+                    }
+                });
+                <%
+            }
+            %>
+        },
     });
 </script>

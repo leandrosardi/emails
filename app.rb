@@ -1,9 +1,9 @@
 # default screen
 get "/emails", :agent => /(.*)/ do
-    redirect2 "/emails/signup", params
+    redirect2 "/emails/campaigns", params
 end
 get "/emails/", :agent => /(.*)/ do
-    redirect2 "/emails/signup", params
+    redirect2 "/emails/campaigns", params
 end
 
 # public screens (signup/landing page)
@@ -29,16 +29,8 @@ get "/emails/campaigns/:gid/edit", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/edit_campaign", :layout => :"/views/layouts/core"
 end
 
-get "/emails/campaigns/:gid/opens", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/opens", :layout => :"/views/layouts/core"
-end
-
-get "/emails/campaigns/:gid/clicks", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/clicks", :layout => :"/views/layouts/core"
-end
-
-get "/emails/campaigns/:gid/unsubscribes", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/unsubscribes", :layout => :"/views/layouts/core"
+get "/emails/campaigns/:gid/:report", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
 end
 
 get "/emails/addresses", :auth => true, :agent => /(.*)/ do
@@ -58,11 +50,25 @@ post "/emails/filter_edit_campaign", :auth => true do
     erb :"/extensions/emails/views/filter_edit_campaign"
 end
 
-post "/emails/filter_launch_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_launch_campaign"
+post "/emails/filter_test_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_test_campaign"
 end
-get "/emails/filter_launch_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_launch_campaign"
+get "/emails/filter_test_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_test_campaign"
+end
+
+post "/emails/filter_play_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_play_campaign"
+end
+get "/emails/filter_play_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_play_campaign"
+end
+
+post "/emails/filter_pause_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_pause_campaign"
+end
+get "/emails/filter_pause_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_pause_campaign"
 end
 
 post "/emails/filter_new_address", :auth => true do
