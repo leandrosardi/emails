@@ -43,8 +43,11 @@ service = Google::Apis::GmailV1::GmailService.new
 service.client_options.application_name = APPLICATION_NAME
 service.authorization = authorize
 
-# Show the user's labels
+# access the email account as the google logged-in
 user_id = "me"
+
+# get the email address of the google logged-in user
+puts service.get_user_profile(user_id).email_address
 
 =begin
 # list labels
@@ -59,7 +62,7 @@ body = "This is a <b>test</b>.
 Did you receive it?"
 message = Mail.new(body)
 message.to = 'sardi.leandro.daniel@gmail.com'
-message.from = 'leandro.sardi@expandedventure.com'
+message.from = 'Pepe Garcia <leandro.sardi@expandedventure.com>'
 message.reply_to = 'sardi.leandro.daniel.2@gmail.com'
 message.subject = 'Test'
 message.text_part = body

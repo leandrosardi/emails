@@ -1,0 +1,67 @@
+<%
+err = []
+begin
+    # map parameters
+    id = params[:id]
+    apikey = params[:apikey]
+
+    # validate: the name is not empty
+    err << "API-Key is required." if apikey.empty?
+
+    # if any error happened, return to the edition screen
+    raise err.join("\n") if err.size > 0
+
+    # TODO: move this to the account model
+    oob_uri = BlackStack::Emails::Google::oob_uri
+    app_name = BlackStack::Emails::Google::app_name
+    google_api_certificate = BlackStack::Emails::Google::google_api_certificate
+    scope = BlackStack::Emails::Google::scope
+    # build the token file
+    id = guid.to_guid # id for the new address
+    token = "#{@login.user.account.storage_sub_folder('emails.google.tokens')}/#{id}.yaml".freeze
+    token_store = Google::Auth::Stores::FileTokenStore.new file: token
+    # get the google-api authorization
+    client_id = Google::Auth::ClientId.from_file google_api_certificate
+    authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
+    # buld credentials and save them in the storage folder of the account
+    credentials = authorizer.get_and_store_credentials_from_code(
+        user_id: 'default', 
+        code: apikey, 
+        base_url: BlackStack::Emails::Google::oob_uri
+    )
+
+    # get the credential of the google logged-in user
+    # TODO: move this to the account model
+    client_id = Google::Auth::ClientId.from_file google_api_certificate
+    token_store = Google::Auth::Stores::FileTokenStore.new file: token
+    authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
+    user_id = 'default'
+    credentials = authorizer.get_credentials user_id
+    raise "Address credentials not found" if credentials.nil?
+
+    # TODO: move this to the account model
+    # Initialize the API
+    service = Google::Apis::GmailV1::GmailService.new
+    service.client_options.application_name = app_name
+    service.authorization = credentials
+    user_id = 'me'
+
+    # create the object
+    o = BlackStack::Emails::Address.new
+    o.id = id
+    o.id_user = @login.id_user
+    o.create_time = now
+    o.type = BlackStack::Emails::Address::TYPE_GMAIL
+    o.address = service.get_user_profile(user_id).email_address # get the email address of the gmail account
+    o.share = false
+    o.max_emails_per_hour = 200 # TODO: this parameter is not being used by now. Only emails_per_day.
+    o.max_emails_per_day = 20
+    o.save
+
+    # return
+    redirect "/emails/addresses?msg="+ CGI::escape('Address registered.')
+rescue => e
+    # return errors
+    redirect "/emails/addresses/new?err="+ CGI::escape(e.message)
+end
+%>

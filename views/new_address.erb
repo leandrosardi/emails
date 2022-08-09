@@ -1,16 +1,22 @@
 <%
-oob_uri = "urn:ietf:wg:oauth:2.0:oob".freeze
-app_name = "ConnectionSphere".freeze
-credentials_path = BlackStack::Emails.google_api_certificate.freeze
-scope = Google::Apis::GmailV1::AUTH_SCOPE #AUTH_GMAIL_READONLY
+@login.user.account.create_storage
 
-token = "token.yaml".freeze
+# map google-api configuration
+oob_uri = BlackStack::Emails::Google::oob_uri
+app_name = BlackStack::Emails::Google::app_name
+google_api_certificate = BlackStack::Emails::Google::google_api_certificate
+scope = BlackStack::Emails::Google::scope
+
+# build the token file
+id = guid.to_guid # id for the new address
+token = "#{@login.user.account.storage_sub_folder('emails.google.tokens')}/#{id}.yaml".freeze
 token_store = Google::Auth::Stores::FileTokenStore.new file: token
 
-client_id = Google::Auth::ClientId.from_file credentials_path
-
+# get the google-api authorization
+client_id = Google::Auth::ClientId.from_file google_api_certificate
 authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
 
+# get the google login page for the user
 url = authorizer.get_authorization_url base_url: oob_uri
 %>
 
@@ -25,42 +31,19 @@ url = authorizer.get_authorization_url base_url: oob_uri
 
 <!-- Single Panel -->
 <section class="row-fluid">
-	<div class="span12 box">            
-            <div class="control-group">
-                <label class="control-label"><b>Step 1:</b></label>
-                <div class="controls">
-                    Get Your API Key
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label"></label>
-                <div class="controls">
-                    <button class='btn btn-blue' id='open' name='open'>Access Your GMail</button>  
-                </div>
-            </div>
+	<div class="span6 box">            
+        <p><b>Step 1:</b></p>
+        <p>Get Your API Key</p>
+        <button class='btn btn-blue' id='open' name='open'>Access Your GMail</button>              
+    </div>
 
-            <br/>
-
-        <form method='post' action='/emails/filter_new_campaign' class="form-horizontal">
-            <div class="control-group">
-                <label class="control-label"><b>Step 2:</b></label>
-                <div class="controls">
-                    <p>Paste Your API Key</p>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="replyto">API Key</label>
-                <div class="controls">
-                    <input type="text" id="apikey" name='apikey' placeholder="API Key..." value='' />
-                </div>
-            </div>
-
-            <div class="control-group">
-                <div class="controls">
-                    <button type="submit" class="btn btn-blue">Create</button>
-                </div>
-            </div>
-
+	<div class="span6 box">            
+        <form method='post' action='/emails/filter_new_address'>
+            <p><b>Step 2:</b></p>
+            <p>Submit Your API Key</p>
+            <input type='hidden' id='id' name='id' value='<%=id%>' />
+            <input class='input input-block-level' type="text" id="apikey" name='apikey' placeholder="API Key..." value='' /><br/>
+            <button type="submit" class="btn btn-blue">Submit</button>
         </form>
 	</div>
 </section>
@@ -68,7 +51,7 @@ url = authorizer.get_authorization_url base_url: oob_uri
 <script> 
 $(document).ready(function() {
     $("#open").click(function() {
-        window.open('http://kanishkkunal.com','popup','width=600,height=600'); 
+        window.open('<%=url%>','popup','width=600,height=600'); 
         return false;
     });
 });
