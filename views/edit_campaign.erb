@@ -11,8 +11,6 @@ id_export = o.id_export
 
 # put fields in readonly mode ?
 disabled = o.can_edit? ? '' : 'disabled'
-contenteditable = o.can_edit? ? 'true' : 'false'
-background_color = o.can_edit? ? 'white' : 'rgb(235,235,235)'
 %>
 
 <%
@@ -161,6 +159,7 @@ q = "
         toolbar_location: 'bottom',
         menubar: false,
         statusbar: false,
+        readonly: <%=o.can_edit? ? 'false' : 'true'%>,
         setup: function (editor) {
             <%
             BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.each { |tag|

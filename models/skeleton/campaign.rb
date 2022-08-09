@@ -89,9 +89,9 @@ module BlackStack
             # this should not call this method.
             def merge(s, lead)
                 ret = s
-                email = lead.datas.select { |d| d.type == Leads::FlData::TYPE_EMAIL }.first
-                phone = lead.datas.select { |d| d.type == Leads::FlData::TYPE_PHONE }.first
-                linkd = lead.datas.select { |d| d.type == Leads::FlData::TYPE_LINKEDIN }.first
+                email = lead.emails.first.nil? ? '' : lead.emails.first.value
+                phone = lead.phones.first.nil? ? '' : lead.phones.first.value
+                linkd = lead.linkedins.first.nil? ? '' : lead.linkedins.first.value
                 unsub = "#{CS_HOME_WEBSITE}/api1.0/emails/unsubscribe.json?lid=#{lead.id.to_guid}&gid=#{self.id.to_guid}"
 
                 # replace merge-tags with no fallback values
@@ -107,32 +107,29 @@ module BlackStack
 
                 # replace merge-tags with fallback values
                 ret.scan(/#{Regexp.escape('{company-name|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, lead.stat_company_name.to_s.empty? ? m.gsub(/^\{company-name\|/, '').gsub(/\}$/) : lead.stat_company_name.to_s)
+                    ret.sub!(m, lead.stat_company_name.to_s.empty? ? m.gsub(/^\{company-name\|/, '').gsub(/\}$/, '') : lead.stat_company_name.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{first-name|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, lead.first_name.to_s.empty? ? m.gsub(/^\{first-name\|/, '').gsub(/\}$/) : lead.first_name.to_s)
+                    ret.sub!(m, lead.first_name.to_s.empty? ? m.gsub(/^\{first-name\|/, '').gsub(/\}$/, '') : lead.first_name.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{last-name|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, lead.last_name.to_s.empty? ? m.gsub(/^\{last-name\|/, '').gsub(/\}$/) : lead.last_name.to_s)
+                    ret.sub!(m, lead.last_name.to_s.empty? ? m.gsub(/^\{last-name\|/, '').gsub(/\}$/, '') : lead.last_name.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{location|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, lead.stat_location_name.to_s.empty? ? m.gsub(/^\{location\|/, '').gsub(/\}$/) : lead.stat_location_name.to_s)
+                    ret.sub!(m, lead.stat_location_name.to_s.empty? ? m.gsub(/^\{location\|/, '').gsub(/\}$/, '') : lead.stat_location_name.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{industry|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, lead.stat_industry_name.to_s.empty? ? m.gsub(/^\{industry\|/, '').gsub(/\}$/) : lead.stat_industry_name.to_s)
+                    ret.sub!(m, lead.stat_industry_name.to_s.empty? ? m.gsub(/^\{industry\|/, '').gsub(/\}$/, '') : lead.stat_industry_name.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{email-address|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, email.to_s.empty? ? m.gsub(/^\{email-address\|/, '').gsub(/\}$/) : email.to_s)
+                    ret.sub!(m, email.to_s.empty? ? m.gsub(/^\{email-address\|/, '').gsub(/\}$/, '') : email.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{phone-number|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, phone.to_s.empty? ? m.gsub(/^\{phone-number\|/, '').gsub(/\}$/) : phone.to_s)
+                    ret.sub!(m, phone.to_s.empty? ? m.gsub(/^\{phone-number\|/, '').gsub(/\}$/, '') : phone.to_s)
                 } 
                 ret.scan(/#{Regexp.escape('{linkedin-url|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, linkd.to_s.empty? ? m.gsub(/^\{linkedin-url\|/, '').gsub(/\}$/) : linkd.to_s)
+                    ret.sub!(m, linkd.to_s.empty? ? m.gsub(/^\{linkedin-url\|/, '').gsub(/\}$/, '') : linkd.to_s)
                 } 
-                ret.scan(/#{Regexp.escape('{unsubscribe-url|')}.*#{Regexp.escape('}')}/).each { |m| 
-                    ret.sub!(m, unsub.to_s.empty? ? m.gsub(/^\{unsubscribe-url\|/, '').gsub(/\}$/) : unsub.to_s)
-                }
                 # return
                 ret             
             end

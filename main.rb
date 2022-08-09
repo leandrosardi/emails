@@ -26,23 +26,6 @@ module BlackStack
             @@mergetags
         end
 
-        # inherit from BlackStack::MySaaS::User
-        class User < BlackStack::MySaaS::User
-            one_to_many :addresses, :class=>:'BlackStack::Emails::Address', :key=>:id_user
-            one_to_many :campaigns, :class=>:'BlackStack::Emails::Campaign', :key=>:id_user
-        end # class User
-
-        # inherit from BlackStack::MySaaS::Account
-        class Account < BlackStack::MySaaS::Account
-            def addresses
-                self.users.map { |u| BlackStack::Emails::Users.where(:id=>u.id).first.addresses }.flatten
-            end # def addresses
-
-            def campaigns
-                self.users.map { |u| BlackStack::Emails::Users.where(:id=>u.id).first.campaigns }.flatten
-            end # def campaigns
-        end # class Account
-
         # Google module
         module Google
             # where to find the gmail cartification file for the app.

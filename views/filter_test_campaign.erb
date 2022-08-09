@@ -9,18 +9,18 @@ begin
     campaign = BlackStack::Emails::Campaign.where(:id=>gid).first
 
     # choose a random lead
-    lead = o.export.fl_export_leads.sample.fl_lead
+    lead = campaign.export.fl_export_leads.sample.fl_lead
 
     # choose a random address
     address = acc.addresses.sample
     
     # send a test email to the logged in user
-    address.send_test_email(campaign, lead, @login.user)
+    address.send_test(campaign, lead, @login.user)
 
     # return
-    redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape("Test email sent to #{to}.")
+    redirect "/emails/campaigns/#{campaign.id.to_guid}/edit?msg="+ CGI::escape("Test email sent to #{to}.")
 rescue => e
     # return errors
-    redirect "/emails/campaigns/#{o.id.to_guid}/edit?err="+ CGI::escape(e.message)
+    redirect "/emails/campaigns/#{campaign.id.to_guid}/edit?err="+ CGI::escape(e.message)
 end
 %>

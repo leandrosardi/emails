@@ -101,7 +101,7 @@ module BlackStack
             def send_test(campaign, lead, user)
                 self.send({
                     :to => user.email, 
-                    :subject => campaign.merged_subject(lead), 
+                    :subject => '[Test] '+campaign.merged_subject(lead), 
                     :body => campaign.merged_body(lead), 
                     :from_name => user.name, 
                     :reply_to => user.email,

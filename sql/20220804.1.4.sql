@@ -119,6 +119,15 @@ create table IF NOT EXISTS eml_unsubscribe (
     create_time TIMESTAMP NOT NULL
 );
 
+-- add planning fields to the campaign
+alter table eml_campaign add column if not exists planning_start_time timestamp null;
+alter table eml_campaign add column if not exists planning_end_time timestamp null;
+alter table eml_campaign add column if not exists planning_success boolean null;
+alter table eml_campaign add column if not exists planning_error_description varchar(8000) null;
+
+-- add scheduling fields to the job
+alter table eml_job add column if not exists schedule_start_time timestamp not null; -- when the campaign will be sent
+
 -- trigger when sent an email
 
 -- trigger when track open
