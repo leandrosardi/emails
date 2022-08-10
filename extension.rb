@@ -24,9 +24,9 @@ BlackStack::Extensions::add ({
 
     # what are the screens to add in the leftbar
     :leftbar_icons => [
-        { :label => 'campaigns', :icon => :'envelope-alt', :screen => :campaigns, },
-        { :label => 'gmails', :icon => :group, :screen => :gmails, },
-        #{ :label => 'readers', :icon => :'user', :screen => :readers, },
+        { :label => 'campaigns', :icon => :envelope, :screen => :campaigns, },
+        { :label => 'addresses', :icon => :tags, :screen => :addresses, },
+        #{ :label => 'lists', :icon => :'icon-cloud-download', :screen => :lists, },
         #{ :label => 'profits', :icon => :'money', :screen => :'profits', },
     ],
 
