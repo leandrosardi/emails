@@ -24,10 +24,12 @@ BlackStack::Extensions::add ({
 
     # what are the screens to add in the leftbar
     :leftbar_icons => [
+        { :label => 'leads', :icon => :heart, :screen => :leads, },
+        { :label => 'lists', :icon => :list, :screen => :lists, },
         { :label => 'campaigns', :icon => :envelope, :screen => :campaigns, },
-        { :label => 'addresses', :icon => :tags, :screen => :addresses, },
-        #{ :label => 'lists', :icon => :'icon-cloud-download', :screen => :lists, },
-        #{ :label => 'profits', :icon => :'money', :screen => :'profits', },
+        { :label => 'jobs', :icon => :tasks, :screen => :jobs, },
+        { :label => 'deliveries', :icon => :truck, :screen => :deliveries, },
+        #{ :label => 'addresses', :icon => :tags, :screen => :addresses, },
     ],
 
     # add a folder to the storage from where user can download the exports.
