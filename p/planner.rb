@@ -57,9 +57,10 @@ shared_addresses = BlackStack::Emails::Address.where(
 ).all.freeze
 l.logf "done (#{shared_addresses.size})"
 
-# TODO: Use case: If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
-
 # TODO: Use case: If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
+
+# TODO: restart abandoned jobs
+# If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
 
 # Use case: Each `eml_job` record has one and only one address assigned.
 # For each active campaign pending planning, I have to create the jobs.
@@ -73,7 +74,15 @@ campaigns.each { |campaign|
             # it is VERY important to sort leads, in order to reach them in the same order in a further followup
             l.logs "Load leads... "
             leads = campaign.export.fl_export_leads.map { |el| el.fl_lead }.sort_by {|l| l.id}
-            l.done
+            l.logf "done (#{leads.size})"
+
+            # remove leads who already have a delivery created for this campaign
+            # that is important for cases when a job is being reprocessed, because an address has been deprecated.
+            l.logs "Remove leads who already have a delivery created for this campaign... "
+            leads.dup.each { |lead|
+                leads.reject! { |x| x.id.to_guid==lead.id.to_guid } if campaign.include?(lead)
+            }
+            l.logf "done (#{leads.size} left)"
 
             l.logs "Calc total leads... "
             n = leads.size

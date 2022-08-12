@@ -88,7 +88,7 @@ module BlackStack
             # this is a general purpose method to send email.
             # this should not call this method.
             def merge(s, lead)
-                ret = s
+                ret = s.dup
                 email = lead.emails.first.nil? ? '' : lead.emails.first.value
                 phone = lead.phones.first.nil? ? '' : lead.phones.first.value
                 linkd = lead.linkedins.first.nil? ? '' : lead.linkedins.first.value
@@ -160,6 +160,21 @@ module BlackStack
                 self.save
             end
 
+            # return true if there is a delivery for the given lead
+            # otherwise return false
+            def include?(lead)
+                DB["
+                    SELECT COUNT(*) AS n
+                    FROM eml_job j
+                    JOIN eml_delivery d ON (
+                        j.id = d.id_job AND 
+                        d.id_lead='#{lead.id.to_guid}' AND 
+                        d.delivery_start_time IS NULL -- delivery should not be started yet
+                    )
+                    WHERE j.id_campaign = '#{self.id}'
+                "].first[:n] > 0
+            end
+
             # create a job to deliver an email to all the leads in the array `leads`, thru the address in `address`
             def create_jobs(leads, address)
                 # create the job
@@ -172,15 +187,15 @@ module BlackStack
                 j.save
                 
                 # create deliveries for each lead
-                leads.each { |l| 
+                leads.each { |lead|
                     d = BlackStack::Emails::Delivery.new
                     d.id = guid
                     d.id_job = j.id
-                    d.id_lead = l.id
+                    d.id_lead = lead.id
                     d.create_time = now
-                    d.email = l.emails.first.value
-                    d.subject = self.merged_subject(l)
-                    d.body = self.merged_body(l)
+                    d.email = lead.emails.first.value
+                    d.subject = self.merged_subject(lead)
+                    d.body = self.merged_body(lead)
                     d.save
                     # release resources
                     GC.start
@@ -190,6 +205,7 @@ module BlackStack
                 # return the job
                 j
             end
+
         end # class Campaign
     end # Emails
 end # BlackStack
