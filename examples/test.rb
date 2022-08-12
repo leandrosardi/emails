@@ -1,3 +1,5 @@
+# This example is about sending a test email.
+
 # load gem and connect database
 require 'mysaas'
 require 'lib/stubs'
