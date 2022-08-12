@@ -26,8 +26,8 @@ module BlackStack
             @@mergetags
         end
 
-        # Google module
-        module Google
+        # GoogleConfig module
+        module GoogleConfig
             # where to find the gmail cartification file for the app.
             @@google_api_certificate = nil
             @@oob_uri = nil #"urn:ietf:wg:oauth:2.0:oob".freeze
@@ -58,6 +58,6 @@ module BlackStack
             def self.scope
                 @@scope
             end
-        end # module Google
+        end # module GoogleConfig
     end # module Emails
 end # module BlackStack

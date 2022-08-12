@@ -12,10 +12,10 @@ begin
     raise err.join("\n") if err.size > 0
 
     # TODO: move this to the account model
-    oob_uri = BlackStack::Emails::Google::oob_uri
-    app_name = BlackStack::Emails::Google::app_name
-    google_api_certificate = BlackStack::Emails::Google::google_api_certificate
-    scope = BlackStack::Emails::Google::scope
+    oob_uri = BlackStack::Emails::GoogleConfig::oob_uri
+    app_name = BlackStack::Emails::GoogleConfig::app_name
+    google_api_certificate = BlackStack::Emails::GoogleConfig::google_api_certificate
+    scope = BlackStack::Emails::GoogleConfig::scope
     # build the token file
     id = guid.to_guid # id for the new address
     token = "#{@login.user.account.storage_sub_folder('emails.google.tokens')}/#{id}.yaml".freeze
@@ -27,7 +27,7 @@ begin
     credentials = authorizer.get_and_store_credentials_from_code(
         user_id: 'default', 
         code: apikey, 
-        base_url: BlackStack::Emails::Google::oob_uri
+        base_url: BlackStack::Emails::GoogleConfig::oob_uri
     )
 
     # get the credential of the google logged-in user

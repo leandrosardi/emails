@@ -11,10 +11,14 @@ module BlackStack
             # send email.
             # this is a general purpose method to send email.
             # end user should not call this method.
-            def send(to, subject, body, from_name, reply_to)
+            def send_email(to, subject, body, from_name, reply_to)
                 raise 'Abstract method'                
             end # send
 
+            # recevive all same the parameters than `send_email` but into a hash.
+            # validate the value of each parameters.
+            # raise exception with all the errors found in the parameters.
+            # if there is no errors, then call `send_email` with the parameters. 
             def send(h)
                 err = []
                 # validate: h is a hash
@@ -30,21 +34,32 @@ module BlackStack
                 # validate: reply_to is required
                 err << 'reply_to is required' unless h[:reply_to]
                 # validate: to is a string and it is a valid email address
-                err << 'to is not a string' unless !h[:to].nil? && !h[:to].is_a?(String)
-                err << 'to is not a valid email address' unless !h[:to].nil? && !h[:to].to_s.email?
+                err << 'to is not a string' if !h[:to].nil? && !h[:to].is_a?(String)
+                err << 'to is not a valid email address' if !h[:to].nil? && !h[:to].to_s.email?
                 # validate: subject is a string
-                err << 'subject is not a string' unless !h[:subject].nil? && !h[:subject].is_a?(String)
+                err << 'subject is not a string' if !h[:subject].nil? && !h[:subject].is_a?(String)
                 # validate: body is a string
-                err << 'body is not a string' unless !h[:body].nil? && !h[:body].is_a?(String)
+                err << 'body is not a string' if !h[:body].nil? && !h[:body].is_a?(String)
                 # validate: from_name is a string
-                err << 'from_name is not a string' unless !h[:from_name].nil? && !h[:from_name].is_a?(String)
+                err << 'from_name is not a string' if !h[:from_name].nil? && !h[:from_name].is_a?(String)
                 # validate: reply_to is a string and it is a valid email address
-                err << 'reply_to is not a string' unless !h[:reply_to].nil? && !h[:reply_to].is_a?(String)
-                err << 'reply_to is not a valid email address' unless !h[:reply_to].nil? && !h[:reply_to].to_s.email?
-                # return if errors
-                return err if err.size > 0
+                err << 'reply_to is not a string' if !h[:reply_to].nil? && !h[:reply_to].is_a?(String)
+                err << 'reply_to is not a valid email address' if !h[:reply_to].nil? && !h[:reply_to].to_s.email?
+                # raise exception if any error
+                raise err.join("\n") unless err.empty?
                 # send email
-                send(h[:to], h[:subject], h[:body], h[:from_name], h[:reply_to])
+                send_email(h[:to], h[:subject], h[:body], h[:from_name], h[:reply_to])
+            end
+
+            # send a test email to the logged in user
+            def send_test(campaign, lead, user)
+                self.send({
+                    :to => user.email, 
+                    :subject => '[Test] '+campaign.merged_subject(lead), 
+                    :body => campaign.merged_body(lead), 
+                    :from_name => campaign.from_name, 
+                    :reply_to => campaign.reply_to,
+                })
             end
 
             # return the next day when it is available to deliver the number of emails configured on its `max_deliveries_per_day` parameters.
@@ -65,7 +80,6 @@ module BlackStack
                     "].first[:dt]
                 end
             end
-
         end # class Address
 
 
@@ -77,10 +91,10 @@ module BlackStack
 
             # to access the gmail account, we need to use the gmail api's credentials
             def credentials
-                oob_uri = BlackStack::Emails::Google::oob_uri
-                app_name = BlackStack::Emails::Google::app_name
-                google_api_certificate = BlackStack::Emails::Google::google_api_certificate
-                scope = BlackStack::Emails::Google::scope 
+                oob_uri = BlackStack::Emails::GoogleConfig::oob_uri
+                app_name = BlackStack::Emails::GoogleConfig::app_name
+                google_api_certificate = BlackStack::Emails::GoogleConfig::google_api_certificate
+                scope = BlackStack::Emails::GoogleConfig::scope 
 
                 client_id = Google::Auth::ClientId.from_file google_api_certificate
                 token_store = Google::Auth::Stores::FileTokenStore.new file: self.token
@@ -93,7 +107,11 @@ module BlackStack
 
             # get gmail service
             def service
-                app_name = BlackStack::Emails::Google::app_name
+                require "google/apis/gmail_v1"
+                require "googleauth"
+                require "googleauth/stores/file_token_store"
+
+                app_name = BlackStack::Emails::GoogleConfig::app_name
                 service = Google::Apis::GmailV1::GmailService.new
                 service.client_options.application_name = app_name
                 service.authorization = self.credentials
@@ -103,7 +121,7 @@ module BlackStack
             # send email.
             # this is a general purpose method to send email.
             # this should not call this method.
-            def send(to, subject, body, from_name, reply_to)
+            def send_email(to, subject, body, from_name, reply_to)
                 user_id = "me"
                 message = Mail.new(body)
                 message.to = to
@@ -114,18 +132,6 @@ module BlackStack
                 message.html_part = body
                 self.service.send_user_message(user_id, upload_source: StringIO.new(message.to_s), content_type: 'message/rfc822')                
             end # send
-
-            # send a test email to the logged in user
-            def send_test(campaign, lead, user)
-                self.send({
-                    :to => user.email, 
-                    :subject => '[Test] '+campaign.merged_subject(lead), 
-                    :body => campaign.merged_body(lead), 
-                    :from_name => user.name, 
-                    :reply_to => user.email,
-                })
-            end
-
         end # class GMail
 
     end # Emails

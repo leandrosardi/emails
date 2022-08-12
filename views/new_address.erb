@@ -2,10 +2,10 @@
 @login.user.account.create_storage
 
 # map google-api configuration
-oob_uri = BlackStack::Emails::Google::oob_uri
-app_name = BlackStack::Emails::Google::app_name
-google_api_certificate = BlackStack::Emails::Google::google_api_certificate
-scope = BlackStack::Emails::Google::scope
+oob_uri = BlackStack::Emails::GoogleConfig::oob_uri
+app_name = BlackStack::Emails::GoogleConfig::app_name
+google_api_certificate = BlackStack::Emails::GoogleConfig::google_api_certificate
+scope = BlackStack::Emails::GoogleConfig::scope
 
 # build the token file
 id = guid.to_guid # id for the new address

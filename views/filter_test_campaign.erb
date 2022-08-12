@@ -12,13 +12,19 @@ begin
     lead = campaign.export.fl_export_leads.sample.fl_lead
 
     # choose a random address
-    address = acc.addresses.sample
+    # first choice: own addresses
+    # second choice: shared addresses
+    address = acc.addresses.shuffle.first
+    address = BlackStack::Emails::Address.where(:delete_time=>nil, :shared=>true).all.shuffle.first if address.nil?
+    address = BlackStack::Emails::GMail.where(:id=>address.id).first
     
+    # TODO: register test emails
+
     # send a test email to the logged in user
     address.send_test(campaign, lead, @login.user)
 
     # return
-    redirect "/emails/campaigns/#{campaign.id.to_guid}/edit?msg="+ CGI::escape("Test email sent to #{to}.")
+    redirect "/emails/campaigns/#{campaign.id.to_guid}/edit?msg="+ CGI::escape("Test email sent to #{@login.user.email}.")
 rescue => e
     # return errors
     redirect "/emails/campaigns/#{campaign.id.to_guid}/edit?err="+ CGI::escape(e.message)
