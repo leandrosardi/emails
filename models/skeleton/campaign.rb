@@ -206,6 +206,45 @@ module BlackStack
                 j
             end
 
+            # return an array of active campaigns with jobs pending delivery
+            def self.pendings
+                ret = []
+                DB["
+                    SELECT DISTINCT c.id
+                    FROM eml_campaign c
+                    JOIN eml_job j ON (
+                        c.id = j.id_campaign AND
+                        j.delivery_start_time IS NULL AND -- job should not be started yet
+                        j.planning_time > current_timestamp -- job should be planned to be started
+                    )
+                    WHERE c.status = #{STATUS_ON.to_s}
+                "].all.map { |row|
+                    ret << BlackStack::Emails::Campaign.where(:id=>row[:id]).first
+                    # release resources
+                    GC.start
+                    DB.disconnect
+                }
+                # return the array of campaigns
+                ret
+            end
+
+            # return the next job to deliver
+            def next_job
+                row = DB["
+                    SELECT j.id
+                    FROM eml_job j
+                    WHERE j.id_campaign='#{self.id}'
+                    AND j.delivery_start_time IS NULL -- job should not be started yet
+                    AND j.planning_time > current_timestamp -- job should be planned to be started
+                    ORDER BY j.planning_time ASC
+                "].first
+                if row.nil?
+                    nil
+                else
+                    BlackStack::Emails::Job.where(:id=>row[:id]).first
+                end
+            end
+
         end # class Campaign
     end # Emails
 end # BlackStack

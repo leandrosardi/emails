@@ -1,4 +1,4 @@
-<%
+%
 return_message = {}
 begin
     unless  params[:file] &&
@@ -12,7 +12,7 @@ begin
 
     # build the file path
     filename = "#{guid}#{File.extname(name)}".downcase
-    path = "#{@login.user.account.storage_folder}/content.pictures"
+    path = "#{@login.user.account.storage_folder}/emails.pictures"
     return_message[:filename] = filename
     return_message[:path] = path
 

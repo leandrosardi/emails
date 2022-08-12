@@ -36,8 +36,6 @@ BlackStack::Extensions.append :i2p
 BlackStack::Extensions.append :leads
 BlackStack::Extensions.append :emails
 
-BlackStack::Extensions.add_storage_subfolders
-
 l = BlackStack::LocalLogger.new('./planner.log')
 
 # active campaigns pending planning
