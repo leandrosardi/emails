@@ -11,7 +11,7 @@ module BlackStack
             # send email.
             # this is a general purpose method to send email.
             # end user should not call this method.
-            def send_email(to, subject, body, from_name, reply_to)
+            def send_email(to, subject, body, from_name, reply_to, track_opens=false, track_clicks=false, id_delivery=nil)
                 raise 'Abstract method'                
             end # send
 
@@ -45,6 +45,15 @@ module BlackStack
                 # validate: reply_to is a string and it is a valid email address
                 err << 'reply_to is not a string' if !h[:reply_to].nil? && !h[:reply_to].is_a?(String)
                 err << 'reply_to is not a valid email address' if !h[:reply_to].nil? && !h[:reply_to].to_s.email?
+                # validate: if :track_opens exists, it must be a boolean
+                err << 'track_opens is not a boolean' if !h[:track_opens].nil? && !h[:track_opens].is_a?(TrueClass) && !h[:track_opens].is_a?(FalseClass)
+                # validate: if :track_clicks exists, it must be a boolean
+                err << 'track_clicks is not a boolean' if !h[:track_clicks].nil? && !h[:track_clicks].is_a?(TrueClass) && !h[:track_clicks].is_a?(FalseClass)
+                # validate: if :track_opens or :track_click is true, then :id_delivery is required
+                err << 'id_delivery is required when track_opens or track_clicks is true' if !h[:track_opens].nil? && h[:track_opens] && !h[:id_delivery].nil?
+                err << 'id_delivery is required when track_opens or track_clicks is true' if !h[:track_clicks].nil? && h[:track_clicks] && !h[:id_delivery].nil?
+                # validate: if :id_delivery exists, it must be a guid
+                err << 'id_delivery is not a guid' if !h[:id_delivery].nil? && !h[:id_delivery].to_s.guid?
                 # raise exception if any error
                 raise err.join("\n") unless err.empty?
                 # send email
@@ -121,7 +130,7 @@ module BlackStack
             # send email.
             # this is a general purpose method to send email.
             # this should not call this method.
-            def send_email(to, subject, body, from_name, reply_to)
+            def send_email(to, subject, body, from_name, reply_to, track_opens=false, track_clicks=false, id_delivery=nil)
                 user_id = "me"
                 message = Mail.new(body)
                 message.to = to

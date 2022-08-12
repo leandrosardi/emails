@@ -33,6 +33,7 @@ module BlackStack
                         :reply_to => campaign.reply_to,
                         :track_opens => true,
                         :track_clicks => true,
+                        :id_delivery => self.id,
                     })
                     self.end_delivery
                 rescue => e
