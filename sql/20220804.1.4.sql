@@ -4,10 +4,10 @@ create table IF NOT EXISTS eml_address (
     create_time timestamp not null, -- when registered this account
     "type" int not null, -- 0 - gmail, 1 - yahoo, 2 - hotmail
     "address" varchar(255) not null, -- example: ceo123@gmail.com
-    share boolean not null, -- true if I am willing to rent this account to other users of the platform
-    shared_id_account uuid null references account(id), -- if share is true, this is the id of the account is renting it
+    shared boolean not null, -- true if I am willing to rent this account to other users of the platform
+    shared_id_account uuid null references account(id), -- if shared is true, this is the id of the account is renting it
     max_emails_per_hour int not null, -- how many emails per hour can deliver
-    max_emails_per_day int not null -- how many emails per day can deliver
+    max_deliveries_per_day int not null -- how many emails per day can deliver
 );
 
 create table IF NOT EXISTS eml_campaign (
@@ -27,11 +27,11 @@ create table IF NOT EXISTS eml_campaign (
     "status" int not null, -- 0 - draft, 1 - sent, 2 - error
     -- statistics of the campaign
     stat_sent bigint not null, -- how many emails were sent
-    stat_opened bigint not null, -- how many emails were opened
-    stat_clicked bigint not null, -- how many emails were clicked
-    stat_bounced bigint not null, -- how many emails were bounced
-    stat_unsubscribed bigint not null, -- how many emails were unsubscribed
-    stat_complained bigint not null, -- how many emails were complained
+    stat_opens bigint not null, -- how many emails were opened
+    stat_clicks bigint not null, -- how many emails were clicked
+    stat_bounces bigint not null, -- how many emails were bounced
+    stat_unsubscribes bigint not null, -- how many emails were unsubscribed
+    stat_camplaints bigint not null, -- how many emails were complained
     -- schedule of the campaign
     schedule_start_time timestamp not null, -- when the campaign will be sent
     schedule_hour_0 boolean not null, -- true if the campaign is scheduled at 0 hour
@@ -76,7 +76,7 @@ create table IF NOT EXISTS eml_link (
     create_time TIMESTAMP NOT NULL,
     link_number int NOT NULL, -- the number of the link in the body
     "url" VARCHAR(8000) NOT NULL, -- the url to redirect.
-    stat_opened bigint not null -- how many emails were opened
+    stat_opens bigint not null -- how many emails were opened
 );
 
 create table IF NOT EXISTS eml_job (
@@ -89,6 +89,9 @@ create table IF NOT EXISTS eml_job (
     delivery_error_description varchar(8000) null
 );
 
+alter table eml_job add column IF NOT EXISTS planning_id_address uuid not null references eml_address(id);
+alter table eml_job add column IF NOT EXISTS planning_time timestamp not null; 
+
 create table IF NOT EXISTS eml_delivery (
     id uuid not null primary key,
     id_job uuid not null references eml_job(id), 
@@ -99,6 +102,11 @@ create table IF NOT EXISTS eml_delivery (
     delivery_success boolean null,
     delivery_error_description varchar(8000) null
 );
+
+-- one lead may have more than 1 email address, so I have to specify the email address to deliver the email to
+alter table eml_delivery add column if not exists email varchar(500) not null;
+alter table eml_delivery add column if not exists subject varchar(8000) not null;
+alter table eml_delivery add column if not exists body text not null;
 
 create table IF NOT EXISTS eml_open (
     id uuid not null primary key,
@@ -125,17 +133,44 @@ alter table eml_campaign add column if not exists planning_end_time timestamp nu
 alter table eml_campaign add column if not exists planning_success boolean null;
 alter table eml_campaign add column if not exists planning_error_description varchar(8000) null;
 
--- add scheduling fields to the job
-alter table eml_job add column if not exists schedule_start_time timestamp not null; -- when the campaign will be sent
+-- remove this feature of allocating gmail addresses to other users.
+alter table eml_address drop column if exists shared_id_account;
 
--- trigger when sent an email
+-- timeline snapshot of deliveries
+create table IF NOT EXISTS eml_timeline (
+    id uuid not null primary key,
+    id_campaign uuid not null references eml_campaign(id), 
+    create_time TIMESTAMP NOT NULL,
+    year int not null,
+    month int not null,
+    day int not null,
+    hour int not null,
+    minute int not null,
+    stat_sent bigint not null,
+    stat_opens bigint not null,
+    stat_clicks bigint not null,
+    stat_bounces bigint not null,
+    stat_unsubscribes bigint not null,
+    stat_camplaints bigint not null,
+    CONSTRAINT uk_timeline UNIQUE (id_campaign, year, month, day, hour, minute)
+);
 
--- trigger when track open
+-- add support to delete objects
+alter table eml_address add column if not exists delete_time timestamp null;
+alter table eml_campaign add column if not exists delete_time timestamp null;
 
--- trigger when track click
+-- hourly limit for emails delivery has been deprecated.
+alter table eml_address drop column if exists max_emails_per_hour;
 
--- trigger when track bounce
 
--- trigger when track unsubscribe
+-- TODO: create trigger: when sent an email, increase the stat_sent field of the campaign, blocking concurrent access
 
--- trigger when track complaint
+-- TODO: create trigger: when track open, increase the stat_opens field of the campaign
+
+-- TODO: create trigger: when track click, increase the stat_clicks field of the campaign
+
+-- TODO: create trigger: when track bounce, increase the stat_bounces field of the campaign
+
+-- TODO: create trigger: when track unsubscribe, increase the stat_unsubscribes field of the campaign
+
+-- TODO: create trigger: when track complaint, increase the stat_camplaints field of the campaign

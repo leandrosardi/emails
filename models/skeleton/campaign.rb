@@ -70,17 +70,17 @@ module BlackStack
             
             def opens_ratio
                 t = self.stat_sent
-                t == 0 ? 0 : ((self.stat_opened.to_f / t.to_f) * 100.to_f).to_i
+                t == 0 ? 0 : ((self.stat_opens.to_f / t.to_f) * 100.to_f).to_i
             end
 
             def clicks_ratio
-                t = self.stat_opened
-                t == 0 ? 0 : ((self.stat_clicked.to_f / t.to_f) * 100.to_f).to_i
+                t = self.stat_opens
+                t == 0 ? 0 : ((self.stat_clicks.to_f / t.to_f) * 100.to_f).to_i
             end
 
             def unsubscribes_ratio
-                t = self.stat_opened
-                t == 0 ? 0 : ((self.stat_unsubscribed.to_f / t.to_f) * 100.to_f).to_i
+                t = self.stat_opens
+                t == 0 ? 0 : ((self.stat_unsubscribes.to_f / t.to_f) * 100.to_f).to_i
             end
 
             # replace merge-tags in the string s with the values of the lead's atrtibutes.
@@ -146,6 +146,50 @@ module BlackStack
                 merge(self.body, lead)
             end
 
-        end # class Address
+            # update the planning flags of this campaign
+            def start_planning()
+                self.planning_start_time = now
+                self.save        
+            end
+
+            # update the planning flags of this campaign
+            def end_planning(error=nil)
+                self.planning_success = error.nil?
+                self.planning_error_description = error
+                self.planning_end_time = now
+                self.save
+            end
+
+            # create a job to deliver an email to all the leads in the array `leads`, thru the address in `address`
+            def create_jobs(leads, address)
+                # create the job
+                j = BlackStack::Emails::Job.new
+                j.id = guid
+                j.id_campaign = self.id
+                j.create_time = now
+                j.planning_id_address = address.id
+                j.planning_time = address.next_available_day
+                j.save
+                
+                # create deliveries for each lead
+                leads.each { |l| 
+                    d = BlackStack::Emails::Delivery.new
+                    d.id = guid
+                    d.id_job = j.id
+                    d.id_lead = l.id
+                    d.create_time = now
+                    d.email = l.emails.first.value
+                    d.subject = self.merged_subject(l)
+                    d.body = self.merged_body(l)
+                    d.save
+                    # release resources
+                    GC.start
+                    DB.disconnect
+                }
+
+                # return the job
+                j
+            end
+        end # class Campaign
     end # Emails
 end # BlackStack

@@ -3,21 +3,14 @@ q = "
     select 
         a.id, 
         a.address, 
-        a.share,
-        a.shared_id_account,
+        a.shared,
         a.create_time,
-        a.max_emails_per_day
+        a.max_deliveries_per_day
     from eml_address a
     join \"user\" u on (
         u.id_account='#{@login.user.id_account}' 
         and
-        (
-            -- address is ownd by the logged account
-            (u.id=a.id_user)
-            or
-            -- address is leased to the logged account
-            (a.shared_id_account is not null and u.id_account = a.shared_id_account)
-        )
+        u.id=a.id_user
     )
     --where a.delete_time is null
     order by a.address

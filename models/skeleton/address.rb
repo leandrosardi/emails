@@ -2,7 +2,7 @@ module BlackStack
     module Emails
         class Address < Sequel::Model(:eml_address)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
-            many_to_one :shared, :class=>:'BlackStack::MySaaS::Account', :key=>:shared_id_account
+
             # types
             TYPE_GMAIL = 0
             TYPE_YAHOO = 1 # pending to develop
@@ -47,6 +47,24 @@ module BlackStack
                 send(h[:to], h[:subject], h[:body], h[:from_name], h[:reply_to])
             end
 
+            # return the next day when it is available to deliver the number of emails configured on its `max_deliveries_per_day` parameters.
+            def next_available_day
+                ret = DB["
+                    select max(planning_time) as dt
+                    from eml_job j
+                    where j.planning_id_address='#{self.id.to_guid}'
+                "].first[:dt]
+
+                if ret.nil?
+                    return now
+                else
+                    return DB["
+                        select max(planning_time)+interval '1 day' as dt
+                        from eml_job j
+                        where j.planning_id_address='#{self.id.to_guid}'
+                    "].first[:dt]
+                end
+            end
 
         end # class Address
 
