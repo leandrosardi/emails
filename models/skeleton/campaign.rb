@@ -92,7 +92,6 @@ module BlackStack
                 email = lead.emails.first.nil? ? '' : lead.emails.first.value
                 phone = lead.phones.first.nil? ? '' : lead.phones.first.value
                 linkd = lead.linkedins.first.nil? ? '' : lead.linkedins.first.value
-                unsub = "#{CS_HOME_WEBSITE}/api1.0/emails/unsubscribe.json?lid=#{lead.id.to_guid}&gid=#{self.id.to_guid}"
 
                 # replace merge-tags with no fallback values
                 ret.gsub!(/#{Regexp.escape('{company-name}')}/, lead.stat_company_name.to_s)
@@ -103,7 +102,6 @@ module BlackStack
                 ret.gsub!(/#{Regexp.escape('{email-address}')}/, email.to_s)
                 ret.gsub!(/#{Regexp.escape('{phone-number}')}/, phone.to_s)
                 ret.gsub!(/#{Regexp.escape('{linkedin-url}')}/, linkd.to_s)
-                ret.gsub!(/#{Regexp.escape('{unsubscribe-url}')}/, unsub.to_s)
 
                 # replace merge-tags with fallback values
                 ret.scan(/#{Regexp.escape('{company-name|')}.*#{Regexp.escape('}')}/).each { |m| 

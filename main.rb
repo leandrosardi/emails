@@ -6,6 +6,8 @@ require 'mail'
 
 module BlackStack
     module Emails
+        UNSUBSCRIBE_MERGETAG = '{unsubscribe-url}'
+
         @@mergetags = [
             '{company-name}',
             '{first-name}',
@@ -15,7 +17,7 @@ module BlackStack
             '{email-address}',
             '{phone-number}',
             '{linkedin-url}',
-            '{unsubscribe-url}',
+            UNSUBSCRIBE_MERGETAG,
         ]
 
         def self.set_mergetags(tags)
