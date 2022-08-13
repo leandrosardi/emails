@@ -41,6 +41,31 @@ get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
 end
 
+get "/emails/leads", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/leads", :layout => :"/views/layouts/core"
+end
+
+get "/emails/lists", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/lists", :layout => :"/views/layouts/core"
+end
+
+get "/emails/lists/:lid", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/view_list", :layout => :"/views/layouts/core"
+end
+
+get "/emails/jobs", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/jobs", :layout => :"/views/layouts/core"
+end
+
+get "/emails/jobs/:jid", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/view_job", :layout => :"/views/layouts/core"
+end
+
+get "/emails/deliveries", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/deliveries", :layout => :"/views/layouts/core"
+end
+
+
 # filters
 post "/emails/filter_new_campaign", :auth => true do
     erb :"/extensions/emails/views/filter_new_campaign"
@@ -83,7 +108,9 @@ get "/emails/filter_edit_address", :auth => true do
 end
 
 # AJAX 
-# TODO: Code Me!
+post "/ajax/emails/upload_picture.json", :auth => true do
+    erb :"/extensions/emails/views/ajax/upload_picture"
+end
 
 # API
 get "/api1.0/emails/open.json", :auth => true do

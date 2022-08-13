@@ -1,7 +1,7 @@
 BlackStack::Extensions::add ({
     # descriptive name and descriptor
     :name => 'Emails',
-    :description => 'Manage thousands of GMail accounts from one signle dashboard.',
+    :description => 'Convert your GMail accounts into an Email Marketing platform.',
 
     # setup the url of the repository for installation and updates
     :repo_url => 'https://github.com/leandrosardi/emails',
@@ -29,7 +29,7 @@ BlackStack::Extensions::add ({
         { :label => 'campaigns', :icon => :envelope, :screen => :campaigns, },
         { :label => 'jobs', :icon => :tasks, :screen => :jobs, },
         { :label => 'deliveries', :icon => :truck, :screen => :deliveries, },
-        #{ :label => 'addresses', :icon => :tags, :screen => :addresses, },
+        { :label => 'addresses', :icon => :tags, :screen => :addresses, },
     ],
 
     # add a folder to the storage from where user can download the exports.
