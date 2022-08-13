@@ -66,10 +66,11 @@ module BlackStack
             # apply tracking links.
             # apply unsubscribe link.
             # finally, call the save method of the parent class.
-            def save()
+            def after_create
+                # call the parent class save method.
+                super
                 # apply pixel for tracking opens.
                 self.body += self.pixel
-
                 # apply tracking links.
                 # iterate all href attributes of anchor tags
                 # reference: https://stackoverflow.com/questions/53766997/replacing-links-in-the-content-with-processed-links-in-rails-using-nokogiri
@@ -79,19 +80,21 @@ module BlackStack
                     # increment the URL counter
                     n += 1
                     # get the link
-                    o = BlackStack::Emails::Link.where(:id_campaign=>self.job.id_campaign, :link_number=>n).first
+                    l = BlackStack::Emails::Link.where(:id_campaign=>self.job.id_campaign, :link_number=>n).first
                     # validate the link URL
-                    raise "Link #{n} is not found." if o.nil?
-                    raise "Link #{n} #{o.url} don't match with #{link['href']}." if o.url != link['href']
+                    raise "Link #{n} is not found." if l.nil?
+                    raise "Link #{n} #{l.url} don't match with #{link['href']}." if l.url != link['href']
                     # replace the link with the tracking link
-                    link['href'] = o.tracking_url(self)
+                    link['href'] = l.tracking_url(self)
                 end
                 # update notification body.
                 self.body = fragment.to_html
+                # this forcing is because of this glitch: https://github.com/sparklemotion/nokogiri/issues/1127
+                self.body.gsub!(/#{Regexp.escape('&amp;')}/, '&')
                 # apply unsubscribe link.
                 self.body.gsub!(/#{Regexp.escape(BlackStack::Emails::UNSUBSCRIBE_MERGETAG)}/, self.unsubscribe_url)
-                # call the parent class save method.
-                super
+                # save the changes.
+                self.save
             end
 
         end # class Delivery

@@ -161,7 +161,6 @@ alter table eml_campaign add column if not exists delete_time timestamp null;
 -- hourly limit for emails delivery has been deprecated.
 alter table eml_address drop column if exists max_emails_per_hour;
 
-
 -- TODO: create trigger: when sent an email, increase the stat_sent field of the campaign, blocking concurrent access
 
 -- TODO: create trigger: when track open, increase the stat_opens field of the campaign

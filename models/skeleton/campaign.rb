@@ -207,7 +207,7 @@ module BlackStack
             # return an array of active campaigns with jobs pending delivery
             def self.pendings
                 ret = []
-                DB["
+                q = "
                     SELECT DISTINCT c.id
                     FROM eml_campaign c
                     JOIN eml_job j ON (
@@ -216,7 +216,12 @@ module BlackStack
                         j.planning_time > current_timestamp -- job should be planned to be started
                     )
                     WHERE c.status = #{STATUS_ON.to_s}
-                "].all.map { |row|
+                "
+puts
+puts q
+                DB[q].all { |row|
+puts
+puts row[:id]
                     ret << BlackStack::Emails::Campaign.where(:id=>row[:id]).first
                     # release resources
                     GC.start
@@ -246,7 +251,9 @@ module BlackStack
             # delete all the record in the table `eml_link` regarding this campaign.
             # create new record in the table `eml_link` for each anchor in the body.
             # call the `save` method of the parent class to save the changes.
-            def save
+            def after_create
+                # call the `save` method of the parent class to save the changes.
+                super
                 # number of URL in the body
                 n = 0
                 # delete all the record in the table `eml_link` regarding this campaign.
@@ -271,8 +278,6 @@ module BlackStack
                     o.url = link['href']
                     o.save
                 end
-                # call the `save` method of the parent class to save the changes.
-                super
             end
 
         end # class Campaign
