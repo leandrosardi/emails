@@ -15,6 +15,7 @@ begin
     # first choice: own addresses
     # second choice: shared addresses
     address = acc.addresses.shuffle.first
+    raise "No available address to send test email." if address.nil?
     address = BlackStack::Emails::Address.where(:delete_time=>nil, :shared=>true).all.shuffle.first if address.nil?
     address = BlackStack::Emails::GMail.where(:id=>address.id).first
     

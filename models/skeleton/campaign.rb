@@ -243,6 +243,38 @@ module BlackStack
                 end
             end
 
+            # delete all the record in the table `eml_link` regarding this campaign.
+            # create new record in the table `eml_link` for each anchor in the body.
+            # call the `save` method of the parent class to save the changes.
+            def save
+                # number of URL in the body
+                n = 0
+                # delete all the record in the table `eml_link` regarding this campaign.
+                BlackStack::Emails::Link.where(:id_campaign=>self.id).all { |link|
+                    DB.execute("DELETE FROM eml_link WHERE id='#{link.id}'")
+                    GC.start
+                    DB.disconnect
+                }
+                # create new record in the table `eml_link` for each anchor in the body.
+                # iterate all href attributes of anchor tags
+                # reference: https://stackoverflow.com/questions/53766997/replacing-links-in-the-content-with-processed-links-in-rails-using-nokogiri
+                fragment = Nokogiri::HTML.fragment(self.body)
+                fragment.css("a[href]").each do |link| 
+                    # increment the URL counter
+                    n += 1
+                    # create and save the object BlackStack::Emails::Link
+                    o = BlackStack::Emails::Link.new
+                    o.id = guid
+                    o.id_campaign = self.id
+                    o.create_time = now
+                    o.link_number = n
+                    o.url = link['href']
+                    o.save
+                end
+                # call the `save` method of the parent class to save the changes.
+                super
+            end
+
         end # class Campaign
     end # Emails
 end # BlackStack

@@ -54,7 +54,6 @@ begin
     o.type = BlackStack::Emails::Address::TYPE_GMAIL
     o.address = service.get_user_profile(user_id).email_address # get the email address of the gmail account
     o.shared = false
-    o.max_emails_per_hour = 200 # TODO: this parameter is not being used by now. Only emails_per_day.
     o.max_deliveries_per_day = 20
     o.save
 

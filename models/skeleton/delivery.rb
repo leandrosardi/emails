@@ -70,11 +70,26 @@ module BlackStack
                 # apply pixel for tracking opens.
                 self.body += self.pixel
 
-                # TODO: apply tracking links.
-                
+                # apply tracking links.
+                # iterate all href attributes of anchor tags
+                # reference: https://stackoverflow.com/questions/53766997/replacing-links-in-the-content-with-processed-links-in-rails-using-nokogiri
+                n = 0
+                fragment = Nokogiri::HTML.fragment(self.body)
+                fragment.css("a[href]").each do |link| 
+                    # increment the URL counter
+                    n += 1
+                    # get the link
+                    o = BlackStack::Emails::Link.where(:id_campaign=>self.job.id_campaign, :link_number=>n).first
+                    # validate the link URL
+                    raise "Link #{n} is not found." if o.nil?
+                    raise "Link #{n} #{o.url} don't match with #{link['href']}." if o.url != link['href']
+                    # replace the link with the tracking link
+                    link['href'] = o.tracking_url(self)
+                end
+                # update notification body.
+                self.body = fragment.to_html
                 # apply unsubscribe link.
                 self.body.gsub!(/#{Regexp.escape(BlackStack::Emails::UNSUBSCRIBE_MERGETAG)}/, self.unsubscribe_url)
-                
                 # call the parent class save method.
                 super
             end

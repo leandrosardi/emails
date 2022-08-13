@@ -6,7 +6,6 @@ create table IF NOT EXISTS eml_address (
     "address" varchar(255) not null, -- example: ceo123@gmail.com
     shared boolean not null, -- true if I am willing to rent this account to other users of the platform
     shared_id_account uuid null references account(id), -- if shared is true, this is the id of the account is renting it
-    max_emails_per_hour int not null, -- how many emails per hour can deliver
     max_deliveries_per_day int not null -- how many emails per day can deliver
 );
 
@@ -76,7 +75,7 @@ create table IF NOT EXISTS eml_link (
     create_time TIMESTAMP NOT NULL,
     link_number int NOT NULL, -- the number of the link in the body
     "url" VARCHAR(8000) NOT NULL, -- the url to redirect.
-    stat_opens bigint not null -- how many emails were opened
+    CONSTRAINT uk_link UNIQUE (id_campaign, "link_number")
 );
 
 create table IF NOT EXISTS eml_job (
