@@ -35,7 +35,7 @@ module BlackStack
                     self.end_delivery
 
                     # increment the open count for the regarding campaign in the timeline snapshot
-                    self.job.campaign.track('sent')
+                    self.job.track('sent')
                 rescue => e
                     self.end_delivery(e.message)
                     raise e

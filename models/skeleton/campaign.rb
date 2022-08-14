@@ -287,57 +287,6 @@ module BlackStack
                     o.save
                 end
             end
-
-            # increment the counter of an event in the timeline of the campaign
-            # event must be ['sent', 'open', 'click', 'bounce', 'unsubscribe', 'complaint']
-            def track(event_name)
-                raise "unknown event" if !['sent', 'open', 'click', 'bounce', 'unsubscribe', 'complaint'].include?(event_name)
-                # get unique key: id_campaign, year, month, day, hour, minute
-                # TODO: get a more reusable way to get year, month, day, hour, minute.
-                cid = self.id.to_guid
-                dt = now # example: 2022-01-01 00:00:00
-                year = dt[0..3]
-                month = dt[5..6]
-                day = dt[8..9]
-                hour = dt[11..12]
-                minute = dt[14..15]
-                # tracking in the timeline snapshpt, with ACID
-                DB.execute("
-                    -- start transaction
-                    --BEGIN;
-                    -- insert the record
-                    -- Remember there is an unique key: id_campaign, year, month, day, hour, minute
-                    -- So, I insert the record but I catch any conflitc with a `on conflitct do nothing` clause.
-                    INSERT INTO eml_timeline 
-                    (
-                        id, id_campaign, create_time, 
-                        year, month, day, hour, minute, 
-                        stat_sents, stat_opens, stat_clicks, stat_bounces, stat_unsubscribes, stat_complaints
-                    )
-                    VALUES (
-                        '#{guid}', '#{cid}', '#{dt}',
-                        #{year}, #{month}, #{day}, #{hour}, #{minute},
-                        0, 0, 0, 0, 0, 0
-                    ) ON CONFLICT DO NOTHING;
-                    -- increment the counter of the event in the timeline snapshot
-                    UPDATE eml_timeline 
-                    SET stat_#{event_name}s = stat_#{event_name}s + 1 
-                    WHERE id_campaign = '#{cid}' 
-                    AND year = #{year} 
-                    AND month = #{month} 
-                    AND day = #{day} 
-                    AND hour = #{hour} 
-                    AND minute = #{minute};
-                    -- increment the counter of the event in the campaign record
-                    UPDATE eml_campaign 
-                    SET stat_#{event_name}s = stat_#{event_name}s + 1 
-                    WHERE id = '#{cid}' 
-                    -- commit transaction
-                    --COMMIT;
-                ")
-            end
-
-
         end # class Campaign
     end # Emails
 end # BlackStack

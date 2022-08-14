@@ -7,7 +7,7 @@ module BlackStack
             # increment the click count for the regarding campaign in the timeline snapshot
             def after_create
                 super
-                self.delivery.job.campaign.track('click')
+                self.delivery.job.track('click')
             end
 
         end # class Click

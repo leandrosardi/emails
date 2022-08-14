@@ -6,7 +6,7 @@ module BlackStack
             # increment the open count for the regarding campaign in the timeline snapshot
             def after_create
                 super
-                self.delivery.job.campaign.track('open')
+                self.delivery.job.track('open')
             end
         end # class Open
     end # Emails

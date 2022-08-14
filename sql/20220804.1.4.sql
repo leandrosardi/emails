@@ -102,7 +102,7 @@ create table IF NOT EXISTS eml_delivery (
     delivery_error_description varchar(8000) null
 );
 
--- one lead may have more than 1 email address, so I have to specify the email address to deliver the email to
+-- one lead may have more than 1 email address, so I have to specify the email address to deliver the email to.
 alter table eml_delivery add column if not exists email varchar(500) not null;
 alter table eml_delivery add column if not exists subject varchar(8000) not null;
 alter table eml_delivery add column if not exists body text not null;
@@ -126,7 +126,7 @@ create table IF NOT EXISTS eml_unsubscribe (
     create_time TIMESTAMP NOT NULL
 );
 
--- add planning fields to the campaign
+-- add planning fields to the campaign.
 alter table eml_campaign add column if not exists planning_start_time timestamp null;
 alter table eml_campaign add column if not exists planning_end_time timestamp null;
 alter table eml_campaign add column if not exists planning_success boolean null;
@@ -135,8 +135,8 @@ alter table eml_campaign add column if not exists planning_error_description var
 -- remove this feature of allocating gmail addresses to other users.
 alter table eml_address drop column if exists shared_id_account;
 
--- timeline snapshot of deliveries
-create table IF NOT EXISTS eml_timeline (
+-- timeline snapshot of deliveries.
+create table IF NOT EXISTS eml_campaign_timeline (
     id uuid not null primary key,
     id_campaign uuid not null references eml_campaign(id), 
     create_time TIMESTAMP NOT NULL,
@@ -152,6 +152,27 @@ create table IF NOT EXISTS eml_timeline (
     stat_unsubscribes bigint not null,
     stat_complaints bigint not null,
     CONSTRAINT uk_timeline UNIQUE (id_campaign, year, month, day, hour, minute)
+);
+
+-- timeline snapshot of deliveries.
+-- use this snapshot to research service degradation at an address-level.
+create table IF NOT EXISTS eml_address_timeline (
+    id uuid not null primary key,
+    id_address uuid not null references eml_address(id), 
+    id_campaign uuid not null references eml_campaign(id), 
+    create_time TIMESTAMP NOT NULL,
+    year int not null,
+    month int not null,
+    day int not null,
+    hour int not null,
+    minute int not null,
+    stat_sents bigint not null,
+    stat_opens bigint not null,
+    stat_clicks bigint not null,
+    stat_bounces bigint not null,
+    stat_unsubscribes bigint not null,
+    stat_complaints bigint not null,
+    CONSTRAINT uk_timeline UNIQUE (id_address, id_campaign, year, month, day, hour, minute)
 );
 
 -- add support to delete objects

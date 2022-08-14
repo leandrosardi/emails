@@ -6,7 +6,7 @@ module BlackStack
             # increment the unsubscribe count for the regarding campaign in the timeline snapshot
             def after_create
                 super
-                self.delivery.job.campaign.track('unsubscribe')
+                self.delivery.job.track('unsubscribe')
             end
         end # class Unsubscribe
     end # Emails
