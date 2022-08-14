@@ -41,6 +41,10 @@ get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
 end
 
+get "/emails/addresses/:aid", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
+end
+
 get "/emails/leads", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/leads", :layout => :"/views/layouts/core"
 end
@@ -75,6 +79,10 @@ post "/emails/filter_edit_campaign", :auth => true do
     erb :"/extensions/emails/views/filter_edit_campaign"
 end
 
+get "/emails/filter_delete_campaign", :auth => true do
+    erb :"/extensions/emails/views/filter_delete_campaign"
+end
+
 post "/emails/filter_test_campaign", :auth => true do
     erb :"/extensions/emails/views/filter_test_campaign"
 end
@@ -105,6 +113,10 @@ post "/emails/filter_edit_address", :auth => true do
 end
 get "/emails/filter_edit_address", :auth => true do
     erb :"/extensions/emails/views/filter_edit_address"
+end
+
+get "/emails/filter_delete_address", :auth => true do
+    erb :"/extensions/emails/views/filter_delete_address"
 end
 
 # AJAX 
