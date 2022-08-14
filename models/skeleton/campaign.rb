@@ -65,11 +65,11 @@ module BlackStack
 
             def sent_ratio
                 t = self.total_leads
-                t == 0 ? 0 : ((self.stat_sent.to_f / t.to_f) * 100.to_f).to_i
+                t == 0 ? 0 : ((self.stat_sents.to_f / t.to_f) * 100.to_f).to_i
             end
             
             def opens_ratio
-                t = self.stat_sent
+                t = self.stat_sents
                 t == 0 ? 0 : ((self.stat_opens.to_f / t.to_f) * 100.to_f).to_i
             end
 
@@ -213,15 +213,11 @@ module BlackStack
                     JOIN eml_job j ON (
                         c.id = j.id_campaign AND
                         j.delivery_start_time IS NULL AND -- job should not be started yet
-                        j.planning_time > current_timestamp -- job should be planned to be started
+                        j.planning_time < current_timestamp -- job should be planned to be started
                     )
                     WHERE c.status = #{STATUS_ON.to_s}
                 "
-puts
-puts q
                 DB[q].all { |row|
-puts
-puts row[:id]
                     ret << BlackStack::Emails::Campaign.where(:id=>row[:id]).first
                     # release resources
                     GC.start
@@ -238,7 +234,7 @@ puts row[:id]
                     FROM eml_job j
                     WHERE j.id_campaign='#{self.id}'
                     AND j.delivery_start_time IS NULL -- job should not be started yet
-                    AND j.planning_time > current_timestamp -- job should be planned to be started
+                    AND j.planning_time < current_timestamp -- job should be planned to be started
                     ORDER BY j.planning_time ASC
                 "].first
                 if row.nil?
@@ -279,6 +275,52 @@ puts row[:id]
                     o.save
                 end
             end
+
+            # increment the counter of an event in the timeline of the campaign
+            # event must be ['sent', 'open', 'click', 'bounce', 'unsubscribe', 'complaint']
+            def track(event_name)
+                raise "unknown event" if !['sent', 'open', 'click', 'bounce', 'unsubscribe', 'complaint'].include?(event_name)
+                # get unique key: id_campaign, year, month, day, hour, minute
+                # TODO: get a more reusable way to get year, month, day, hour, minute.
+                cid = self.id.to_guid
+                dt = now # example: 2022-01-01 00:00:00
+                year = dt[0..3]
+                month = dt[5..6]
+                day = dt[8..9]
+                hour = dt[11..12]
+                minute = dt[14..15]
+                # tracking in the timeline snapshpt, with ACID
+                DB.execute("
+                    -- start transaction
+                    --BEGIN;
+                    -- insert the record
+                    -- Remember there is an unique key: id_campaign, year, month, day, hour, minute
+                    -- So, I insert the record but I catch any conflitc with a `on conflitct do nothing` clause.
+                    INSERT INTO eml_timeline 
+                    (
+                        id, id_campaign, create_time, 
+                        year, month, day, hour, minute, 
+                        stat_sents, stat_opens, stat_clicks, stat_bounces, stat_unsubscribes, stat_complaints
+                    )
+                    VALUES (
+                        '#{guid}', '#{cid}', '#{dt}',
+                        #{year}, #{month}, #{day}, #{hour}, #{minute},
+                        0, 0, 0, 0, 0, 0
+                    ) ON CONFLICT DO NOTHING;
+                    -- increment the counter of the event
+                    UPDATE eml_timeline 
+                    SET stat_#{event_name}s = stat_#{event_name}s + 1 
+                    WHERE id_campaign = '#{cid}' 
+                    AND year = #{year} 
+                    AND month = #{month} 
+                    AND day = #{day} 
+                    AND hour = #{hour} 
+                    AND minute = #{minute};
+                    -- commit transaction
+                    --COMMIT;
+                ")
+            end
+
 
         end # class Campaign
     end # Emails

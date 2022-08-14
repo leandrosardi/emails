@@ -25,12 +25,12 @@ create table IF NOT EXISTS eml_campaign (
     "type" int not null, -- 0 - plain text, 1 - html
     "status" int not null, -- 0 - draft, 1 - sent, 2 - error
     -- statistics of the campaign
-    stat_sent bigint not null, -- how many emails were sent
+    stat_sents bigint not null, -- how many emails were sent
     stat_opens bigint not null, -- how many emails were opened
     stat_clicks bigint not null, -- how many emails were clicked
     stat_bounces bigint not null, -- how many emails were bounced
     stat_unsubscribes bigint not null, -- how many emails were unsubscribed
-    stat_camplaints bigint not null, -- how many emails were complained
+    stat_complaints bigint not null, -- how many emails were complained
     -- schedule of the campaign
     schedule_start_time timestamp not null, -- when the campaign will be sent
     schedule_hour_0 boolean not null, -- true if the campaign is scheduled at 0 hour
@@ -145,13 +145,13 @@ create table IF NOT EXISTS eml_timeline (
     day int not null,
     hour int not null,
     minute int not null,
-    stat_sent bigint not null,
+    stat_sents bigint not null,
     stat_opens bigint not null,
     stat_clicks bigint not null,
     stat_bounces bigint not null,
     stat_unsubscribes bigint not null,
-    stat_camplaints bigint not null,
-    CONSTRAINT uk_timeline UNIQUE (id_campaign, year, month, day, hour, minute)
+    stat_complaints bigint not null,
+    CONSTRAINT uk_timeline UNIQUE ( )
 );
 
 -- add support to delete objects
@@ -160,15 +160,3 @@ alter table eml_campaign add column if not exists delete_time timestamp null;
 
 -- hourly limit for emails delivery has been deprecated.
 alter table eml_address drop column if exists max_emails_per_hour;
-
--- TODO: create trigger: when sent an email, increase the stat_sent field of the campaign, blocking concurrent access
-
--- TODO: create trigger: when track open, increase the stat_opens field of the campaign
-
--- TODO: create trigger: when track click, increase the stat_clicks field of the campaign
-
--- TODO: create trigger: when track bounce, increase the stat_bounces field of the campaign
-
--- TODO: create trigger: when track unsubscribe, increase the stat_unsubscribes field of the campaign
-
--- TODO: create trigger: when track complaint, increase the stat_camplaints field of the campaign

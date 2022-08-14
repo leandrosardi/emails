@@ -113,14 +113,14 @@ post "/ajax/emails/upload_picture.json", :auth => true do
 end
 
 # API
-get "/api1.0/emails/open.json", :auth => true do
+get "/api1.0/emails/open.json" do
     erb :"/extensions/emails/views/api1.0/open"
 end
 
-get "/api1.0/emails/click.json", :auth => true do
+get "/api1.0/emails/click.json" do
     erb :"/extensions/emails/views/api1.0/click"
 end
 
-get "/api1.0/emails/unsubscribe.json", :auth => true do
+get "/api1.0/emails/unsubscribe.json" do
     erb :"/extensions/emails/views/api1.0/unsubscribe"
 end

@@ -9,7 +9,7 @@ q = "
         u.id as id_user, 
         u.name as user_name, 
         c.create_time,
-        c.stat_sent,
+        c.stat_sents,
         c.stat_opens,
         c.stat_clicks,
         c.stat_unsubscribes
@@ -64,8 +64,8 @@ q = "
                     <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><%=row[:subject].to_s.encode_html%></td>
                     <td class="fix" title="<%=row[:user_name].to_s.encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
                     <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
-                    <td class="fix" style="text-align:right;" title="<%=row[:stat_sent].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sent].to_i.to_label%></a>
+                    <td class="fix" style="text-align:right;" title="<%=row[:stat_sents].to_i.to_label%>">
+                        <a href='/email/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sents].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.sent_ratio.to_i.to_label%>%</span>
                     </td>
@@ -80,7 +80,7 @@ q = "
                         <span style='color:gray;'><%=o.clicks_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_unsubscribes].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_sent].to_i.to_label%></a>
+                        <a href='/email/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_sents].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.unsubscribes_ratio.to_i.to_label%>%</span>
                     </td>

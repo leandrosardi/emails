@@ -8,8 +8,6 @@ module BlackStack
                 # validation: self.id is not nil and it is a valid guid
                 errors << "id is nil" if self.id.nil? || !self.id.guid?
                 s = "#{CS_HOME_WEBSITE}/api1.0/emails/click.json?lid=#{self.id.to_guid}&did=#{delivery.id.to_guid}"
-puts self.id
-puts s
                 s
             end # def tracking_url
         end # class Link

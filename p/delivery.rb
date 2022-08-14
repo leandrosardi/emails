@@ -58,7 +58,7 @@ campaigns.each { |campaign|
             l.logf "Error: #{e.message}"
 
             l.logs "Flag delivery error... "
-            campaign.end_delivery(e.message)
+            job.end_delivery(e.message)
             l.done
         end
     l.done

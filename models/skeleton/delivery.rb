@@ -27,15 +27,15 @@ module BlackStack
                     campaign = self.job.campaign
                     address.send({
                         :to => self.email, 
-                        :subject => campaign.merged_subject(lead), 
-                        :body => campaign.merged_body(lead).gsub(/#{Regexp.escape(RESERVED_MERGE_TAG)}/, self.id.to_guid), 
+                        :subject => self.subject, 
+                        :body => self.body, 
                         :from_name => campaign.from_name, 
                         :reply_to => campaign.reply_to,
-                        :track_opens => true,
-                        :track_clicks => true,
-                        :id_delivery => self.id,
                     })
                     self.end_delivery
+
+                    # increment the open count for the regarding campaign in the timeline snapshot
+                    self.job.campaign.track('sent')
                 rescue => e
                     self.end_delivery(e.message)
                     raise e

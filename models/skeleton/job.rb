@@ -2,7 +2,7 @@ module BlackStack
     module Emails
         class Job < Sequel::Model(:eml_job)
             many_to_one :campaign, :class=>:'BlackStack::Emails::Campaign', :key=>:id_campaign
-            many_to_one :address, :class=>:'BlackStack::Emails::Address', :key=>:id_address
+            many_to_one :address, :class=>:'BlackStack::Emails::Address', :key=>:planning_id_address
             one_to_many :deliveries, :class=>:'BlackStack::Emails::Delivery', :key=>:id_job
 
             # return a list of jobs with pending deliveries, assigned to an address that is deleted, or it is belonging another account and no longer shared
