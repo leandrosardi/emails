@@ -40,7 +40,7 @@ q = "
             <thead>
                 <th style="width:36px;"><!-- status --></th>
                 <th style="width:90px;">Name</th>
-                <th style="width:90px;">Export</th>
+                <th style="width:90px;">Export List</th>
                 <th style="width:auto;">Subject</th>
                 <th style="width:90px;">Created By</th>
                 <th style="width:75px;">Creation</th>
@@ -60,7 +60,7 @@ q = "
                 <tr>
                     <td class="fix"><span class='badge badge-<%=o.status_color%>'><%=o.status_name%></span></td>
                     <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
-                    <td class="fix" title="<%=row[:export_filename].to_s.encode_html%>"><%=row[:export_filename].to_s.encode_html%></td>
+                    <td class="fix" title="<%=row[:export_filename].to_s.encode_html%>"><a href='/emails/lists/<%=o.id_export.to_guid%>'><%=row[:export_filename].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:subject].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:user_name].to_s.encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
                     <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
@@ -80,7 +80,7 @@ q = "
                         <span style='color:gray;'><%=o.clicks_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_unsubscribes].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_sents].to_i.to_label%></a>
+                        <a href='/email/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_unsubscribes].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.unsubscribes_ratio.to_i.to_label%>%</span>
                     </td>

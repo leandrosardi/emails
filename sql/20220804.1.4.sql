@@ -151,7 +151,7 @@ create table IF NOT EXISTS eml_timeline (
     stat_bounces bigint not null,
     stat_unsubscribes bigint not null,
     stat_complaints bigint not null,
-    CONSTRAINT uk_timeline UNIQUE ( )
+    CONSTRAINT uk_timeline UNIQUE (id_campaign, year, month, day, hour, minute)
 );
 
 -- add support to delete objects
@@ -160,3 +160,6 @@ alter table eml_campaign add column if not exists delete_time timestamp null;
 
 -- hourly limit for emails delivery has been deprecated.
 alter table eml_address drop column if exists max_emails_per_hour;
+
+-- enable or disable accounts
+alter table eml_address add column if not exists "enabled" boolean not null default true;

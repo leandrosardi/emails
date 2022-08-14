@@ -58,13 +58,25 @@ module BlackStack
                 self.status == STATUS_ON
             end
 
-            # campaign ratios
+            # leads in the export list.
+            # note that may exist leads added after the campaign planning.
             def total_leads
                 DB["SELECT COUNT(*) AS n FROM fl_export_lead WHERE id_export = '#{self.id_export}'"].first[:n]
             end
 
+            # total number of deliveries planned for this campaign
+            def total_deliveries
+                DB["
+                    SELECT COUNT(*) AS n 
+                    FROM eml_job j
+                    JOIN eml_delivery d on j.id=d.id_job 
+                    WHERE j.id_campaign = '#{self.id}'
+                "].first[:n]
+            end
+
+
             def sent_ratio
-                t = self.total_leads
+                t = self.total_deliveries
                 t == 0 ? 0 : ((self.stat_sents.to_f / t.to_f) * 100.to_f).to_i
             end
             
@@ -74,12 +86,12 @@ module BlackStack
             end
 
             def clicks_ratio
-                t = self.stat_opens
+                t = self.stat_sents
                 t == 0 ? 0 : ((self.stat_clicks.to_f / t.to_f) * 100.to_f).to_i
             end
 
             def unsubscribes_ratio
-                t = self.stat_opens
+                t = self.stat_sents
                 t == 0 ? 0 : ((self.stat_unsubscribes.to_f / t.to_f) * 100.to_f).to_i
             end
 
@@ -307,7 +319,7 @@ module BlackStack
                         #{year}, #{month}, #{day}, #{hour}, #{minute},
                         0, 0, 0, 0, 0, 0
                     ) ON CONFLICT DO NOTHING;
-                    -- increment the counter of the event
+                    -- increment the counter of the event in the timeline snapshot
                     UPDATE eml_timeline 
                     SET stat_#{event_name}s = stat_#{event_name}s + 1 
                     WHERE id_campaign = '#{cid}' 
@@ -316,6 +328,10 @@ module BlackStack
                     AND day = #{day} 
                     AND hour = #{hour} 
                     AND minute = #{minute};
+                    -- increment the counter of the event in the campaign record
+                    UPDATE eml_campaign 
+                    SET stat_#{event_name}s = stat_#{event_name}s + 1 
+                    WHERE id = '#{cid}' 
                     -- commit transaction
                     --COMMIT;
                 ")

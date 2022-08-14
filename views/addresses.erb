@@ -4,15 +4,12 @@ q = "
         a.id, 
         a.address, 
         a.shared,
+        a.enabled,
         a.create_time,
         a.max_deliveries_per_day
     from eml_address a
-    join \"user\" u on (
-        u.id_account='#{@login.user.id_account}' 
-        and
-        u.id=a.id_user
-    )
-    --where a.delete_time is null
+    join \"user\" u on ( u.id_account='#{@login.user.id_account}' and u.id=a.id_user )
+    where a.delete_time is null
     order by a.address
 "
 %>
@@ -34,13 +31,12 @@ q = "
 	<div class="span12 box">
         <table class="table table-striped" style="table-layout: fixed; width: 100%;">
             <thead>
-                <th style="width:36px;"><!-- owned, leased --></th>
                 <th style="width:auto;">Address</th>
                 <th style="width:90px;">Creation</th>
-                <th style="width:45px;">Sharing</th>
-                <th style="width:90px;">Owner</th>
-                <th style="width:90px;">Leaser</th>
-                <th style="width:60px;text-align:right;">Emails<br/>Per Day</th>
+                <th style="width:60px;">Sharing</th>
+                <th style="width:60px;">Enabled</th>
+                <th style="width:60px;text-align:right;">Deliveries<br/>Per Day</th>
+                <th style="width:24px;"><!-- edit --></th>
                 <th style="width:24px;"><!-- delete --></th>
             </thead>
             <tbody>
@@ -48,14 +44,19 @@ q = "
                 i = 0
                 DB[q].all do |row|
                     i += 1
-                    o = BlackStack::Emails::Campaign.where(:id=>row[:id]).first
+                    shared = row[:shared] ? "Yes" : "No"
+                    color = row[:shared] ? "blue" : "gray"
+                    enabled = row[:enabled] ? "Yes" : "No"
+                    color2 = row[:enabled] ? "green" : "gray"
                 %>
                 <tr>
-                    <td class="fix"><span class='badge badge-blue'>leased</span></td>
                     <td class="fix" title="<%=row[:address].to_s.encode_html%>"><%=row[:address].to_s.encode_html%></td>
-                    <!--
-                    <td class="fix" style="text-align:right;"><a title='Edit' href='/emails/campaigns/<%=row[:id].to_guid%>/edit'><i class='icon-pencil'></i></a></td>
-                    -->
+                    <td class="fix" title="<%=row[:create_time].to_s.encode_html%>"><%=row[:create_time].to_s[0..9]%></td>
+                    <td class="fix" title="<%=shared%>"><span class='badge badge-<%=color%>'><%=shared%></span></td>
+                    <td class="fix" title="<%=enabled%>"><span class='badge badge-<%=color2%>'><%=enabled%></span></td>
+                    <td class="fix" style="text-align:right;" title="<%=row[:max_deliveries_per_day].to_i.to_label%>"><%=row[:max_deliveries_per_day].to_i.to_label%></td>
+                    <td class="fix" style="text-align:right;"><a title='Edit' href='/emails/address/<%=row[:id].to_guid%>'><i class='icon-pencil'></i></a></td>
+                    <td class="fix" style="text-align:right;"><a title='Delete' href='/emails/filter_delete_address?aid=<%=row[:id].to_guid%>'><i class='icon-trash'></i></a></td>
                 </tr>
                 <%
                 end

@@ -51,7 +51,8 @@ l.logf "done (#{campaigns.size})"
 l.logs 'load shared addresses by any user... '
 shared_addresses = BlackStack::Emails::Address.where(
     :delete_time=>nil, 
-    :shared=>true
+    :shared=>true,
+    :enabled=>true
 ).all.freeze
 l.logf "done (#{shared_addresses.size})"
 
@@ -97,7 +98,7 @@ campaigns.each { |campaign|
             # first choice, I plan using dedicated addresses of the account owner of the campaign.
             # second choice, I plan using crowd-shared addresses.
             # TODO: give the user the choice to use both: shared and owned accounts.
-            addresses = account.addresses
+            addresses = account.addresses.select { |a| a.enabled && a.delete_time.nil? }
             addresses = shared_addresses if addresses.size == 0
             
             # round-robin the accounts for running the planning - run the planning
