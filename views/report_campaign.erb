@@ -1,34 +1,43 @@
 <%
-q = "
-    select 
-        c.id, 
-        c.name, 
-        e.id as id_export,
-        e.filename as export_filename,
-        c.subject, 
-        u.id as id_user, 
-        u.name as user_name, 
-        c.create_time,
-        c.stat_sents,
-        c.stat_opens,
-        c.stat_clicks,
-        c.stat_unsubscribes
-    from eml_campaign c
-    join fl_export e on e.id=c.id_export
-    join \"user\" u on (u.id=c.id_user and u.id_account='#{@login.user.id_account}')
-    --where c.delete_time is null
-    order by c.name
-"
+gid = params[:gid]
+report = params[:report]
+o = BlackStack::Emails::Campaign.where(:id=>gid).first
+
+# report must be one of these values:
+reports = ['all', 'pending', 'inprocess', 'failed', 'sent', 'opens', 'clicks', 'unsubscribes']
+
+redirect '/emails/campaigns?err='+CGI.escape("Invalid report request.") if !reports.include?(report)
+
+DB["
+    SELECT 
+        l.id as lid,
+        l.name as lname, 
+        j.id as jid,
+        d.create_time,
+        j.planning_time,
+        d.delivery_end_time
+        #{ report == 'opens' ? ', o.create_time as action_time' : '' }
+        #{ report == 'clicks' ? ', o.create_time as action_time' : '' }
+        #{ report == 'unsubscribes' ? ', o.create_time as action_time' : '' }
+    FROM eml_job j
+    JOIN eml_delivery d ON j.id = d.id_job
+    JOIN fl_lead l ON l.id = d.id_lead
+    #{ ['opens', 'clicks', 'unsubscribes'].include?(report) ? 'JOIN eml_open o ON d.id = o.id_delivery' : '' }
+    WHERE j.campaign_id = '#{gid}'
+    #{ report == 'pending' ? 'AND d.delivery_start_time IS NULL ' : '' }
+    #{ report == 'inprocess' ? 'AND d.delivery_start_time IS NOT NULL AND j.delivery_end_time IS NULL ' : '' }
+    #{ report == 'failed' ? 'AND d.delivery_end_time IS NOT NULL AND j.delivery_success=true ' : '' }
+    #{ report == 'sent' ? 'AND d.delivery_end_time IS NOT NULL AND j.delivery_success=false ' : '' }
+    ORDER BY 
+        #{ ['opens', 'clicks', 'unsubscribes'].include?(report) ? 'o.create_time desc' : 'j.planning_time desc, d.delivery_end_time desc' }        
+"]
 %>
 
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
-		<div class="span6">
-		    <%=nav2("Emails", "/emails", "Campaigns")%>
-		</div>
-		<div class="span6" style='text-align:right;'>
-		    <a class='btn btn-blue' href='/emails/campaigns/new'><i class='icon-plus'></i> Add</a>
+		<div class="span12">
+		    <%=nav4("Emails", "/emails", "Campaigns", '/emails/campaigns', o.name, "/emails/campaigns/#{o.id.to_guid}/edit", 'Report')%>
 		</div>
 	</section>
 </div>
@@ -40,10 +49,10 @@ q = "
             <thead>
                 <th style="width:36px;"><!-- status --></th>
                 <th style="width:90px;">Name</th>
-                <th style="width:90px;">Export</th>
+                <th style="width:90px;">Export List</th>
                 <th style="width:auto;">Subject</th>
                 <th style="width:90px;">Created By</th>
-                <th style="width:45px;">Creation</th>
+                <th style="width:75px;">Creation</th>
                 <th style="width:45px;text-align:right;">Sent</th>
                 <th style="width:45px;text-align:right;">Opens</th>
                 <th style="width:45px;text-align:right;">Clicks</th>
@@ -59,28 +68,28 @@ q = "
                 %>
                 <tr>
                     <td class="fix"><span class='badge badge-<%=o.status_color%>'><%=o.status_name%></span></td>
-                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><%=row[:name].to_s.encode_html%></td>
-                    <td class="fix" title="<%=row[:export_filename].to_s.encode_html%>"><%=row[:export_filename].to_s.encode_html%></td>
-                    <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><%=row[:subject].to_s.encode_html%></td>
+                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
+                    <td class="fix" title="<%=row[:export_filename].to_s.encode_html%>"><a href='/emails/lists/<%=o.id_export.to_guid%>'><%=row[:export_filename].to_s.encode_html%></a></td>
+                    <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:subject].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:user_name].to_s.encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
-                    <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
+                    <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_sents].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sents].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sents].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.sent_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_opens].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/opens'><%=row[:stat_opens].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/opens'><%=row[:stat_opens].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.opens_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_clicks].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/clicks'><%=row[:stat_clicks].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/clicks'><%=row[:stat_clicks].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.clicks_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_unsubscribes].to_i.to_label%>">
-                        <a href='/email/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_sents].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_unsubscribes].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=o.unsubscribes_ratio.to_i.to_label%>%</span>
                     </td>

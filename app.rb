@@ -32,7 +32,20 @@ end
 get "/emails/campaigns/:gid/:report", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
 end
-
+=begin
+get "/emails/campaigns/:gid/sent", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=sents", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/opens", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=opens", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/clicks", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=clicks", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/unsubscribes", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=unsubscribes", :layout => :"/views/layouts/core"
+end
+=end
 get "/emails/addresses", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/addresses", :layout => :"/views/layouts/core"
 end
@@ -41,20 +54,20 @@ get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
 end
 
-get "/emails/addresses/:aid", :auth => true, :agent => /(.*)/ do
+get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
 end
 
 get "/emails/leads", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/leads", :layout => :"/views/layouts/core"
+    erb :"/extensions/leads/views/results?exported=yes", :layout => :"/views/layouts/core"
 end
 
 get "/emails/lists", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/lists", :layout => :"/views/layouts/core"
+    erb :"/extensions/leads/views/exports", :layout => :"/views/layouts/core"
 end
 
 get "/emails/lists/:lid", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/view_list", :layout => :"/views/layouts/core"
+    erb :"/extensions/leads/views/edit_export", :layout => :"/views/layouts/core"
 end
 
 get "/emails/jobs", :auth => true, :agent => /(.*)/ do

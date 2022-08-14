@@ -23,6 +23,6 @@ begin
     redirect "/emails/addresses?msg="+ CGI::escape('Address updated.')
 rescue => e
     # return errors
-    redirect "/emails/addresses/#{params[:aid].to_guid}?err="+ CGI::escape(e.message)
+    redirect "/emails/addresses/#{params[:aid].to_guid}/edit?err="+ CGI::escape(e.message)
 end
 %>
