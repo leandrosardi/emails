@@ -56,7 +56,7 @@ BlackStack::Extensions::add ({
             :command => "
                 cd ~/code/mysaas; 
                 mv ./google-api.json ./google-api.%timestamp%.json;
-                echo \"%google_api_json_content%\" > ./google-api.json;
+                echo '#{File.read(BlackStack::Emails::GoogleConfig::google_api_certificate)}' > ./google-api.json;
             ",
             #:matches => [ /^$/, /mv: cannot stat '\.\/config.rb': No such file or directory/ ],
             #:nomatches => [ { :nomatch => /.+/, :error_description => 'No output expected.' } ],
