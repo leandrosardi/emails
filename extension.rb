@@ -24,11 +24,11 @@ BlackStack::Extensions::add ({
 
     # what are the screens to add in the leftbar
     :leftbar_icons => [
-        { :label => 'leads', :icon => :heart, :screen => :leads, },
-        { :label => 'lists', :icon => :list, :screen => :lists, },
+#        { :label => 'leads', :icon => :heart, :screen => :leads, },
+#        { :label => 'lists', :icon => :list, :screen => :lists, },
         { :label => 'campaigns', :icon => :envelope, :screen => :campaigns, },
-        { :label => 'jobs', :icon => :tasks, :screen => :jobs, },
-        { :label => 'deliveries', :icon => :truck, :screen => :deliveries, },
+#        { :label => 'jobs', :icon => :tasks, :screen => :jobs, },
+        { :label => 'activity', :icon => :tasks, :screen => :activity, },
         { :label => 'addresses', :icon => :tags, :screen => :addresses, },
     ],
 

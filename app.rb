@@ -57,7 +57,7 @@ end
 get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
 end
-
+=begin
 get "/emails/leads", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/leads/views/results?exported=yes", :layout => :"/views/layouts/core"
 end
@@ -77,9 +77,9 @@ end
 get "/emails/jobs/:jid", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/view_job", :layout => :"/views/layouts/core"
 end
-
-get "/emails/deliveries", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/deliveries", :layout => :"/views/layouts/core"
+=end
+get "/emails/activity", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
 end
 
 

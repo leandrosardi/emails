@@ -1,7 +1,6 @@
 <%
 gid = params[:gid]
 report = params[:report]
-o = BlackStack::Emails::Campaign.where(:id=>gid).first
 
 # normalization
 title = "Activity"
@@ -32,7 +31,8 @@ q = "
         o.planning_time,
         o.url as url
     FROM eml_log o
-    WHERE o.id_campaign = '#{gid}' 
+    WHERE o.id_account = '#{@login.user.id_account}' 
+    #{gid.nil? ? "" : "AND o.id_campaign = '#{gid}'"} 
     #{report.nil? ? "" : "AND o.\"type\" = '#{report.to_sql}'"}
     ORDER BY o.create_time DESC
 "
@@ -42,7 +42,18 @@ q = "
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span12">
-		    <%=nav4("Emails", "/emails", "Campaigns", '/emails/campaigns', o.name, "/emails/campaigns/#{o.id.to_guid}/edit", title)%>
+            <%
+            if !gid.nil?
+                o = BlackStack::Emails::Campaign.where(:id=>gid).first
+                %>
+                <%=nav4("Emails", "/emails", "Campaigns", '/emails/campaigns', o.name, "/emails/campaigns/#{o.id.to_guid}/edit", title)%>
+                <%
+            else
+                %>
+                <%=nav2("Emails", "/emails", "Activity")%>
+                <%
+            end
+            %>
 		</div>
 	</section>
 </div>
