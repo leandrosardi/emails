@@ -7,6 +7,8 @@ module BlackStack
             def after_create
                 super
                 self.delivery.job.track('open')
+                # write history in eml_log
+                self.delivery.track('open')
             end
         end # class Open
     end # Emails

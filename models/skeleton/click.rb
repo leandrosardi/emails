@@ -8,6 +8,8 @@ module BlackStack
             def after_create
                 super
                 self.delivery.job.track('click')
+                # write history in eml_log
+                self.delivery.track('click', self.link.url)
             end
 
         end # class Click

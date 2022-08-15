@@ -3,41 +3,46 @@ gid = params[:gid]
 report = params[:report]
 o = BlackStack::Emails::Campaign.where(:id=>gid).first
 
+# normalization
+title = "Activity"
+if !report.nil?
+    title = report.capitalize
+    report = 'open' if report == 'opens'
+    report = 'click' if report == 'clicks'
+    report = 'unsubscribe' if report == 'unsubscribes'
+end
+
 # report must be one of these values:
-reports = ['all', 'pending', 'inprocess', 'failed', 'sent', 'opens', 'clicks', 'unsubscribes']
+reports = BlackStack::Emails::Delivery::LOG_TYPES #+ ['all']
 
-redirect '/emails/campaigns?err='+CGI.escape("Invalid report request.") if !reports.include?(report)
+# if report is not nil, it must be a valid code
+redirect '/emails/campaigns?err='+CGI.escape("Invalid report request.") if !report.nil? && !reports.include?(report)
 
-DB["
+q = "
     SELECT 
-        l.id as lid,
-        l.name as lname, 
-        j.id as jid,
-        d.create_time,
-        j.planning_time,
-        d.delivery_end_time
-        #{ report == 'opens' ? ', o.create_time as action_time' : '' }
-        #{ report == 'clicks' ? ', o.create_time as action_time' : '' }
-        #{ report == 'unsubscribes' ? ', o.create_time as action_time' : '' }
-    FROM eml_job j
-    JOIN eml_delivery d ON j.id = d.id_job
-    JOIN fl_lead l ON l.id = d.id_lead
-    #{ ['opens', 'clicks', 'unsubscribes'].include?(report) ? 'JOIN eml_open o ON d.id = o.id_delivery' : '' }
-    WHERE j.campaign_id = '#{gid}'
-    #{ report == 'pending' ? 'AND d.delivery_start_time IS NULL ' : '' }
-    #{ report == 'inprocess' ? 'AND d.delivery_start_time IS NOT NULL AND j.delivery_end_time IS NULL ' : '' }
-    #{ report == 'failed' ? 'AND d.delivery_end_time IS NOT NULL AND j.delivery_success=true ' : '' }
-    #{ report == 'sent' ? 'AND d.delivery_end_time IS NOT NULL AND j.delivery_success=false ' : '' }
-    ORDER BY 
-        #{ ['opens', 'clicks', 'unsubscribes'].include?(report) ? 'o.create_time desc' : 'j.planning_time desc, d.delivery_end_time desc' }        
-"]
+        o.id,
+        o.create_time, 
+        o.\"type\",
+        o.\"color\",
+        o.id_campaign,
+        o.campaign_name,
+        o.id_lead,
+        o.lead_name, 
+        o.id_job,
+        o.planning_time,
+        o.url as url
+    FROM eml_log o
+    WHERE o.id_campaign = '#{gid}' 
+    #{report.nil? ? "" : "AND o.\"type\" = '#{report.to_sql}'"}
+    ORDER BY o.create_time DESC
+"
 %>
 
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span12">
-		    <%=nav4("Emails", "/emails", "Campaigns", '/emails/campaigns', o.name, "/emails/campaigns/#{o.id.to_guid}/edit", 'Report')%>
+		    <%=nav4("Emails", "/emails", "Campaigns", '/emails/campaigns', o.name, "/emails/campaigns/#{o.id.to_guid}/edit", title)%>
 		</div>
 	</section>
 </div>
@@ -47,65 +52,41 @@ DB["
 	<div class="span12 box">
         <table class="table table-striped" style="table-layout: fixed; width: 100%;">
             <thead>
-                <th style="width:36px;"><!-- status --></th>
-                <th style="width:90px;">Name</th>
-                <th style="width:90px;">Export List</th>
-                <th style="width:auto;">Subject</th>
-                <th style="width:90px;">Created By</th>
-                <th style="width:75px;">Creation</th>
-                <th style="width:45px;text-align:right;">Sent</th>
-                <th style="width:45px;text-align:right;">Opens</th>
-                <th style="width:45px;text-align:right;">Clicks</th>
-                <th style="width:45px;text-align:right;">Unsubs</th>
-                <th style="width:24px;"><!-- edit --></th>
+                <th style="width:150px;">Campaign</th>
+                <th style="width:auto;">Lead</th>
+                <th style="width:75px;">Scheduled</th>
+                <th style="width:75px;">Date</th>
+                <th style="width:90px;text-align:right;">Event</th>
+                <th style="width:75px"><!-- link clicked --></th>
             </thead>
             <tbody>
                 <%
                 i = 0
-                DB[q].all do |row|
+                DB[q].all { |row|
                     i += 1
-                    o = BlackStack::Emails::Campaign.where(:id=>row[:id]).first
+                    %>
+                    <tr>
+                        <td class="fix"><%=row[:campaign_name].to_s.encode_html%></td>
+                        <td class="fix"><%=row[:lead_name].to_s.encode_html%></td>
+                        <td class="fix"><%=row[:planning_time].to_s[0..9]%></td>
+                        <td class="fix"><%=row[:create_time].to_s[0..9]%></td>
+                        <td class="fix" style='text-align:right;'><span class='badge badge-<%=row[:color]%>'><%=row[:type].to_s.encode_html%></span></td>
+                        <td class="fix"><%=row[:url].to_s%></td>
+                    </tr>
+                    <%
+                }
                 %>
-                <tr>
-                    <td class="fix"><span class='badge badge-<%=o.status_color%>'><%=o.status_name%></span></td>
-                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
-                    <td class="fix" title="<%=row[:export_filename].to_s.encode_html%>"><a href='/emails/lists/<%=o.id_export.to_guid%>'><%=row[:export_filename].to_s.encode_html%></a></td>
-                    <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:subject].to_s.encode_html%></a></td>
-                    <td class="fix" title="<%=row[:user_name].to_s.encode_html%>"><%=row[:user_name].to_s.encode_html%></td>
-                    <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
-                    <td class="fix" style="text-align:right;" title="<%=row[:stat_sents].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sents].to_i.to_label%></a>
-                        <br/>
-                        <span style='color:gray;'><%=o.sent_ratio.to_i.to_label%>%</span>
-                    </td>
-                    <td class="fix" style="text-align:right;" title="<%=row[:stat_opens].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/opens'><%=row[:stat_opens].to_i.to_label%></a>
-                        <br/>
-                        <span style='color:gray;'><%=o.opens_ratio.to_i.to_label%>%</span>
-                    </td>
-                    <td class="fix" style="text-align:right;" title="<%=row[:stat_clicks].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/clicks'><%=row[:stat_clicks].to_i.to_label%></a>
-                        <br/>
-                        <span style='color:gray;'><%=o.clicks_ratio.to_i.to_label%>%</span>
-                    </td>
-                    <td class="fix" style="text-align:right;" title="<%=row[:stat_unsubscribes].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_unsubscribes].to_i.to_label%></a>
-                        <br/>
-                        <span style='color:gray;'><%=o.unsubscribes_ratio.to_i.to_label%>%</span>
-                    </td>
-                    <td class="fix" style="text-align:right;"><a title='Edit' href='/emails/campaigns/<%=row[:id].to_guid%>/edit'><i class='icon-pencil'></i></a></td>
-                </tr>
-                <%
-                end
 
-                if i==0
+                <%
+                if i == 0 
                 %>
                 <tr>
-                    <td colspan="8" class="fix" align='center' style='text-align:center;'>
-                        No campaigns found.</br>
-                        <a href='/emails/campaigns/new'>Create a new campaign here.</a>
+                    <td colspan="6" class="fix">
+                        <br/>
+                        <center>No results found.</center>
+                        <br/>
                     </td>
-                <tr>
+                </tr>
                 <%
                 end
                 %>

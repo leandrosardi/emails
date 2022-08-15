@@ -7,6 +7,8 @@ module BlackStack
             def after_create
                 super
                 self.delivery.job.track('unsubscribe')
+                # write history in eml_log
+                self.delivery.track('unsubscribe')
             end
         end # class Unsubscribe
     end # Emails

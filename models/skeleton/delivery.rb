@@ -4,6 +4,74 @@ module BlackStack
             many_to_one :job, :class=>:'BlackStack::Emails::Job', :key=>:id_job
             many_to_one :lead, :class=>:'Leads::FlLead', :key=>:id_lead
 
+            LOG_TYPES = ['pending', 'failed', 'sent', 'open', 'click', 'unsubscribe']
+
+            def self.log_type_color(type)
+                raise "Invalid log type #{type}." unless LOG_TYPES.include?(type)
+                ret = nil
+                case type
+                    when 'pending'
+                        ret = 'gray'
+                    when 'failed'
+                        ret = 'red'
+                    when 'sent'
+                        ret = 'green'
+                    when 'open'
+                        ret = 'blue'
+                    when 'click'
+                        ret = 'pink'
+                    when 'unsubscribe'
+                        ret = 'orange'
+                end
+                ret
+            end
+
+            # track en event in the table eml_log
+            def track(type, url=nil, error_description=nil)
+                raise "Invalid log type #{type}." unless LOG_TYPES.include?(type)
+                DB.execute("
+                    INSERT INTO eml_log (
+                        id,
+                        create_time,
+                        \"type\",
+                        \"color\",
+                        id_lead,
+                        id_delivery, 
+                        id_job, 
+                        id_campaign,
+                        lead_name,
+                        campaign_name,
+                        planning_time,
+                        \"url\",
+                        planning_id_address,
+                        \"address\",
+                        \"subject\",
+                        \"body\",
+                        error_description,
+                        id_account
+                    ) VALUES (
+                        '#{guid}',
+                        '#{now}',
+                        '#{type.to_sql}',
+                        '#{self.class.log_type_color(type)}',
+                        '#{self.id_lead}',
+                        '#{self.id}',
+                        '#{self.id_job}',
+                        '#{self.job.id_campaign}',
+                        '#{self.lead.name.to_sql}',
+                        '#{self.job.campaign.name.to_sql}',
+                        '#{self.job.planning_time}',
+                        #{url.nil? ? "NULL" : "'#{url.to_sql}'"},
+                        '#{self.job.address.id}',
+                        '#{self.job.address.address.to_sql}',
+                        '#{self.subject.to_sql}',
+                        '#{self.body.to_sql}',
+                        #{error_description.nil? ? "NULL" : "'#{error_description.to_sql}'"},
+                        '#{self.job.campaign.user.id_account}'
+                    )
+                ")
+            end
+
             # update the delivery flags of this job
             def start_delivery()
                 self.delivery_start_time = now
@@ -36,8 +104,15 @@ module BlackStack
 
                     # increment the open count for the regarding campaign in the timeline snapshot
                     self.job.track('sent')
+
+                    # track log
+                    self.track('sent')
+
                 rescue => e
                     self.end_delivery(e.message)
+                    # track log
+                    self.track('failed', nil, e.message)
+                    # raise the exception
                     raise e
                 end
             end
@@ -93,6 +168,8 @@ module BlackStack
                 self.body.gsub!(/#{Regexp.escape('&amp;')}/, '&')
                 # apply unsubscribe link.
                 self.body.gsub!(/#{Regexp.escape(BlackStack::Emails::UNSUBSCRIBE_MERGETAG)}/, self.unsubscribe_url)
+                # write history in eml_log
+                self.track('pending')
                 # save the changes.
                 self.save
             end

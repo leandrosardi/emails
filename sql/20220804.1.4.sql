@@ -175,6 +175,32 @@ create table IF NOT EXISTS eml_address_timeline (
     CONSTRAINT uk_timeline UNIQUE (id_address, id_campaign, year, month, day, hour, minute)
 );
 
+-- deliveries event tracking.
+-- use this snapshot to show the activity of each campaign.
+create table IF NOT EXISTS eml_log (
+    id uuid not null primary key,
+    create_time TIMESTAMP NOT NULL,
+    "type" varchar(50) not null, -- 'planned', 'failed', 'sent', 'opened', 'clicked', 'unsubscribed'
+    "color" varchar(50) not null, -- 'gray', 'red', 'green', 'opened', 'pink', 'orange'
+    id_lead uuid not null references fl_lead(id),
+    id_delivery uuid not null references eml_delivery(id), 
+    id_job uuid not null references eml_job(id), 
+    id_campaign uuid not null references eml_campaign(id),
+    lead_name varchar(8000) not null,
+    planning_time timestamp not null, -- useful for for pending deliveries
+    "url" varchar(8000) null -- this is the URL for when the event is a click.
+);
+
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS planning_id_address uuid NOT NULL REFERENCES eml_address(id);
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "address" VARCHAR(8000) NOT NULL;
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS campaign_name VARCHAR(8000) NOT NULL;
+
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "subject" VARCHAR(8000) NOT NULL;
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "body" TEXT NOT NULL;
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "error_description" TEXT NULL;
+
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS id_account uuid NOT NULL REFERENCES account(id);
+
 -- add support to delete objects
 alter table eml_address add column if not exists delete_time timestamp null;
 alter table eml_campaign add column if not exists delete_time timestamp null;
