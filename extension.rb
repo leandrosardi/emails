@@ -43,8 +43,8 @@ BlackStack::Extensions::add ({
         :name => 'install-gems',
         :commands => [{ 
             :command => "
-                gem install google-api-client -v 0.53.0
-                gem install mail -v 2.7.1
+                gem install --no-document google-api-client -v 0.53.0
+                gem install --no-document mail -v 2.7.1
             ",
             :sudo => true,
         }],
@@ -60,6 +60,32 @@ BlackStack::Extensions::add ({
             ",
             #:matches => [ /^$/, /mv: cannot stat '\.\/config.rb': No such file or directory/ ],
             #:nomatches => [ { :nomatch => /.+/, :error_description => 'No output expected.' } ],
+            :sudo => false,
+        }],
+    }, {
+        :name => 'start-planning-process',
+        :commands => [{ 
+            # back up old configuration file
+            # setup new configuration file
+            :command => "
+                source /home/%ssh_username%/.rvm/scripts/rvm; rvm install 3.1.2; rvm --default use 3.1.2 > /dev/null 2>&1;
+                cd /home/%ssh_username%/code/mysaas/extensions/emails/p > /dev/null 2>&1; 
+                export RUBYLIB=/home/%ssh_username%/code/mysaas > /dev/null 2>&1;
+                nohup ruby planner.rb > /dev/null 2>&1 &
+            ",
+            :sudo => false,
+        }],
+    }, {
+        :name => 'start-delivery-process',
+        :commands => [{ 
+            # back up old configuration file
+            # setup new configuration file
+            :command => "
+                source /home/%ssh_username%/.rvm/scripts/rvm; rvm install 3.1.2; rvm --default use 3.1.2 > /dev/null 2>&1;
+                cd /home/%ssh_username%/code/mysaas/extensions/emails/p > /dev/null 2>&1; 
+                export RUBYLIB=/home/%ssh_username%/code/mysaas > /dev/null 2>&1;
+                nohup ruby delivery.rb > /dev/null 2>&1 &
+            ",
             :sudo => false,
         }],
     }],
