@@ -86,7 +86,7 @@ BlackStack::Extensions::add ({
                 export RUBYLIB=/home/%ssh_username%/code/mysaas > /dev/null 2>&1;
                 nohup ruby delivery.rb > /dev/null 2>&1 &
             ",
-            :sudo => false,
+            :sudo => true,
         }],
     }],
 })
