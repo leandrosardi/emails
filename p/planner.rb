@@ -38,99 +38,103 @@ BlackStack::Extensions.append :emails
 
 l = BlackStack::LocalLogger.new('./planner.log')
 
-# active campaigns pending planning
-l.logs 'load active campaigns pending planning... '
-campaigns = BlackStack::Emails::Campaign.where(
-    :delete_time=>nil,
-    :status=>BlackStack::Emails::Campaign::STATUS_ON, 
-    :planning_start_time=>nil
-).all
-l.logf "done (#{campaigns.size})"
+while (true)
+    # active campaigns pending planning
+    l.logs 'load active campaigns pending planning... '
+    campaigns = BlackStack::Emails::Campaign.where(
+        :delete_time=>nil,
+        :status=>BlackStack::Emails::Campaign::STATUS_ON, 
+        :planning_start_time=>nil
+    ).all
+    l.logf "done (#{campaigns.size})"
 
-# shared addresses by any user
-l.logs 'load shared addresses by any user... '
-shared_addresses = BlackStack::Emails::Address.where(
-    :delete_time=>nil, 
-    :shared=>true,
-    :enabled=>true
-).all.freeze
-l.logf "done (#{shared_addresses.size})"
+    # shared addresses by any user
+    l.logs 'load shared addresses by any user... '
+    shared_addresses = BlackStack::Emails::Address.where(
+        :delete_time=>nil, 
+        :shared=>true,
+        :enabled=>true
+    ).all.freeze
+    l.logf "done (#{shared_addresses.size})"
 
-# TODO: Use case: If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
+    # TODO: Use case: If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
 
-# TODO: restart abandoned jobs
-# If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
+    # TODO: restart abandoned jobs
+    # If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
 
-# Use case: Each `eml_job` record has one and only one address assigned.
-# For each active campaign pending planning, I have to create the jobs.
-campaigns.each { |campaign|
-    l.logs "#{campaign.id}..."
-        l.logs "Flag planning start... "
-        campaign.start_planning
-        l.done
-
-        begin
-            # it is VERY important to sort leads, in order to reach them in the same order in a further followup
-            l.logs "Load leads... "
-            leads = campaign.export.fl_export_leads.map { |el| el.fl_lead }.sort_by {|l| l.id}
-            l.logf "done (#{leads.size})"
-
-            # remove leads who already have a delivery created for this campaign
-            # that is important for cases when a job is being reprocessed, because an address has been deprecated.
-            l.logs "Remove leads who already have a delivery created for this campaign... "
-            leads.dup.each { |lead|
-                leads.reject! { |x| x.id.to_guid==lead.id.to_guid } if campaign.include?(lead)
-            }
-            l.logf "done (#{leads.size} left)"
-
-            l.logs "Calc total leads... "
-            n = leads.size
-            l.logf "done (#{n})"
-
-            l.logs "Load campaign user... "
-            user = BlackStack::Emails::User.where(:id=>campaign.id_user).first
+    # Use case: Each `eml_job` record has one and only one address assigned.
+    # For each active campaign pending planning, I have to create the jobs.
+    campaigns.each { |campaign|
+        l.logs "#{campaign.id}..."
+            l.logs "Flag planning start... "
+            campaign.start_planning
             l.done
 
-            l.logs "Load campaign account... "
-            account = BlackStack::Emails::Account.where(:id=>user.id_account).first
-            l.done
+            begin
+                # it is VERY important to sort leads, in order to reach them in the same order in a further followup
+                l.logs "Load leads... "
+                leads = campaign.export.fl_export_leads.map { |el| el.fl_lead }.sort_by {|l| l.id}
+                l.logf "done (#{leads.size})"
 
-            # first choice, I plan using dedicated addresses of the account owner of the campaign.
-            # second choice, I plan using crowd-shared addresses.
-            # TODO: give the user the choice to use both: shared and owned accounts.
-            addresses = account.addresses.select { |a| a.enabled && a.delete_time.nil? }
-            addresses = shared_addresses if addresses.size == 0
-            
-            # round-robin the accounts for running the planning - run the planning
-            while leads.size > 0
-                addresses.each { |addr|
-                    l.logs "#{addr.address}... "
-                        # grab the first leads and drop them from the array
-                        i = addr.max_deliveries_per_day
-                        my_leads = leads.first(i)
-                        leads = leads.drop(i)
-                        # exit if there are no more leads into the array
-                        break if my_leads.size == 0
-                        # create job with grabbed leads
-                        campaign.create_jobs(my_leads, addr)
-                    l.logf "done (#{my_leads.size.to_s})"
-                    # release resources
-                    GC.start
-                    DB.disconnect
+                # remove leads who already have a delivery created for this campaign
+                # that is important for cases when a job is being reprocessed, because an address has been deprecated.
+                l.logs "Remove leads who already have a delivery created for this campaign... "
+                leads.dup.each { |lead|
+                    leads.reject! { |x| x.id.to_guid==lead.id.to_guid } if campaign.include?(lead)
                 }
-            end # while
+                l.logf "done (#{leads.size} left)"
 
-            l.logs "Flag planning end... "
-            campaign.end_planning
-            l.done
-        rescue Exception => e
-            l.logf "Error: #{e.message}"
+                l.logs "Calc total leads... "
+                n = leads.size
+                l.logf "done (#{n})"
 
-            l.logs "Flag planning error... "
-            campaign.end_planning(e.message)
-            l.done
-        end
+                l.logs "Load campaign user... "
+                user = BlackStack::Emails::User.where(:id=>campaign.id_user).first
+                l.done
+
+                l.logs "Load campaign account... "
+                account = BlackStack::Emails::Account.where(:id=>user.id_account).first
+                l.done
+
+                # first choice, I plan using dedicated addresses of the account owner of the campaign.
+                # second choice, I plan using crowd-shared addresses.
+                # TODO: give the user the choice to use both: shared and owned accounts.
+                addresses = account.addresses.select { |a| a.enabled && a.delete_time.nil? }
+                addresses = shared_addresses if addresses.size == 0
+                
+                # round-robin the accounts for running the planning - run the planning
+                while leads.size > 0
+                    addresses.each { |addr|
+                        l.logs "#{addr.address}... "
+                            # grab the first leads and drop them from the array
+                            i = addr.max_deliveries_per_day
+                            my_leads = leads.first(i)
+                            leads = leads.drop(i)
+                            # exit if there are no more leads into the array
+                            break if my_leads.size == 0
+                            # create job with grabbed leads
+                            campaign.create_jobs(my_leads, addr)
+                        l.logf "done (#{my_leads.size.to_s})"
+                        # release resources
+                        GC.start
+                        DB.disconnect
+                    }
+                end # while
+
+                l.logs "Flag planning end... "
+                campaign.end_planning
+                l.done
+            rescue Exception => e
+                l.logf "Error: #{e.message}"
+
+                l.logs "Flag planning error... "
+                campaign.end_planning(e.message)
+                l.done
+            end
+        l.done
+    }
+
+    l.logs 'Sleeping... '
+    sleep(10)
     l.done
-}
-
-
+  end # while (true)

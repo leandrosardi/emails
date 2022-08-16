@@ -201,6 +201,8 @@ ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "error_description" TEXT NULL;
 
 ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS id_account uuid NOT NULL REFERENCES account(id);
 
+ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS lead_email varchar(8000) NOT NULL DEFAULT '';
+
 -- add support to delete objects
 alter table eml_address add column if not exists delete_time timestamp null;
 alter table eml_campaign add column if not exists delete_time timestamp null;

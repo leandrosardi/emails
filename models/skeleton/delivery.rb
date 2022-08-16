@@ -48,7 +48,8 @@ module BlackStack
                         \"subject\",
                         \"body\",
                         error_description,
-                        id_account
+                        id_account,
+                        lead_email
                     ) VALUES (
                         '#{guid}',
                         '#{now}',
@@ -67,7 +68,8 @@ module BlackStack
                         '#{self.subject.to_sql}',
                         '#{self.body.to_sql}',
                         #{error_description.nil? ? "NULL" : "'#{error_description.to_sql}'"},
-                        '#{self.job.campaign.user.id_account}'
+                        '#{self.job.campaign.user.id_account}',
+                        '#{self.email.to_sql}'
                     )
                 ")
             end
