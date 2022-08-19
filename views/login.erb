@@ -7,7 +7,7 @@ msg = params[:msg]
 redirect_on_success = session['redirect_on_success']
 
 # setup default values
-redirect_on_success = '/content/seminars?service=content' if redirect_on_success.to_s.size == 0
+redirect_on_success = '/emails/campaigns?service=emails' if redirect_on_success.to_s.size == 0
 %>
 <section class='row-fluid  signin-page' style='vertical-align: middle; height: 100%;' height='100%'>
 	<div class='span4 signin-page'>
@@ -47,7 +47,7 @@ redirect_on_success = '/content/seminars?service=content' if redirect_on_success
 
 			<form action="/login" method="post">
 				<input type="hidden" name="redirect_on_success" id="redirect_on_success" value="<%=redirect_on_success.to_s.encode_html%>" />
-				<input type="hidden" name="redirect_on_error" id="redirect_on_error" value="/content/login" />
+				<input type="hidden" name="redirect_on_error" id="redirect_on_error" value="/emails/login" />
 				<fieldset>
 					<div class="fields">
 						<input type="text" name="email" placeholder="Email" id="id_email" tabindex="1"  onfocus="$(this).select();" value="<%=email.encode_html%>">
@@ -61,7 +61,7 @@ redirect_on_success = '/content/seminars?service=content' if redirect_on_success
 				<br/>
 				<center>
 					Don't have an account?<br/>
-					<a href='/content/signup' class='btn btn-gray btn-block' tabindex="5"><b>Create a new <%=APP_NAME%> account</b></a>
+					<a href='/emails/signup' class='btn btn-gray btn-block' tabindex="5"><b>Create a new <%=APP_NAME%> account</b></a>
 				</center>
 			</div>
 		</div>
@@ -78,11 +78,11 @@ redirect_on_success = '/content/seminars?service=content' if redirect_on_success
 		<img src='/core/images/landing.png' width='100%' title='<%=APP_NAME%> Dahsboard' /><br/>
 
 		<h3 class='landing'>
-			<%=APP_NAME%> Accounts<br/>Include Lorem Ipsum....
+			<%=APP_SHORT_NAME%> Accounts Include<br/>A Lifetime Free Tier....
 		</h3>
 
 		<span>
-			<a href='/content/signup' target='_window'>Signup</a> to Grab Your Leads!
+			<a href='/emails/signup' target='_window'>Signup</a> & Start for Free!
 		</span>
 		</center>
 	</div>
