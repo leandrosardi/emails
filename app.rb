@@ -57,15 +57,15 @@ end
 get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
 end
-=begin
+
 get "/emails/leads", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/leads/views/results?exported=yes", :layout => :"/views/layouts/core"
+    erb :"/extensions/leads/views/results", :layout => :"/views/layouts/core"
 end
 
 get "/emails/lists", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/leads/views/exports", :layout => :"/views/layouts/core"
 end
-
+=begin
 get "/emails/lists/:lid", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/leads/views/edit_export", :layout => :"/views/layouts/core"
 end
