@@ -228,6 +228,8 @@ module BlackStack
                         j.planning_time < current_timestamp -- job should be planned to be started
                     )
                     WHERE c.status = #{STATUS_ON.to_s}
+                    AND c.planning_success = true
+                    AND c.planning_end_time IS NOT NULL
                 "
                 DB[q].all { |row|
                     ret << BlackStack::Emails::Campaign.where(:id=>row[:id]).first

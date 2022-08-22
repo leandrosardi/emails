@@ -9,14 +9,27 @@ q = "
         u.id as id_user, 
         u.name as user_name, 
         c.create_time,
-        c.stat_sents,
-        c.stat_opens,
-        c.stat_clicks,
-        c.stat_unsubscribes
+        count(distinct l1.id_lead) as stat_sents,
+        count(distinct l2.id_lead) as stat_opens,
+        count(distinct l3.id_lead) as stat_clicks,
+        count(distinct l4.id_lead) as stat_unsubscribes
     from eml_campaign c
     join fl_export e on e.id=c.id_export
     join \"user\" u on (u.id=c.id_user and u.id_account='#{@login.user.id_account}')
+left join eml_log l1 on (l1.id_campaign = c.id and l1.type = 'sent')
+left join eml_log l2 on (l2.id_campaign = c.id and l2.type = 'open')
+left join eml_log l3 on (l3.id_campaign = c.id and l3.type = 'click')
+left join eml_log l4 on (l4.id_campaign = c.id and l4.type = 'unsubscribe')
     --where c.delete_time is null
+group by
+c.id, 
+c.name, 
+e.id,
+e.filename,
+c.subject, 
+u.id, 
+u.name, 
+c.create_time
     order by c.name
 "
 %>
@@ -69,8 +82,10 @@ q = "
                     <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_sents].to_i.to_label%>">
                         <a href='/emails/campaigns/<%=row[:id].to_guid%>/sent'><%=row[:stat_sents].to_i.to_label%></a>
+                        <!--
                         <br/>
                         <span style='color:gray;'><%=o.sent_ratio.to_i.to_label%>%</span>
+                        -->
                     </td>
                     <!--
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_opens].to_i.to_label%>">
@@ -81,18 +96,24 @@ q = "
                     -->
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_opens].to_i.to_label%>">
                         <a href='/emails/campaigns/<%=row[:id].to_guid%>/opens'><%=row[:stat_opens].to_i.to_label%></a>
+                        <!--
                         <br/>
                         <span style='color:gray;'><%=o.opens_ratio.to_i.to_label%>%</span>
+                        -->
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_clicks].to_i.to_label%>">
                         <a href='/emails/campaigns/<%=row[:id].to_guid%>/clicks'><%=row[:stat_clicks].to_i.to_label%></a>
+                        <!--
                         <br/>
                         <span style='color:gray;'><%=o.clicks_ratio.to_i.to_label%>%</span>
+                        -->
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_unsubscribes].to_i.to_label%>">
                         <a href='/emails/campaigns/<%=row[:id].to_guid%>/unsubscribes'><%=row[:stat_unsubscribes].to_i.to_label%></a>
+                        <!--
                         <br/>
                         <span style='color:gray;'><%=o.unsubscribes_ratio.to_i.to_label%>%</span>
+                        -->
                     </td>
                     <td class="fix" style="text-align:right;"><a title='Edit' href='/emails/campaigns/<%=row[:id].to_guid%>/edit'><i class='icon-pencil'></i></a></td>
                 </tr>
