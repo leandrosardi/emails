@@ -9,27 +9,31 @@ q = "
         u.id as id_user, 
         u.name as user_name, 
         c.create_time,
-        count(distinct l1.id_lead) as stat_sents,
-        count(distinct l2.id_lead) as stat_opens,
-        count(distinct l3.id_lead) as stat_clicks,
-        count(distinct l4.id_lead) as stat_unsubscribes
+        c.stat_sents,
+        c.stat_opens,
+        c.stat_clicks,
+        c.stat_unsubscribes
+        --count(distinct l1.id_lead) as stat_sents,
+        --count(distinct l2.id_lead) as stat_opens,
+        --count(distinct l3.id_lead) as stat_clicks,
+        --count(distinct l4.id_lead) as stat_unsubscribes
     from eml_campaign c
     join fl_export e on e.id=c.id_export
     join \"user\" u on (u.id=c.id_user and u.id_account='#{@login.user.id_account}')
-left join eml_log l1 on (l1.id_campaign = c.id and l1.type = 'sent')
-left join eml_log l2 on (l2.id_campaign = c.id and l2.type = 'open')
-left join eml_log l3 on (l3.id_campaign = c.id and l3.type = 'click')
-left join eml_log l4 on (l4.id_campaign = c.id and l4.type = 'unsubscribe')
+--left join eml_log l1 on (l1.id_campaign = c.id and l1.type = 'sent')
+--left join eml_log l2 on (l2.id_campaign = c.id and l2.type = 'open')
+--left join eml_log l3 on (l3.id_campaign = c.id and l3.type = 'click')
+--left join eml_log l4 on (l4.id_campaign = c.id and l4.type = 'unsubscribe')
     --where c.delete_time is null
-group by
-c.id, 
-c.name, 
-e.id,
-e.filename,
-c.subject, 
-u.id, 
-u.name, 
-c.create_time
+--group by
+--c.id, 
+--c.name, 
+--e.id,
+--e.filename,
+--c.subject, 
+--u.id, 
+--u.name, 
+--c.create_time
     order by c.name
 "
 %>
