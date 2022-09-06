@@ -43,8 +43,8 @@ BlackStack::Extensions::add ({
         :name => 'install-gems',
         :commands => [{ 
             :command => "
-                gem install --no-document google-api-client -v 0.53.0
-                gem install --no-document mail -v 2.7.1
+                gem install --no-document google-api-client -v 0.53.0;
+                gem install --no-document mail -v 2.7.1;
             ",
             :sudo => true,
         }],
@@ -68,12 +68,13 @@ BlackStack::Extensions::add ({
             # back up old configuration file
             # setup new configuration file
             :command => "
-                source /home/%ssh_username%/.rvm/scripts/rvm; rvm install 3.1.2; rvm --default use 3.1.2 > /dev/null 2>&1;
-                cd /home/%ssh_username%/code/mysaas/extensions/emails/p > /dev/null 2>&1; 
-                export RUBYLIB=/home/%ssh_username%/code/mysaas > /dev/null 2>&1;
-                nohup ruby planner.rb > /dev/null 2>&1 &
+                source /home/%ssh_username%/.rvm/scripts/rvm; rvm install 3.1.2; rvm --default use 3.1.2;
+                cd /home/%ssh_username%/code/mysaas/extensions/emails/p; 
+                export RUBYLIB=/home/%ssh_username%/code/mysaas;
+                nohup ruby planner.rb;
             ",
             :sudo => false,
+            :background => true,
         }],
     }, {
         :name => 'start-delivery-process',
@@ -81,12 +82,13 @@ BlackStack::Extensions::add ({
             # back up old configuration file
             # setup new configuration file
             :command => "
-                source /home/%ssh_username%/.rvm/scripts/rvm; rvm install 3.1.2; rvm --default use 3.1.2 > /dev/null 2>&1;
-                cd /home/%ssh_username%/code/mysaas/extensions/emails/p > /dev/null 2>&1; 
-                export RUBYLIB=/home/%ssh_username%/code/mysaas > /dev/null 2>&1;
-                nohup ruby delivery.rb > /dev/null 2>&1 &
+                source /home/%ssh_username%/.rvm/scripts/rvm; rvm install 3.1.2; rvm --default use 3.1.2;
+                cd /home/%ssh_username%/code/mysaas/extensions/emails/p; 
+                export RUBYLIB=/home/%ssh_username%/code/mysaas;
+                nohup ruby delivery.rb;
             ",
             :sudo => true,
+            :background => true,
         }],
     }],
 })
