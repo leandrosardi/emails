@@ -54,7 +54,7 @@ BlackStack::Extensions::add ({
             # back up old configuration file
             # upload configuration file from local working directory to remote server
             :command => "
-                cd ~/code/mysaas; 
+                cd ~/code/mysaas;
                 mv ./google-api.json ./google-api.%timestamp%.json;
                 echo '#{File.read(LOCALW ? '/home/leandro/code/mysaas/google-api.json' : '/home/ubuntu/code/mysaas/google-api.json')}' > ./google-api.json;
             ",
