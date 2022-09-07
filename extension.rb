@@ -73,7 +73,7 @@ BlackStack::Extensions::add ({
                 export RUBYLIB=/home/%ssh_username%/code/mysaas;
                 nohup ruby planner.rb;
             ",
-            :sudo => false,
+            :sudo => true,
             :background => true,
         }],
     }, {
