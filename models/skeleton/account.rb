@@ -3,7 +3,11 @@ module BlackStack
         # inherit from BlackStack::MySaaS::Account
         class Account < BlackStack::MySaaS::Account
             def addresses
-                self.users.map { |u| BlackStack::Emails::User.where(:id=>u.id).first.addresses }.flatten
+                self.users.map { |u| 
+                    BlackStack::Emails::User.where(:id=>u.id).first.addresses.select { |o| 
+                        o.delete_time.nil? && o.enabled 
+                    } 
+                }.flatten
             end # def addresses
 
             def campaigns
