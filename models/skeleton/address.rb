@@ -32,7 +32,7 @@ module BlackStack
                 # validate: from_name is required
                 err << 'from_name is required' unless h[:from_name]
                 # validate: reply_to is required
-                err << 'reply_to is required' unless h[:reply_to]
+                #err << 'reply_to is required' unless h[:reply_to]
                 # validate: to is a string and it is a valid email address
                 err << 'to is not a string' if !h[:to].nil? && !h[:to].is_a?(String)
                 err << 'to is not a valid email address' if !h[:to].nil? && !h[:to].to_s.email?
@@ -43,8 +43,8 @@ module BlackStack
                 # validate: from_name is a string
                 err << 'from_name is not a string' if !h[:from_name].nil? && !h[:from_name].is_a?(String)
                 # validate: reply_to is a string and it is a valid email address
-                err << 'reply_to is not a string' if !h[:reply_to].nil? && !h[:reply_to].is_a?(String)
-                err << 'reply_to is not a valid email address' if !h[:reply_to].nil? && !h[:reply_to].to_s.email?
+                err << 'reply_to is not a string' if !h[:reply_to].empty? && !h[:reply_to].is_a?(String)
+                err << 'reply_to is not a valid email address' if !h[:reply_to].empty? && !h[:reply_to].to_s.email?
                 # raise exception if any error
                 raise err.join("\n") unless err.empty?
                 # send email
