@@ -35,15 +35,17 @@ BlackStack::Extensions::add ({
     # add a folder to the storage from where user can download the exports.
     :storage_folders => [
         { :name => 'emails.pictures', },
-        { :name => 'emails.google.tokens', },
+        # removed becuase of the issue https://github.com/leandrosardi/emails/issues/31
+        #{ :name => 'emails.google.tokens', },
     ],
 
     # deployment routines
     :deployment_routines => [{
         :name => 'install-gems',
         :commands => [{ 
+            # removed becuase of the issue https://github.com/leandrosardi/emails/issues/31
+            #gem install --no-document google-api-client -v 0.53.0;
             :command => "
-                gem install --no-document google-api-client -v 0.53.0;
                 gem install --no-document mail -v 2.7.1;
                 gem install --no-document email_reply_parser -v 0.5.10;
             ",

@@ -82,20 +82,21 @@ module BlackStack
             end
         end # class Address
 
-
+=begin
+        # removed becuase of the issue https://github.com/leandrosardi/emails/issues/31
         class GMail < BlackStack::Emails::Address
             # authentication token file
             def token
                 token = "#{self.user.account.storage_sub_folder('emails.google.tokens')}/#{id}.yaml".freeze
             end # def token
-
+            
             # to access the gmail account, we need to use the gmail api's credentials
             def credentials
                 oob_uri = BlackStack::Emails::GoogleConfig::oob_uri
                 app_name = BlackStack::Emails::GoogleConfig::app_name
                 google_api_certificate = BlackStack::Emails::GoogleConfig::google_api_certificate
                 scope = BlackStack::Emails::GoogleConfig::scope 
-
+            
                 client_id = Google::Auth::ClientId.from_file google_api_certificate
                 token_store = Google::Auth::Stores::FileTokenStore.new file: self.token
                 authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
@@ -110,7 +111,7 @@ module BlackStack
                 require "google/apis/gmail_v1"
                 require "googleauth"
                 require "googleauth/stores/file_token_store"
-
+            
                 app_name = BlackStack::Emails::GoogleConfig::app_name
                 service = Google::Apis::GmailV1::GmailService.new
                 service.client_options.application_name = app_name
@@ -133,6 +134,6 @@ module BlackStack
                 self.service.send_user_message(user_id, upload_source: StringIO.new(message.to_s), content_type: 'message/rfc822')                
             end # send
         end # class GMail
-
+=end
     end # Emails
 end # BlackStack
