@@ -45,6 +45,7 @@ BlackStack::Extensions::add ({
             :command => "
                 gem install --no-document google-api-client -v 0.53.0;
                 gem install --no-document mail -v 2.7.1;
+                gem install --no-document email_reply_parser -v 0.5.10;
             ",
             :sudo => true,
         }],
