@@ -13,7 +13,6 @@
 require 'net/imap'
 require 'email_reply_parser'
 
-n = 8
 imap = Net::IMAP.new("imap.googlemail.com", 993, true)
 
 res = imap.login('sardi.leandro.daniel@gmail.com', '***')
