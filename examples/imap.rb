@@ -8,7 +8,7 @@
 # 
 # Reference: 
 # https://www.ombulabs.com/blog/ruby/imap/a-comprehensive-guide-to-interacting-with-imap-using-ruby.html
-#
+# 
 
 require 'net/imap'
 require 'email_reply_parser'
