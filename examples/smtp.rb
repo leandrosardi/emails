@@ -35,4 +35,7 @@ mail = Mail.new do
 end # Mail.new
 
 # deliver the email
-mail.deliver
+message = mail.deliver
+
+# record the message_id in the database, in order to track the conversation thread
+puts "Message sent: #{message.message_id}"
