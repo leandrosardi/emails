@@ -15,7 +15,7 @@ require 'email_reply_parser'
 
 imap = Net::IMAP.new("imap.googlemail.com", 993, true)
 
-res = imap.login('sardi.leandro.daniel@gmail.com', '***')
+res = imap.login('sardi.leandro.daniel@gmail.com', '********')
 p res.name
 
 # To list all of your mailboxes
@@ -31,7 +31,7 @@ p res.name
 #p res.name
 
 # Searching email messages
-res = imap.search(["SUBJECT", '"Test 678 abcde"']) #, "SINCE", "08-Sept-2022"
+res = imap.search(["SUBJECT", '"This is the begining of a great friendship"'])
 p res.inspect
 
 # ids of the messages that match with the search
@@ -48,6 +48,7 @@ ids.each { |id|
     puts "Subject: #{envelope.subject}"
     puts "Date: #{envelope.date}"
     puts "Message-ID: #{envelope.message_id}"
+    puts "In-Reply-To: #{envelope.in_reply_to}" # use this parameter to track a conversation thread
 
     # this line gets the email body, even if it is HTML (not TEXT)
     body = imap.fetch(id, "BODY[TEXT]")[0].attr["BODY[TEXT]"]
