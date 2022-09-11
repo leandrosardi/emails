@@ -27,7 +27,8 @@ module BlackStack
         def self.mergetags
             @@mergetags
         end
-
+# Removed because of https://github.com/leandrosardi/emails/issues/31
+=begin
         # GoogleConfig module
         module GoogleConfig
             # where to find the gmail cartification file for the app.
@@ -61,5 +62,6 @@ module BlackStack
                 @@scope
             end
         end # module GoogleConfig
+=end
     end # module Emails
 end # module BlackStack

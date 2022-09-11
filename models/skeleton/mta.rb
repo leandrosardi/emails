@@ -1,13 +1,7 @@
 module BlackStack
     module Emails
-        class Address < Sequel::Model(:eml_address)
+        class Mta < Sequel::Model(:eml_mta)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
-
-            # types
-            TYPE_GMAIL = 0
-            TYPE_YAHOO = 1 # pending to develop
-            TYPE_HOTMAIL = 2 # pending to develop
-            TYPE_GENERIC = 3 # generic MTA
 
             # validate hash descriptor
             # TODO: move this to a base module, in order to  develop a stub-skeleton/rpc model.

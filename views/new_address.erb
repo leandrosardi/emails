@@ -1,25 +1,3 @@
-<%
-@login.user.account.create_storage
-
-# map google-api configuration
-oob_uri = BlackStack::Emails::GoogleConfig::oob_uri
-app_name = BlackStack::Emails::GoogleConfig::app_name
-google_api_certificate = BlackStack::Emails::GoogleConfig::google_api_certificate
-scope = BlackStack::Emails::GoogleConfig::scope
-
-# build the token file
-id = guid.to_guid # id for the new address
-token = "#{@login.user.account.storage_sub_folder('emails.google.tokens')}/#{id}.yaml".freeze
-token_store = Google::Auth::Stores::FileTokenStore.new file: token
-
-# get the google-api authorization
-client_id = Google::Auth::ClientId.from_file google_api_certificate
-authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
-
-# get the google login page for the user
-url = authorizer.get_authorization_url base_url: oob_uri
-%>
-
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
@@ -32,17 +10,36 @@ url = authorizer.get_authorization_url base_url: oob_uri
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span6 box">            
-        <p><b>Step 1:</b></p>
-        <p>Get Your API Key</p>
-        <button class='btn btn-blue' id='open' name='open'>Access Your GMail</button>              
+        <h3>Steps to Add a Gmail Address</h3>
+        <p>Follow the steps below to get a <b>app password</b> for your Gmail address.</p>
+
+        <p><b>Step 1:</b> Go <a href='https://mail.google.com/mail/u/1/#settings/fwdandpop' target='_window'>here</a>, enable IMAP and save changes.</p>
+
+        <img src='/emails/images/gmail1.png' class='img-polaroid' />
+        <br/><br/>
+
+        <p><b>Step 2:</b> Go <a href='https://myaccount.google.com/u/1/security' target='_window'>here</a> and enable <b>2-step verification</b>.</p>
+        <img src='/emails/images/gmail2.png' class='img-polaroid' />
+        <br/><br/>
+
+        <p><b>Step 3:</b> Go <a href='https://myaccount.google.com/u/1/apppasswords' target='_window'>here</a> and create an <b>app password</b>.</p>
+        <img src='/emails/images/gmail3.png' class='img-polaroid' />
+        <br/><br/>
+        <img src='/emails/images/gmail4.png' class='img-polaroid' />
+        <br/><br/>
+
     </div>
 
 	<div class="span6 box">            
         <form method='post' action='/emails/filter_new_address'>
-            <p><b>Step 2:</b></p>
-            <p>Submit Your API Key</p>
-            <input type='hidden' id='id' name='id' value='<%=id%>' />
-            <input class='input input-block-level' type="text" id="apikey" name='apikey' placeholder="API Key..." value='' /><br/>
+            <h3>Add a Gmail Address</h3>
+
+            <p>Email Address</p>
+            <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='' /><br/>
+
+            <p>App Password</p>
+            <input class='input input-block-level' type="text" id="password" name='password' placeholder="Example: atdzebbqlslovjxt" value='' /><br/>
+
             <button type="submit" class="btn btn-blue">Submit</button>
         </form>
 	</div>
