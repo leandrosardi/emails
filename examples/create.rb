@@ -18,8 +18,8 @@ params = {
     "imap_address"=>"imap.googlemail.com", 
     "imap_port"=>"993", 
     "type"=>"0", # google
-    "address"=>"leandro@gmail.com", 
-    "password"=>"pass1232",
+    "address"=>"sardi.leandro.daniel.2@gmail.com", 
+    "password"=>"********",
 }
 puts "params: #{params.to_s}"
 
@@ -43,6 +43,19 @@ if BlackStack::Emails::Address.exists?(h)
     add = BlackStack::Emails::Address.load(h)
     puts 'loaded'
 else
-    add = BlackStack::Emails::Address.new(h).save
+    add = BlackStack::Emails::Address.new(h)
     puts 'created'
+
+    print 'Testing... '
+    begin
+        add.test_connection
+        puts 'done'
+
+        print 'Saving... '
+        add.save
+        puts 'done'    
+    rescue => e
+        puts "Connection Filed: #{e.message}."
+    end
+   
 end

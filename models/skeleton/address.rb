@@ -2,6 +2,7 @@ module BlackStack
     module Emails
         class Address < Sequel::Model(:eml_address)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
+            many_to_one :mta, :class=>:'BlackStack::Emails::Mta', :key=>:id_mta
 
             # types
             TYPE_GMAIL = 0
@@ -130,15 +131,15 @@ module BlackStack
             # return an Address object belonging the account of the user, with the same address and id_mta
             def self.load(h)
                 u = BlackStack::Emails::User.where(:id=>h[:id_user]).first
-                id = DB["
+                row = DB["
                     SELECT a.id 
                     FROM eml_address a
                     JOIN \"user\" u ON ( u.id=a.id_user AND u.id_account='#{u.id_account}' )
                     WHERE a.address='#{h[:address]}' 
                     AND a.id_mta='#{h[:id_mta]}' 
-                "].first[:id]
-                return nil if id.nil?
-                return BlackStack::Emails::Address.where(:id=>id).first
+                "].first
+                return nil if row.nil?
+                return BlackStack::Emails::Address.where(:id=>row[:id]).first
             end
 
             # return true if the user's account already has an MTA record with these settings
@@ -148,9 +149,17 @@ module BlackStack
 
             # return true if the user's account already has an MTA record with these settings
             def exists?
-                !BlackStack::Emails::Address.load(self.to_h).nil?
+                !BlackStack::Emails::Address.exists?(self.to_h).nil?
             end
 
+            # test the the login to the imap server
+            # raise an exception if the login fails
+            def test_connection
+                imap = Net::IMAP.new(self.mta.imap_address, self.mta.imap_port, true)
+                res = imap.login(self.address, self.password)
+                raise res.name unless res.name == "OK"
+                imap.logout
+            end
 
 
             # send email.

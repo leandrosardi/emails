@@ -1,8 +1,7 @@
-require "google/apis/gmail_v1"
-require "googleauth"
-require "googleauth/stores/file_token_store"
 require "fileutils"
 require 'mail'
+require 'net/imap'
+require 'email_reply_parser'
 
 module BlackStack
     module Emails

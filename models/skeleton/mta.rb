@@ -100,7 +100,7 @@ module BlackStack
             # return an Mta object belonging the account of the user, with the same smtp and imap addresses and ports.
             def self.load(h)
                 u = BlackStack::Emails::User.where(:id=>h[:id_user]).first
-                id = DB["
+                row = DB["
                     SELECT m.id 
                     FROM eml_mta m
                     JOIN \"user\" u ON ( u.id=m.id_user AND u.id_account='#{u.id_account}' )
@@ -108,9 +108,9 @@ module BlackStack
                     AND m.smtp_port='#{h[:smtp_port]}' 
                     AND m.imap_address='#{h[:imap_address]}' 
                     AND m.imap_port='#{h[:imap_port]}'
-                "].first[:id]
-                return nil if id.nil?
-                return BlackStack::Emails::Mta.where(:id=>id).first
+                "].first
+                return nil if row.nil?
+                return BlackStack::Emails::Mta.where(:id=>row[:id]).first
             end
 
             # return true if the user's account already has an MTA record with these settings
@@ -120,7 +120,7 @@ module BlackStack
 
             # return true if the user's account already has an MTA record with these settings
             def exists?
-                !BlackStack::Emails::Mta.load(self.to_h).nil?
+                !BlackStack::Emails::Mta.exists?(self.to_h).nil?
             end
         end # class Mta
     end # module Emails
