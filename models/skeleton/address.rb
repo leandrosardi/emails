@@ -154,13 +154,12 @@ module BlackStack
 
             # test the the login to the imap server
             # raise an exception if the login fails
-            def test_connection
+            def test
                 imap = Net::IMAP.new(self.mta.imap_address, self.mta.imap_port, true)
                 res = imap.login(self.address, self.password)
                 raise res.name unless res.name == "OK"
                 imap.logout
             end
-
 
             # send email.
             # this is a general purpose method to send email.

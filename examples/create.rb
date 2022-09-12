@@ -48,7 +48,7 @@ else
 
     print 'Testing... '
     begin
-        add.test_connection
+        add.test
         puts 'done'
 
         print 'Saving... '
