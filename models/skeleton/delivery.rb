@@ -93,7 +93,6 @@ module BlackStack
                 self.start_delivery
                 begin
                     address = self.job.address
-                    address = BlackStack::Emails::GMail.where(:id=>address.id).first # by now, I deliver using GMail accounts only.
                     campaign = self.job.campaign
                     address.send({
                         :to_email => self.email, 
