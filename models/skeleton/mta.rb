@@ -2,153 +2,126 @@ module BlackStack
     module Emails
         class Mta < Sequel::Model(:eml_mta)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
+            one_to_many :addresses, :class=>:'BlackStack::Emails::Address', :key=>:id_mta
+
+            VALID_AUTHENTICATION_VALUES = ['plain', 'login', 'cram_md5', 'none']
+            VERIFY_MODES = [
+                OpenSSL::SSL::VERIFY_NONE, 
+                OpenSSL::SSL::VERIFY_PEER, 
+                OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT, 
+                OpenSSL::SSL::VERIFY_CLIENT_ONCE
+            ]
 
             # validate hash descriptor
             # TODO: move this to a base module, in order to  develop a stub-skeleton/rpc model.
             def self.validate_descriptor(h)
-                type
-                address
-                password
-                shared
-                max_deliveries_per_day
-                enabled
+                # list of errors found
+                errors = []
+                # validate: h must be a hash
+                errors << 'h is not a hash' unless h.is_a?(Hash)
+                # if h is a hash
+                if h.is_a?(Hash)
+                    # validate: id_user is mandatory
+                    errors << 'id_user is mandatory' unless h[:id_user] 
+                    # validate: smtp_address is mandatory
+                    errors << 'smtp_address is mandatory' unless h[:smtp_address]
+                    # validate: smtp_port is mandatory
+                    errors << 'smtp_port is mandatory' unless h[:smtp_port]
+                    # validate: imap_address is mandatory
+                    errors << 'imap_address is mandatory' unless h[:imap_address]
+                    # validate: imap_port is mandatory
+                    errors << 'imap_port is mandatory' unless h[:imap_port]
+    
+                    # validate: id_user is an uuid
+                    errors << 'id_user is not an uuid' if h[:id_user] && !h[:id_user].to_s.guid?
+                    # validate: user exists
+                    errors << 'user does not exists' if h[:id_user] && BlackStack::MySaaS::User.where(:id=>h[:id_user]).first.nil?
 
-                id_user
-                smtp_address
-                smtp_port
-                authentication
-                enable_starttls_auto
-                openssl_verify_mode
-                imap_port
-                imap_address
+                    # validate: smtp_address is a string
+                    errors << 'smtp_address is not a string' if h[:smtp_address] && !h[:smtp_address].is_a?(String)
+                    # validate: smtp_port is an integer
+                    errors << 'smtp_port is not an integer' if h[:smtp_port] && !h[:smtp_port].to_s =~ /^\d+$/
+                    
+                    # validate: imap_address is a string
+                    errors << 'imap_address is not a string' if h[:imap_address] && !h[:imap_address].is_a?(String)
+                    # validate: imap_port is an integer
+                    errors << 'imap_port is not an integer' if h[:imap_port] && !h[:imap_port].to_s =~ /^\d+$/
+
+                    # validate: if :authentication exists, it must be a valid value
+                    errors << "authentication is not a valid value (#{VALID_AUTHENTICATION_VALUES.join(', ')})" if h[:authentication] && !VALID_AUTHENTICATION_VALUES.include?(h[:authentication])
+
+                    # validate: if :enable_starttls_auto exists, it must be a boolean
+                    errors << 'enable_starttls_auto is not a boolean' if h[:enable_starttls_auto] && !h[:enable_starttls_auto].is_a?(TrueClass) && !h[:enable_starttls_auto].is_a?(FalseClass)
+
+                    # validate: if :openssl_verify_mode it must be a valid value
+                    errors << "openssl_verify_mode is not a valid value (#{VERIFY_MODES})" if h[:openssl_verify_mode] && !VERIFY_MODES.include?(h[:openssl_verify_mode])        
+                end # if h.is_a?(Hash)
+                # return
+                return errors.uniq
+            end # self.validate_descriptor
+
+            # map a hash descriptor to the object attributes
+            def initialize(h)
+                # create Sequel object
+                super()
+                # validate h
+                errors = self.class.validate_descriptor(h)
+                # raise exception if there is errors
+                raise errors.join(', ') if errors.size > 0
+                # map attributes
+                self.id = guid
+                self.create_time = now
+                self.id_user = h[:id_user]
+                self.smtp_address = h[:smtp_address]
+                self.smtp_port = h[:smtp_port].to_i
+                self.imap_address = h[:imap_address]
+                self.imap_port = h[:imap_port].to_i
+                self.authentication = h[:authentication] || 'plain'
+                self.enable_starttls_auto = h[:enable_starttls_auto] || true
+                self.openssl_verify_mode = h[:openssl_verify_mode] || OpenSSL::SSL::VERIFY_NONE
             end
 
-            # send email.
-            # this is a general purpose method to send email.
-            # end user should not call this method.
-            def send_email(to, subject, body, from_name, reply_to, track_opens=false, track_clicks=false, id_delivery=nil)
-                raise 'Abstract method'                
-            end # send
-
-            # recevive all same the parameters than `send_email` but into a hash.
-            # validate the value of each parameters.
-            # raise exception with all the errors found in the parameters.
-            # if there is no errors, then call `send_email` with the parameters. 
-            def send(h)
-                err = []
-                # validate: h is a hash
-                err << 'h is not a hash' unless h.is_a?(Hash)
-                # validate: to is required
-                err << 'to is required' unless h[:to]
-                # validate: subject is required
-                err << 'subject is required' unless h[:subject]
-                # validate: body is required
-                err << 'body is required' unless h[:body]
-                # validate: from_name is required
-                err << 'from_name is required' unless h[:from_name]
-                # validate: reply_to is required
-                #err << 'reply_to is required' unless h[:reply_to]
-                # validate: to is a string and it is a valid email address
-                err << 'to is not a string' if !h[:to].nil? && !h[:to].is_a?(String)
-                err << 'to is not a valid email address' if !h[:to].nil? && !h[:to].to_s.email?
-                # validate: subject is a string
-                err << 'subject is not a string' if !h[:subject].nil? && !h[:subject].is_a?(String)
-                # validate: body is a string
-                err << 'body is not a string' if !h[:body].nil? && !h[:body].is_a?(String)
-                # validate: from_name is a string
-                err << 'from_name is not a string' if !h[:from_name].nil? && !h[:from_name].is_a?(String)
-                # validate: reply_to is a string and it is a valid email address
-                err << 'reply_to is not a string' if !h[:reply_to].empty? && !h[:reply_to].is_a?(String)
-                err << 'reply_to is not a valid email address' if !h[:reply_to].empty? && !h[:reply_to].to_s.email?
-                # raise exception if any error
-                raise err.join("\n") unless err.empty?
-                # send email
-                send_email(h[:to], h[:subject], h[:body], h[:from_name], h[:reply_to])
+            # return a hash descriptor from the object attributes
+            def to_h
+                {
+                    :id=>self.id,
+                    :create_time=>self.create_time,
+                    :id_user=>self.id_user,
+                    :smtp_address=>self.smtp_address,
+                    :smtp_port=>self.smtp_port,
+                    :imap_address=>self.imap_address,
+                    :imap_port=>self.imap_port,
+                    :authentication=>self.authentication,
+                    :enable_starttls_auto=>self.enable_starttls_auto,
+                    :openssl_verify_mode=>self.openssl_verify_mode,
+                }
             end
 
-            # send a test email to the logged in user
-            def send_test(campaign, lead, user)
-                self.send({
-                    :to => user.email, 
-                    :subject => '[Test] '+campaign.merged_subject(lead), 
-                    :body => campaign.merged_body(lead), 
-                    :from_name => campaign.from_name, 
-                    :reply_to => campaign.reply_to,
-                })
+            # return an Mta object belonging the account of the user, with the same smtp and imap addresses and ports.
+            def self.load(h)
+                u = BlackStack::Emails::User.where(:id=>h[:id_user]).first
+                id = DB["
+                    SELECT m.id 
+                    FROM eml_mta m
+                    JOIN \"user\" u ON ( u.id=m.id_user AND u.id_account='#{u.id_account}' )
+                    WHERE m.smtp_address='#{h[:smtp_address]}' 
+                    AND m.smtp_port='#{h[:smtp_port]}' 
+                    AND m.imap_address='#{h[:imap_address]}' 
+                    AND m.imap_port='#{h[:imap_port]}'
+                "].first[:id]
+                return nil if id.nil?
+                return BlackStack::Emails::Mta.where(:id=>id).first
             end
 
-            # return the next day when it is available to deliver the number of emails configured on its `max_deliveries_per_day` parameters.
-            def next_available_day
-                ret = DB["
-                    select max(planning_time) as dt
-                    from eml_job j
-                    where j.planning_id_address='#{self.id.to_guid}'
-                "].first[:dt]
-
-                if ret.nil?
-                    return now
-                else
-                    return DB["
-                        select max(planning_time)+interval '1 day' as dt
-                        from eml_job j
-                        where j.planning_id_address='#{self.id.to_guid}'
-                    "].first[:dt]
-                end
-            end
-        end # class Address
-
-=begin
-        # removed becuase of the issue https://github.com/leandrosardi/emails/issues/31
-        class GMail < BlackStack::Emails::Address
-            # authentication token file
-            def token
-                token = "#{self.user.account.storage_sub_folder('emails.google.tokens')}/#{id}.yaml".freeze
-            end # def token
-            
-            # to access the gmail account, we need to use the gmail api's credentials
-            def credentials
-                oob_uri = BlackStack::Emails::GoogleConfig::oob_uri
-                app_name = BlackStack::Emails::GoogleConfig::app_name
-                google_api_certificate = BlackStack::Emails::GoogleConfig::google_api_certificate
-                scope = BlackStack::Emails::GoogleConfig::scope 
-            
-                client_id = Google::Auth::ClientId.from_file google_api_certificate
-                token_store = Google::Auth::Stores::FileTokenStore.new file: self.token
-                authorizer = Google::Auth::UserAuthorizer.new client_id, scope, token_store
-                user_id = 'default'
-                ret = authorizer.get_credentials user_id
-                raise "Address credentials not found" if ret.nil?
-                ret
+            # return true if the user's account already has an MTA record with these settings
+            def self.exists?(h)
+                !BlackStack::Emails::Mta.load(h).nil?
             end
 
-            # get gmail service
-            def service
-                require "google/apis/gmail_v1"
-                require "googleauth"
-                require "googleauth/stores/file_token_store"
-            
-                app_name = BlackStack::Emails::GoogleConfig::app_name
-                service = Google::Apis::GmailV1::GmailService.new
-                service.client_options.application_name = app_name
-                service.authorization = self.credentials
-                service
-            end # def service
-
-            # send email.
-            # this is a general purpose method to send email.
-            # this should not call this method.
-            def send_email(to, subject, body, from_name, reply_to, track_opens=false, track_clicks=false, id_delivery=nil)
-                user_id = "me"
-                message = Mail.new(body)
-                message.to = to
-                message.from = "#{from_name} <#{self.address}>"
-                message.reply_to = reply_to
-                message.subject = subject
-                message.text_part = body
-                message.html_part = body
-                self.service.send_user_message(user_id, upload_source: StringIO.new(message.to_s), content_type: 'message/rfc822')                
-            end # send
-        end # class GMail
-=end
-    end # Emails
+            # return true if the user's account already has an MTA record with these settings
+            def exists?
+                !BlackStack::Emails::Mta.load(self.to_h).nil?
+            end
+        end # class Mta
+    end # module Emails
 end # BlackStack

@@ -9,25 +9,149 @@ module BlackStack
             TYPE_HOTMAIL = 2 # pending to develop
             TYPE_GENERIC = 3 # generic MTA
 
+            # return array of valid types for an address
+            def self.types
+                [TYPE_GMAIL, TYPE_YAHOO, TYPE_HOTMAIL, TYPE_GENERIC]
+            end
+
+            # return a descriptive string for a type
+            def self.type_name(type)
+                case type
+                when TYPE_GMAIL
+                    'Gmail'
+                when TYPE_YAHOO
+                    'Yahoo'
+                when TYPE_HOTMAIL
+                    'Hotmail'
+                when TYPE_GENERIC
+                    'Generic'
+                else
+                    'Unknown'
+                end
+            end
+
+            # return a descriptive string for the address
+            def type_name
+                Address.type_name(self.type)
+            end
+
             # validate hash descriptor
             # TODO: move this to a base module, in order to  develop a stub-skeleton/rpc model.
             def self.validate_descriptor(h)
-                type
-                address
-                password
-                shared
-                max_deliveries_per_day
-                enabled
+                errors = []
+                # validate: h is a hash
+                errors << 'h is not a hash' unless h.is_a?(Hash)
+                # if h is a hash, then validate the keys
+                if h.is_a?(Hash)
+                    # validate: id_user is mandatory
+                    errors << 'id_user is mandatory' unless h[:id_user] 
+                    # validate: id_mta is mandatory
+                    errors << 'id_mta is mandatory' unless h[:id_mta]
+                    # validate: type is mandatory
+                    errors << 'type is mandatory' unless h[:type]
+                    # validate: address is mandatory
+                    errors << 'address is mandatory' unless h[:address]
+                    # validate: password is mandatory
+                    errors << 'password is mandatory' unless h[:password]
+                    # validate: shared is mandatory
+                    #errors << 'shared is mandatory' unless h[:shared]
+                    # validate: max_deliveries_per_day is mandatory
+                    #errors << 'max_deliveries_per_day is mandatory' unless h[:max_deliveries_per_day]
+                    # validate: enabled is mandatory
+                    #errors << 'enabled is mandatory' unless h[:enabled]
 
-                id_user
-                smtp_address
-                smtp_port
-                authentication
-                enable_starttls_auto
-                openssl_verify_mode
-                imap_port
-                imap_address
+                    # validate: id_user is an uuid
+                    errors << 'id_user is not an uuid' if h[:id_user] && !h[:id_user].to_s.guid?
+                    # validate: user exists
+                    errors << 'user does not exists' if h[:id_user] && BlackStack::MySaaS::User.where(:id=>h[:id_user]).first.nil?
+
+                    # validate: id_mta is an uuid
+                    errors << 'id_mta is not an uuid' if h[:id_mta] && !h[:id_mta].to_s.guid?
+                    # validate: mta exists and it is belonging the user's account
+                    errors << 'mta does not exists in the account of the user' if h[:id_mta] && DB["
+                        SELECT * 
+                        FROM eml_mta m
+                        JOIN \"user\" u ON (u.id = m.id_user AND u.id_account = '#{BlackStack::MySaaS::User.where(:id=>h[:id_user]).first.id_account}')
+                    "].first.nil?
+
+                    # validate: if type exists it is a valid value
+                    errors << "type is not a valid value (#{BlackStack::Emails::Address.types.join(', ')})" if h[:type] && !BlackStack::Emails::Address.types.include?(h[:type].to_i)
+                    # validate: if address exists it is a valid email address
+                    errors << 'address is not a valid email address' if h[:address] && !h[:address].to_s.email?
+                    # validate: if password exists it is a string
+                    errors << 'password is not a string' if h[:password] && !h[:password].is_a?(String)
+                    # validate: if shared exists it is a boolean
+                    errors << 'shared is not a boolean' if h[:shared] && !h[:shared].is_a?(TrueClass) && !h[:shared].is_a?(FalseClass)
+                    # validate: if max_deliveries_per_day exists it is a number
+                    errors << 'max_deliveries_per_day is not a number' if h[:max_deliveries_per_day] && !h[:max_deliveries_per_day].to_s =~ /^\d+$/
+                    # validate: if enabled exists it is a boolean
+                    errors << 'enabled is not a boolean' if h[:enabled] && !h[:enabled].is_a?(TrueClass) && !h[:enabled].is_a?(FalseClass)
+                    # return
+                    errors
+                end # if h.is_a?(Hash)
+            end # def self.validate
+
+            # create a new object from a hash descriptor
+            def initialize(h)
+                # create Sequel object
+                super()
+                # validate descriptor
+                errors = BlackStack::Emails::Address.validate_descriptor(h)
+                raise errors.join(', ') unless errors.empty?
+                # map attributes
+                self.id = guid
+                self.create_time = now
+                self.id_user = h[:id_user]
+                self.id_mta = h[:id_mta]
+                self.type = h[:type].to_i
+                self.address = h[:address]
+                self.password = h[:password]
+                self.shared = h[:shared] || false
+                self.max_deliveries_per_day = h[:max_deliveries_per_day] || 50
+                self.enabled = h[:enabled] || true
             end
+
+            # update object from a hash descriptor
+            def to_h
+                {
+                    :id => self.id,
+                    :create_time => self.create_time,
+                    :id_user => self.id_user,
+                    :id_mta => self.id_mta,
+                    :type => self.type,
+                    :address => self.address,
+                    :password => self.password,
+                    :shared => self.shared,
+                    :max_deliveries_per_day => self.max_deliveries_per_day,
+                    :enabled => self.enabled
+                }
+            end
+
+            # return an Address object belonging the account of the user, with the same address and id_mta
+            def self.load(h)
+                u = BlackStack::Emails::User.where(:id=>h[:id_user]).first
+                id = DB["
+                    SELECT a.id 
+                    FROM eml_address a
+                    JOIN \"user\" u ON ( u.id=a.id_user AND u.id_account='#{u.id_account}' )
+                    WHERE a.address='#{h[:address]}' 
+                    AND a.id_mta='#{h[:id_mta]}' 
+                "].first[:id]
+                return nil if id.nil?
+                return BlackStack::Emails::Address.where(:id=>id).first
+            end
+
+            # return true if the user's account already has an MTA record with these settings
+            def self.exists?(h)
+                !BlackStack::Emails::Address.load(h).nil?
+            end
+
+            # return true if the user's account already has an MTA record with these settings
+            def exists?
+                !BlackStack::Emails::Address.load(self.to_h).nil?
+            end
+
+
 
             # send email.
             # this is a general purpose method to send email.

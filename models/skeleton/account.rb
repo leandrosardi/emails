@@ -2,6 +2,12 @@ module BlackStack
     module Emails
         # inherit from BlackStack::MySaaS::Account
         class Account < BlackStack::MySaaS::Account
+            def mtas
+                self.users.map{ |u|
+                    BlackStack::Emails::User.where(:id=>u.id).first.mtas
+                }.flatten
+            end
+
             def addresses
                 self.users.map { |u| 
                     BlackStack::Emails::User.where(:id=>u.id).first.addresses.select { |o| 

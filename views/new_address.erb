@@ -34,6 +34,23 @@
         <form method='post' action='/emails/filter_new_address'>
             <h3>Add a Gmail Address</h3>
 
+            <!-- common paramaters --!>
+            <input type='hidden' name='id_user' value='<%=@login.id_user%>' />
+
+            <!-- mta regarding paramaters --!>
+            <input type='hidden' name='smtp_address' value='smtp.gmail.com' />
+            <input type='hidden' name='smtp_port' value='25' />
+            <input type='hidden' name='imap_address' value='imap.googlemail.com' />
+            <input type='hidden' name='imap_port' value='993' />
+            <!--
+            <input type='hidden' name='authentication' value='' />
+            <input type='hidden' name='enable_starttls_auto' value='' />
+            <input type='hidden' name='openssl_verify_mode' value='' />
+            -->
+            
+            <!-- address regarding paramaters --!>
+            <input type='hidden' name='type' value='<%=BlackStack::Emails::Address::TYPE_GMAIL.to_s%>' />
+
             <p>Email Address</p>
             <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='' /><br/>
 

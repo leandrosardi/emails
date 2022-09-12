@@ -1,22 +1,19 @@
+<p><%=params.to_s%></p>
 <%
+=begin
 err = []
 begin
-    # create the object
-    o = BlackStack::Emails::Address.new
-    o.id = id
-    o.id_user = @login.id_user
-    o.create_time = now
-    o.type = BlackStack::Emails::Address::TYPE_GMAIL
-    o.address = service.get_user_profile(user_id).email_address # get the email address of the gmail account
-    o.shared = false
-    o.enabled = true
-    o.max_deliveries_per_day = 20
-    o.save
+    mta = BlackStack::Emails::Mta.new(params)
+    mta.save if !mta.exists?
 
+    add = BlackStack::Emails::Address.new(params)
+    add.save
+    
     # return
     redirect "/emails/addresses?msg="+ CGI::escape('Address registered.')
 rescue => e
     # return errors
     redirect "/emails/addresses/new?err="+ CGI::escape(e.message)
 end
+=end
 %>
