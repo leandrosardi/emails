@@ -1,6 +1,6 @@
-# load gem and connect database
-require 'mail'
+# this example is about registering an MTA and an Address in the database.
 
+require 'mail'
 require 'mysaas'
 require 'lib/stubs'
 require 'config'

@@ -162,10 +162,52 @@ module BlackStack
             end
 
             # send email.
+            # return the message_id of the delivered email.
+            #
             # this is a general purpose method to send email.
             # end user should not call this method.
-            def send_email(to, subject, body, from_name, reply_to, track_opens=false, track_clicks=false, id_delivery=nil)
-                raise 'Abstract method'                
+            #
+            def send_email(to_email, to_name, subject, body, from_name, reply_to=nil, track_opens=false, track_clicks=false, id_delivery=nil)
+                mta = self.mta
+
+                options = { 
+                    :address                => mta.smtp_address,
+                    :port                   => mta.smtp_port,
+                    :user_name              => self.address,
+                    :password               => self.password,
+                    :authentication         => 'plain', #mta.authentication,
+                    :enable_starttls_auto   => true, #mta.enable_starttls_auto,
+                    :openssl_verify_mode    => OpenSSL::SSL::VERIFY_NONE #mta.openssl_verify_mode
+                }
+                
+                Mail.defaults do
+                    delivery_method :smtp, options
+                end
+
+                addr = self
+                mail = Mail.new do
+                    from "#{from_name} <#{addr.address}>"
+                    to "#{to_name} <#{to_email}>"
+                    
+                    reply_to "#{reply_to}" if !reply_to.nil?
+                    
+                    subject "#{subject}"
+                    
+                    # plain text email
+                    body "#{body}"
+
+                    # TODO: enable this only of HTML content is enabled for the campaign
+                    html_part do
+                        content_type 'text/html; charset=UTF-8'
+                        body "#{body}"
+                    end                
+                end # Mail.new
+                
+                # deliver the email
+                message = mail.deliver
+                
+                # record the message_id in the database, in order to track the conversation thread
+                return message.message_id
             end # send
 
             # recevive all same the parameters than `send_email` but into a hash.
@@ -176,8 +218,10 @@ module BlackStack
                 err = []
                 # validate: h is a hash
                 err << 'h is not a hash' unless h.is_a?(Hash)
-                # validate: to is required
-                err << 'to is required' unless h[:to]
+                # validate: to_email is required
+                err << 'to_email is required' unless h[:to_email]
+                # validate: to_name is required
+                err << 'to_name is required' unless h[:to_name]
                 # validate: subject is required
                 err << 'subject is required' unless h[:subject]
                 # validate: body is required
@@ -200,14 +244,15 @@ module BlackStack
                 err << 'reply_to is not a valid email address' if !h[:reply_to].empty? && !h[:reply_to].to_s.email?
                 # raise exception if any error
                 raise err.join("\n") unless err.empty?
-                # send email
-                send_email(h[:to], h[:subject], h[:body], h[:from_name], h[:reply_to])
+                # send email & return the message_id
+                return send_email(h[:to_email], h[:to_name], h[:subject], h[:body], h[:from_name], h[:reply_to])
             end
 
             # send a test email to the logged in user
             def send_test(campaign, lead, user)
                 self.send({
-                    :to => user.email, 
+                    :to_email => user.email,
+                    :to_name => user.name, 
                     :subject => '[Test] '+campaign.merged_subject(lead), 
                     :body => campaign.merged_body(lead), 
                     :from_name => campaign.from_name, 

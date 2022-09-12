@@ -17,7 +17,11 @@ module BlackStack
             end # def addresses
 
             def campaigns
-                self.users.map { |u| BlackStack::Emails::User.where(:id=>u.id).first.campaigns }.flatten
+                self.users.map { |u| 
+                    BlackStack::Emails::User.where(:id=>u.id).first.campaigns.select { |o|
+                        o.delete_time.nil?
+                    }
+                }.flatten
             end # def campaigns
         end # class Account
     end # module Emails
