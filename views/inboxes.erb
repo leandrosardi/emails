@@ -61,7 +61,7 @@ q = "
             DB[q].all { |row|
                 i += 1
                 %>
-                <div class='ticket'>
+                <div class='ticket' data-id-conversation='<%=row[:id_conversation].to_s%>'>
                     <span class="label label-green">reply</span>
                     <a href="#" title="<%=row[:lead_name].to_s.encode_html%>" class='load-conversation' data-id-conversation='<%=row[:id_conversation].to_s%>'>
                         <%=row[:lead_name].to_s.encode_html%>
@@ -95,28 +95,8 @@ q = "
 
 	<div class="span8 box">
         <div class='widget-chat chats-contaier'>
-            <div class='chats'>
-                <div class="message left">
-                    <img src="/emails/images/avatar.png" alt="">
-                    <div>
-                        <a href="#" title="">Sarah Connor</a> says:
-                        <span class="pull-right">2 minutes ago</span>
-                        <div>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                            <button class="btn btn-mini btn-link">expand</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="message right">
-                    <img src="/emails/images/avatar.png" alt="">
-                    <div>
-                        <a href="#" title="">Second User</a> says:
-                        <span class="pull-right">2 minutes ago</span>
-                        <div>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                        </div>
-                    </div>
-                </div>
+            <div class='chats' data-id-conversation=''>
+                Click a Message to load the conversation.
             </div>
         </div>
 
@@ -131,6 +111,9 @@ q = "
 
 <script> 
     $(document).ready(function() {
+        // hide the .reply div
+        $('.reply').hide();
+
         // design the edit like a chat box.
         // reference: https://www.tiny.cloud/blog/build-a-chat-app-with-our-wysiwyg-editor/
         tinymce.init({
@@ -191,6 +174,14 @@ q = "
                     if (res.status == 'success') {
                         // empty the chats
                         $('.chats').html('');
+                        // show the .reply div
+                        $('.reply').show();
+                        // set the data-id-conversation attribute
+                        $('.chats').attr('data-id-conversation', vid);
+                        // remove the .ticket-selected class from all the div.ticket
+                        $('.ticket').removeClass('ticket-selected');
+                        // add the .ticket-selected class to the div.ticket with the same data-id-conversation
+                        $('.ticket[data-id-conversation="' + vid + '"]').addClass('ticket-selected');
                         // iterate the conversations
                         for (let i = 0; i<res.deliveries.length; i++) { 
                             // get the delivery
@@ -214,7 +205,7 @@ q = "
                                 img = $('<img src="/emails/images/avatar.png" alt="">');
                                 div.append(img);
                                 div2 = $('<div></div>');
-                                a = $('<a href="#" title="">'+d.from_name+'</a>');
+                                a = $('<a href="#" title="">You</a>');
                                 div2.append(a);
                                 div2.append(' says: ');
                                 span = $('<span class="pull-right">'+d.create_time+'</span>');
@@ -241,7 +232,7 @@ q = "
                                 img = $('<img src="/emails/images/avatar.png" alt="">');
                                 div.append(img);
                                 div2 = $('<div></div>');
-                                a = $('<a href="#" title="">'+d.from_name+'</a>');
+                                a = $('<a href="#" title="">'+d.name+'</a>');
                                 div2.append(a);
                                 div2.append(' says: ');
                                 span = $('<span class="pull-right">'+d.create_time+'</span>');
@@ -258,36 +249,6 @@ q = "
                 },
                 error: function(data) {
                     $('.chats').html('Error loading conversation.');
-                }
-            });
-        });
-    });
-</script>
-
-I am trying to use the tinymce editor to send messages in a chat box. I have the editor working, but I am having trouble sending the message. I am using the editor in a chat box, so I want to send the message when the user clicks on the send button. I have the button working, but I am not sure how to get the message to send. I am using the following code to send the message: alert(editor.getContent()); editor.resetContent(); But I am not sure how to get the message to send. I am using the following code to send the message: alert(editor.getContent()); editor.resetContent(); But I am not sure how to get the message to send. I am using the following code to send the message: alert(editor.getContent()); editor.resetContent(); But I am not sure how to get the message to send. I am using the following
-
-                            } else {
-                                // draw message received
-                                //<div class="message right">
-                                //    <img src="/emails/images/avatar.png" alt="">
-                                //    <div>
-                                //        <a href="#" title="">Second User</a> says:
-                                //        <span class="pull-right">2 minutes ago</span>
-                                //        <div>
-                                //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                                //        </div>
-                                //    </div>
-                                //</div>
-            
-                            }
-                        }
-                        
-                    } else {
-                        alert('Error: ' + res.message);
-                    }
-                },
-                error: function(data) {
-                    alert('Error: ' + data.message);
                 }
             });
         });
