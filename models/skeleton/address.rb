@@ -278,6 +278,83 @@ module BlackStack
                     "].first[:dt]
                 end
             end
+
+            # connect the address via IMAP.
+            # find the new incoming emails, using the last ID processed.
+            # for each email, if it is a reply to a previous email sent by the system, then insert it in the delivery table.
+            # update the last id processed for this address.
+            #
+            # This method is for internal use only.
+            # It should not be called by the end user.
+            # 
+            def receive(folder='Inbox', track_field='imap_inbox_last_id', l=nil, limit=1000)
+                addr = self
+
+                # create dummy log
+                l = BlackStack::DummyLogger.new(nil) if l.nil?
+
+                # connecting imap 
+                l.logs "Connecting IMAP... "
+                imap = Net::IMAP.new(addr.mta.imap_address, addr.mta.imap_port, true)
+                conn = imap.login(addr.address, addr.password)
+                l.logf "done (#{conn.name})"
+        
+                # To choose one mailbox Read-only:
+                l.logs "Choosing mailbox #{folder}... "
+                res = imap.examine(folder)
+                l.logf "done (#{res.name})"
+        
+                # Gettin latest 1000 messages received, in reverse order (newest first)
+                l.logs "Getting latest #{limit.to_s} messages... "
+                ids = imap.search(["SUBJECT", '*']).reverse[0..limit]
+                l.logf "done (#{ids.size.to_s} messages)"
+                
+                # iterate the messages
+                ids.each { |id|
+                    l.logs "Processing message #{id.to_s}... "
+                    # getting the envelope
+                    envelope = imap.fetch(id, "ENVELOPE")[0].attr["ENVELOPE"]
+                    # getting the parameters
+                    from_name = envelope.from[0].name
+                    from_email = envelope.from[0].mailbox + '@' + envelope.from[0].host 
+                    date = envelope.date
+
+                    # TODO: develop a normalization function for mail.message_id
+                    message_id = envelope.message_id.to_s.gsub(/^</, '').gsub(/>$/, '')
+                    in_reply_to = envelope.in_reply_to.to_s.gsub(/^</, '').gsub(/>$/, '') # use this parameter to track a conversation thread
+
+                    subject = envelope.subject
+                    body = imap.fetch(id, "BODY[TEXT]")[0].attr["BODY[TEXT]"]
+                    
+                    # check if this message_id is is the latest processed
+                    #if message_id == addr[track_field.to_sym]
+                    #    l.logf "done with all new messages"
+                    #    break
+                    #else
+                        # check if it is a reply to a previous email sent by the system
+                        d = in_reply_to.to_s.empty? ? nil : BlackStack::Emails::Delivery.where(:message_id => in_reply_to).first 
+                        if d.nil?
+                            l.logf "ignored" # not a reply to a previous email sent by the system
+                        else
+                            d.insert_reply(subject, from_name, from_email, date, message_id, body)
+                            l.logf "registered" # insert such a reply in database 
+                        end
+                        # update the last id processed
+                        DB.execute("update eml_address set #{track_field} = '#{message_id.to_s}' where id='#{addr.id.to_guid}'")
+                    #end
+                    
+                    # TODO: ingest ALL the inbox anyway, in order to gather information about our users
+                    # TODO: ingest ALL the sent messages anyway, in order to gather information about our users
+                    # TODO: track the automated warming up emails
+                    
+                }
+                
+                # disconnect
+                l.logs "Disconnecting IMAP... "
+                res = imap.logout
+                l.logf "done (#{res.name})"
+            end # end receive
+
         end # class Address
 
 =begin

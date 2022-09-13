@@ -24,7 +24,7 @@ q = "
     join fl_lead l on (d.id_lead = l.id)
     where d.is_response = true
     #{filter_keyword.empty? ? "" : "and (l.name ilike '%#{filter_keyword}%' or l.position ilike '%#{filter_keyword}%' or l.stat_company_name ilike '%#{filter_keyword}%')"}
-    order by d.delivery_end_time desc
+    order by d.create_time desc
     limit 100
 "
 %>

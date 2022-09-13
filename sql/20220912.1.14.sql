@@ -30,3 +30,9 @@ alter table eml_delivery add column if not exists id_user uuid references "user"
 -- deliveries from manually written emails need to register the id_address
 alter table eml_delivery add column if not exists id_address uuid references eml_address(id) null;
 
+-- incoming messages (replies) include the name of the sender
+alter table eml_delivery add column if not exists "name" varchar(500) null;
+
+-- to process the inboxes, we need to know the last id processed
+alter table eml_address add column if not exists imap_inbox_last_id varchar(500) null;
+alter table eml_address add column if not exists imap_spam_last_id varchar(500) null;

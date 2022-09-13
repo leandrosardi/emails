@@ -9,6 +9,7 @@
 
 # References:
 # - https://stackoverflow.com/questions/2185391/localized-gmail-imap-folders
+# - https://stackoverflow.com/questions/1084780/getting-only-new-mail-from-an-imap-server
 # 
 
 # load gem and connect database
@@ -41,44 +42,9 @@ while (true)
 
     # for each address
     addrs.each { |addr|
+        # process the inbox
         l.logs "Process address #{addr.address}... "
-
-        l.logs "Connecting IMAP... "
-        imap = Net::IMAP.new(addr.mta.imap_address, addr.mta.imap_port, true)
-        conn = imap.login(addr.address, addr.password)
-        l.logf "done (#{conn.name})"
-
-        # To choose one mailbox Read-only:
-        #l.logs "Choosing mailbox SPAM... "
-        #res = imap.examine("[Gmail]/Spam")
-        #l.logf res.name
-
-        # To choose one mailbox Read-only:
-        l.logs "Choosing mailbox INBOX... "
-        res = imap.examine('Inbox')
-        l.logf res.name
-
-        # Gettin all messages
-        l.logs "Getting all messages... "
-        res = imap.search(["SUBJECT", '*'])
-        id = res.first
-        l.logf id.to_s
-        
-        # 
-        envelope = imap.fetch(id, "ENVELOPE")[0].attr["ENVELOPE"]
-        puts "From: <#{envelope.from[0].name}> #{envelope.from[0].mailbox}@#{envelope.from[0].host}"
-        puts "To: <#{envelope.to[0].name}> #{envelope.to[0].mailbox}@#{envelope.to[0].host}"
-        puts "Subject: #{envelope.subject}"
-        puts "Date: #{envelope.date}"
-        puts "Message-ID: #{envelope.message_id}"
-        puts "In-Reply-To: #{envelope.in_reply_to}" # use this parameter to track a conversation thread
-    
-        # disconnect
-        l.logs "Disconnecting IMAP... "
-        res = imap.logout
-        l.logf "done (#{res.name})"
-
-
+        addr.receive('Inbox', 'imap_inbox_last_id', l, 25)
         l.done
     }
 

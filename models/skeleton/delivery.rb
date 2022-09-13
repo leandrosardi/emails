@@ -177,6 +177,37 @@ module BlackStack
                 self.save
             end
 
+            # insert reply from the lead to the database.
+            # reutrn the new delivery object.
+            def insert_reply(subject, from_name, from_email, date, message_id, body)
+                # if the reply is already registered, then return it.
+                r = BlackStack::Emails::Delivery.where(:message_id=>message_id).first
+                return r if !r.nil?
+                # create a conversation id
+                if self.id_conversation.nil?
+                    self.id_conversation = guid
+                    self.save
+                end
+                # insert the reply
+                r = BlackStack::Emails::Delivery.new
+                r.id = guid
+                r.id_job = self.id_job
+                r.id_lead = self.id_lead
+                r.create_time = now
+                r.name = from_name
+                r.email = from_email
+                r.subject = subject
+                r.body = EmailReplyParser.parse_reply(body)
+                r.message_id = message_id
+                r.id_user = self.id_user # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
+                r.id_address = self.id_address # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
+                r.id_conversation = self.id_conversation
+                r.is_response = true # very important flag!
+                r.save
+                # return 
+                r
+            end # def insert_reply(from_name, from_email, date, message_id, body)
+
         end # class Delivery
     end # Emails
 end # BlackStack
