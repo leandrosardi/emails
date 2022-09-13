@@ -82,6 +82,9 @@ get "/emails/activity", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
 end
 
+get "/emails/inboxes", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/inboxes", :layout => :"/views/layouts/core"
+end
 
 # filters
 post "/emails/filter_new_campaign", :auth => true do

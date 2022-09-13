@@ -26,10 +26,11 @@ BlackStack::Extensions::add ({
     :leftbar_icons => [
         { :label => 'leads', :icon => :heart, :screen => :leads, },
         { :label => 'lists', :icon => :list, :screen => :lists, },
-        { :label => 'campaigns', :icon => :envelope, :screen => :campaigns, },
+        { :label => 'addresses', :icon => :envelope, :screen => :addresses, },
+        { :label => 'inboxes', :icon => :inbox, :screen => :inboxes, },
+        { :label => 'campaigns', :icon => :beaker, :screen => :campaigns, },
 #        { :label => 'jobs', :icon => :tasks, :screen => :jobs, },
         { :label => 'activity', :icon => :tasks, :screen => :activity, },
-        { :label => 'addresses', :icon => :tags, :screen => :addresses, },
     ],
 
     # add a folder to the storage from where user can download the exports.

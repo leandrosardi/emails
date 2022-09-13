@@ -1,0 +1,296 @@
+<%
+q = "
+    select 
+        a.id, 
+        a.address, 
+        a.shared,
+        a.enabled,
+        a.create_time,
+        a.max_deliveries_per_day
+    from eml_address a
+    join \"user\" u on ( u.id_account='#{@login.user.id_account}' and u.id=a.id_user )
+    where a.delete_time is null
+    order by a.address
+"
+%>
+
+<style>
+    div.ticket-selected {
+        background-color: rgb(235,235,255);
+    }
+
+
+    div.inbox-contaier {
+        position: relative;
+        right: 5px;
+        top: 0px;
+        height: 500px;
+        bottom: 0px;
+        overflow-y: scroll;
+    }
+
+    div.inbox-contaier div.inboxes {
+        position: absolute;  
+    }
+
+
+    div.chats-contaier {
+        position: relative;
+        right: 5px;
+        top: 0px;
+        height: 400px;
+        bottom: 0px;
+        overflow-y: scroll;
+    }
+
+    div.chats-contaier div.chats {
+        position: absolute;  
+    }
+
+
+    div.reply-contaier {
+        position: relative;
+        right: 5px;
+        top: 0px;
+        height: 100px;
+        bottom: 0px;
+        overflow-y: scroll;
+    }
+
+
+</style>
+
+<!-- NavBar -->
+<div class="mynavbar mysticky">
+	<section class="row-fluid">	
+		<div class="span6">
+		    <%=nav2("Emails", "/emails", "Inboxes")%>
+		</div>
+		<div class="span6">
+            <form action="/emails/inboxes" method="get">
+            <div class="pull-right">
+                <div class="span8">
+                    <input type='text' class='input-block-level select-all-on-focus' id='keyword' name='keyword'/>
+                </div>
+
+                <button class="btn btn-blue btn-medium btn-submit" style="margin-left: 2px;" type="submit" onclick="">
+                    <i class='icon-search'></i> Search
+                </button>
+            </div>
+            </form>
+		</div>
+	</section>
+</div>
+
+<!-- Single Panel -->
+<section class="row-fluid">
+	<div class="span4 box widget-support-tickets inbox-contaier">
+        <div class='inboxes'>
+            <div class='ticket ticket-selected'>
+                <span class="label label-blue">sent</span>
+                <a href="#" title="">Sarah Connor <span>CEO | Carpentier</span></a>
+                <img src="/emails/images/avatar.png" alt="Avatar">
+                <span class="opened-by">
+                    Campaign: <a href="#" title="">Beta Testers</a> <br>
+                    Jan 28, 2012 10:24
+                </span>
+            </div>
+            <div class='ticket'>
+                <span class="label label-green">reply</span>
+                <a href="#" title="">John Connor <span>Production Manager | Amazon Web Services - Dublin</span></a>
+                <img src="/emails/images/avatar.png" alt="Avatar">
+                <span class="opened-by">
+                    Campaign: <a href="#" title="">Beta Testers</a> <br>
+                    Jan 28, 2012 10:24
+                </span>
+            </div>
+        </div>
+    </div>
+
+	<div class="span8 box">
+        <div class='widget-chat chats-contaier'>
+        <div class='chats'>
+            <div class="message">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Sarah Connor</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                        <button class="btn btn-mini btn-link">expand</button>
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+            <div class="message right">
+                <img src="/emails/images/avatar.png" alt="">
+                <div>
+                    <a href="#" title="">Second User</a> says:
+                    <span class="pull-right">2 minutes ago</span>
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div class='reply'>
+            <textarea id="body" name='body' placeholder="Body" rows=2 style='width:100%;' maxlength=4000></textarea>
+        </div>
+
+
+    </div>
+</section>
+
+
+<script> 
+    tinymce.init({
+        height: 100,
+        selector: '#body',
+        plugins: "emoticons hr image link lists table autoresize", 
+        toolbar: "bold italic link image emoticons | formatgroup paragraphgroup insertgroup | mySendButton",
+        autosave_restore_when_empty: false,
+        toolbar_groups: {
+            formatgroup: {
+                icon: 'format',
+                tooltip: 'Formatting',
+                items: 'bold italic underline strikethrough | forecolor backcolor | superscript subscript | removeformat'
+            },
+            paragraphgroup: {
+                icon: 'paragraph',
+                tooltip: 'Paragraph format',
+                items: 'h1 h2 h3 | bullist numlist | alignleft aligncenter alignright | indent outdent'
+            },
+            insertgroup: {
+                icon: 'plus',
+                tooltip: 'Insert',
+                items: 'undo redo link image emoticons hr'
+            }
+        },
+        skin: 'outside',
+        toolbar_location: 'top',
+        menubar: false,
+        statusbar: false,
+        placeholder: 'Type your message here',
+        setup: function (editor) {
+            editor.ui.registry.addButton("mySendButton", {
+                tooltip: "Send Message",
+                text: "Send",
+                onAction: function () {
+                    alert(editor.getContent());
+                    editor.resetContent();
+                },
+            });
+        },
+    });
+</script>
