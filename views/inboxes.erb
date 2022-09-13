@@ -293,7 +293,7 @@ q = "
                         // set focus on textarea.body - TODO: this is not working!
                         //$('#body').focus();
                     } else {
-                        $('.chats').html('Error loading conversation.');
+                        $('.chats').html('Error loading conversation ('+res.status+').');
                     }
                 },
                 error: function(data) {

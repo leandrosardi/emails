@@ -48,10 +48,8 @@ module BlackStack
                 
                 # remove anchor tag with URL equal than self.pixel_url
                 ret = lines.join("\n")
-                html = Nokogiri::HTML(ret)
-                html.css("a[href='#{self.pixel_url}']").each { |a| a.remove }
-                ret = html.text
-                
+                ret.gsub!(/#{Regexp.escape(self.pixel)}/, '')
+                          
                 # return the result
                 ret 
             end
