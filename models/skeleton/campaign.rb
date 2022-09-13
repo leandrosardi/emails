@@ -206,6 +206,8 @@ module BlackStack
                     d.email = lead.emails.first.value
                     d.subject = self.merged_subject(lead)
                     d.body = self.merged_body(lead)
+                    d.id_user = self.id_user # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
+                    d.id_address = address.id # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
                     d.save
                     # release resources
                     GC.start

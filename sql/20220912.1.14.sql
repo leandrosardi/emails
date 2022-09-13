@@ -27,5 +27,6 @@ alter table eml_delivery alter column "subject" set not null;
 -- deliveries from manually written emails need to register the id_user
 alter table eml_delivery add column if not exists id_user uuid references "user"(id) null;
 
--- deliveries from manually written emails need to register the id_user
-alter table eml_delivery add column if not exists id_account uuid references account(id) null;
+-- deliveries from manually written emails need to register the id_address
+alter table eml_delivery add column if not exists id_address uuid references eml_address(id) null;
+

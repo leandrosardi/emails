@@ -111,7 +111,10 @@ while (true)
                             my_leads = leads.first(i)
                             leads = leads.drop(i)
                             # exit if there are no more leads into the array
-                            break if my_leads.size == 0
+                            if my_leads.size == 0
+                                l.logf "done (no more leads)"
+                                break
+                            end
                             # create job with grabbed leads
                             campaign.create_jobs(my_leads, addr)
                         l.logf "done (#{my_leads.size.to_s})"

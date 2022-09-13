@@ -81,10 +81,11 @@ module BlackStack
             end
 
             # update the delivery flags of this job
-            def end_delivery(error=nil)
+            def end_delivery(error=nil, message_id=nil)
                 self.delivery_success = error.nil?
                 self.delivery_error_description = error
                 self.delivery_end_time = now
+                self.message_id = message_id
                 self.save
             end
 
@@ -94,7 +95,7 @@ module BlackStack
                 begin
                     address = self.job.address
                     campaign = self.job.campaign
-                    address.send({
+                    message_id = address.send({
                         :to_email => self.email, 
                         :to_name => self.lead.name,
                         :subject => self.subject, 
@@ -102,7 +103,7 @@ module BlackStack
                         :from_name => campaign.from_name, 
                         :reply_to => campaign.reply_to,
                     })
-                    self.end_delivery
+                    self.end_delivery(nil, message_id)
 
                     # increment the open count for the regarding campaign in the timeline snapshot
                     self.job.track('sent')
