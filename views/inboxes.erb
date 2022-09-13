@@ -1,64 +1,36 @@
 <%
+filter_keyword = @login.user.preference('emails.inboxes.filter.keyword', "", params[:keyword])
+
 q = "
     select 
-        a.id, 
-        a.address, 
-        a.shared,
-        a.enabled,
-        a.create_time,
-        a.max_deliveries_per_day
-    from eml_address a
-    join \"user\" u on ( u.id_account='#{@login.user.id_account}' and u.id=a.id_user )
-    where a.delete_time is null
-    order by a.address
+        d.id as id_delivery,
+        d.create_time,
+
+        c.id as id_campaign,
+        c.name as campaign_name,
+
+        l.id as id_lead, 
+        l.name as lead_name,
+        l.position as lead_position,
+        l.stat_company_name as lead_company,
+        
+        d.body
+    from eml_delivery d
+    left join eml_job j on d.id_job = j.id
+    left join eml_campaign c on j.id_campaign = c.id
+    
+    join \"user\" u on (c.id_user=u.id and u.id_account='#{@login.user.id_account}')
+    
+    join fl_lead l on (d.id_lead = l.id)
+    
+    where d.is_response = true
+    
+    #{filter_keyword.empty? ? "" : "and (l.name ilike '%#{filter_keyword}%' or l.position ilike '%#{filter_keyword}%' or l.stat_company_name ilike '%#{filter_keyword}%')"}
+    
+    order by d.delivery_end_time desc
+    limit 100
 "
 %>
-
-<style>
-    div.ticket-selected {
-        background-color: rgb(235,235,255);
-    }
-
-
-    div.inbox-contaier {
-        position: relative;
-        right: 5px;
-        top: 0px;
-        height: 500px;
-        bottom: 0px;
-        overflow-y: scroll;
-    }
-
-    div.inbox-contaier div.inboxes {
-        position: absolute;  
-    }
-
-
-    div.chats-contaier {
-        position: relative;
-        right: 5px;
-        top: 0px;
-        height: 400px;
-        bottom: 0px;
-        overflow-y: scroll;
-    }
-
-    div.chats-contaier div.chats {
-        position: absolute;  
-    }
-
-
-    div.reply-contaier {
-        position: relative;
-        right: 5px;
-        top: 0px;
-        height: 100px;
-        bottom: 0px;
-        overflow-y: scroll;
-    }
-
-
-</style>
 
 <!-- NavBar -->
 <div class="mynavbar mysticky">
@@ -70,7 +42,7 @@ q = "
             <form action="/emails/inboxes" method="get">
             <div class="pull-right">
                 <div class="span8">
-                    <input type='text' class='input-block-level select-all-on-focus' id='keyword' name='keyword'/>
+                    <input type='text' class='input-block-level select-all-on-focus' id='keyword' name='keyword' value='<%=filter_keyword.encode_html%>'/>
                 </div>
 
                 <button class="btn btn-blue btn-medium btn-submit" style="margin-left: 2px;" type="submit" onclick="">
@@ -86,24 +58,37 @@ q = "
 <section class="row-fluid">
 	<div class="span4 box widget-support-tickets inbox-contaier">
         <div class='inboxes'>
-            <div class='ticket ticket-selected'>
-                <span class="label label-blue">sent</span>
-                <a href="#" title="">Sarah Connor <span>CEO | Carpentier</span></a>
-                <img src="/emails/images/avatar.png" alt="Avatar">
-                <span class="opened-by">
-                    Campaign: <a href="#" title="">Beta Testers</a> <br>
-                    Jan 28, 2012 10:24
-                </span>
-            </div>
-            <div class='ticket'>
-                <span class="label label-green">reply</span>
-                <a href="#" title="">John Connor <span>Production Manager | Amazon Web Services - Dublin</span></a>
-                <img src="/emails/images/avatar.png" alt="Avatar">
-                <span class="opened-by">
-                    Campaign: <a href="#" title="">Beta Testers</a> <br>
-                    Jan 28, 2012 10:24
-                </span>
-            </div>
+            <%
+            i = 0
+            DB[q].all { |row|
+                i += 1
+                %>
+                <div class='ticket'>
+                    <span class="label label-green">reply</span>
+                    <a href="#" title=""><%=row[:lead_name].to_s.encode_html%><span><%=row[:lead_position].to_s.encode_html%> | <%=row[:lead_company].to_s.encode_html%></span></a>
+                    <img src="/emails/images/avatar.png" alt="Avatar">
+                    <span class="opened-by">
+                        <%
+                        if !row[:id_campaign].nil?
+                        %> 
+                        Campaign: <a href="/emails/campaigns/<%=row[:id_campaign]%>/edit" title="Open Campaign"><%=row[:campaign_name].to_s.encode_html%></a> <br>
+                        <%
+                        end # if row[:campaign_id].nil?
+                        %>                         
+                        <%=row[:create_time].to_s%>
+                    </span>
+                </div>
+                <%
+            }
+
+            if i == 0
+                %>
+                <div>
+                    <i>No conversations found.</i>
+                </div>
+                <%
+            end # if i == 0
+            %>
         </div>
     </div>
 
@@ -254,6 +239,8 @@ q = "
 
 
 <script> 
+    // design the edit like a chat box.
+    // reference: https://www.tiny.cloud/blog/build-a-chat-app-with-our-wysiwyg-editor/
     tinymce.init({
         height: 100,
         selector: '#body',

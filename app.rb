@@ -140,6 +140,14 @@ post "/ajax/emails/upload_picture.json", :auth => true do
     erb :"/extensions/emails/views/ajax/upload_picture"
 end
 
+post "/ajax/emails/load_deliveries.json", :auth => true do
+    erb :"/extensions/emails/views/ajax/load_deliveries"
+end
+
+post "/ajax/emails/create_delivery.json", :auth => true do
+    erb :"/extensions/emails/views/ajax/create_delivery"
+end
+
 # API
 get "/api1.0/emails/open.json" do
     erb :"/extensions/emails/views/api1.0/open"

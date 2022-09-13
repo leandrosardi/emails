@@ -96,4 +96,9 @@ BlackStack::Extensions::add ({
             :background => true,
         }],
     }],
+
+    # define CSS files to add
+    :css_files => [
+        '/emails/css/inboxes.css',
+    ],
 })

@@ -1,0 +1,38 @@
+div.ticket-selected {
+    background-color: rgb(235,235,255);
+}
+
+div.inbox-contaier {
+    position: relative;
+    right: 5px;
+    top: 0px;
+    height: 500px;
+    bottom: 0px;
+    overflow-y: scroll;
+}
+
+div.inbox-contaier div.inboxes {
+    position: absolute;  
+}
+
+div.chats-contaier {
+    position: relative;
+    right: 5px;
+    top: 0px;
+    height: 400px;
+    bottom: 0px;
+    overflow-y: scroll;
+}
+
+div.chats-contaier div.chats {
+    position: absolute;  
+}
+
+div.reply-contaier {
+    position: relative;
+    right: 5px;
+    top: 0px;
+    height: 100px;
+    bottom: 0px;
+    overflow-y: scroll;
+}
