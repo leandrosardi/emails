@@ -39,6 +39,12 @@ alter table eml_address add column if not exists imap_spam_last_id varchar(500) 
 
 
 
+-- track if an email is single email
+alter table eml_delivery add column if not exists is_single boolean not null default false;
+
+-- record in in_reply_to for both: sent and received emails.
+alter table eml_delivery add column if not exists in_reply_to varchar(500) null;
+
 -- track replies
 alter table eml_campaign add column if not exists stat_replys bigint not null default 0;
 alter table eml_campaign_timeline add column if not exists stat_replys bigint not null default 0;

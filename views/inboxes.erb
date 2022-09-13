@@ -110,6 +110,109 @@ q = "
 
 
 <script> 
+    // add a deliver to the .chats div.
+    // draw different if it is a message sent or a message received.
+    function draw_delivery(d) {
+        if ( d.is_response == false ) {
+            // draw message sent
+            //<div class="message left">
+            //    <img src="/emails/images/avatar.png" alt="">
+            //    <div>
+            //        <a href="#" title="">Sarah Connor</a> says:
+            //        <span class="pull-right">2 minutes ago</span>
+            //        <div>
+            //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+            //            <button class="btn btn-mini btn-link">expand</button>
+            //        </div>
+            //    </div>
+            //</div>
+            div = $('<div class="message left"></div>');
+            img = $('<img src="/emails/images/avatar.png" alt="">');
+            div.append(img);
+            div2 = $('<div></div>');
+            a = $('<a href="#" title="">You</a>');
+            div2.append(a);
+            div2.append(' says: ');
+            span = $('<span class="pull-right">'+d.create_time+'</span>');
+            div2.append(span);
+            div2.append('<br>');
+            div2.append(d.simplified_body);
+            div.append(div2);
+            $('.chats').append(div);
+        } else {
+            // draw message received
+            //<div class="message right">
+            //    <img src="/emails/images/avatar.png" alt="">
+            //    <div>
+            //        <a href="#" title="">Second User</a> says:
+            //        <span class="pull-right">2 minutes ago</span>
+            //        <div>
+            //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+            //        </div>
+            //    </div>
+            //</div>
+            div = $('<div class="message right"></div>');
+            img = $('<img src="/emails/images/avatar.png" alt="">');
+            div.append(img);
+            div2 = $('<div></div>');
+            a = $('<a href="#" title="">'+d.name+'</a>');
+            div2.append(a);
+            div2.append(' says: ');
+            span = $('<span class="pull-right">'+d.create_time+'</span>');
+            div2.append(span);
+            div2.append('<br>');
+            div2.append(d.simplified_body);
+            div.append(div2);
+            $('.chats').append(div);
+        }
+    } // function draw_delivery
+
+    // draw a 'sending...' legend in the bottom of the .chats div.
+    function draw_sending() {
+        div = $('<div class="message right sending"></div>');
+        div.append('Sending...');
+        $('.chats').append(div);
+    }
+
+    // remove the 'sending...' legend in the bottom of the .chats div.
+    function remove_sending() {
+        $('.chats .sending').remove();
+    }
+
+    // create a new delivery by calling the access point /ajax/emails/create_delivery.json
+    // draw the new delivery in the .chats div
+    function create_delivery(body) {
+        // get conversation id from the .chats div
+        vid = $('.chats').data('id-conversation');
+        // show loading legend
+        draw_sending();
+        // post ajax call to /ajax/emails/create_delivery.json
+        $.ajax({
+            url: '/ajax/emails/create_delivery.json',
+            type: 'POST',
+            data: {
+                vid: vid,
+                body: body,
+            },
+            success: function(data) {
+                res = JSON.parse(data);
+                if (res.status == 'success') {
+                    // hide the sending legend
+                    remove_sending();
+                    // draw the new delivery
+                    draw_delivery(res.delivery);
+                    // set focus on textarea.body - TODO: this is not working!
+                    //$('#body').focus();
+                } else {
+                    $('.chats').html('Error sending message ('+res.status+').');
+                }
+            },
+            error: function(data) {
+                $('.chats').html('Error sending.');
+            }
+        });
+    }
+
     $(document).ready(function() {
         // hide the .reply div
         $('.reply').hide();
@@ -149,7 +252,7 @@ q = "
                     tooltip: "Send Message",
                     text: "Send",
                     onAction: function () {
-                        alert(editor.getContent());
+                        create_delivery(editor.getContent());
                         editor.resetContent();
                     },
                 });
@@ -185,64 +288,10 @@ q = "
                         // iterate the conversations
                         for (let i = 0; i<res.deliveries.length; i++) { 
                             // get the delivery
-                            d = res.deliveries[i];
-                            // draw different if it is a message sent or a message received
-                            if ( d.is_response == false ) {
-                                // draw message sent
-                                //<div class="message left">
-                                //    <img src="/emails/images/avatar.png" alt="">
-                                //    <div>
-                                //        <a href="#" title="">Sarah Connor</a> says:
-                                //        <span class="pull-right">2 minutes ago</span>
-                                //        <div>
-                                //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                                //            <button class="btn btn-mini btn-link">expand</button>
-                                //        </div>
-                                //    </div>
-                                //</div>
-            
-                                div = $('<div class="message left"></div>');
-                                img = $('<img src="/emails/images/avatar.png" alt="">');
-                                div.append(img);
-                                div2 = $('<div></div>');
-                                a = $('<a href="#" title="">You</a>');
-                                div2.append(a);
-                                div2.append(' says: ');
-                                span = $('<span class="pull-right">'+d.create_time+'</span>');
-                                div2.append(span);
-                                div2.append('<br>');
-                                div2.append(d.simplified_body);
-                                div.append(div2);
-                                $('.chats').append(div);
-
-                            } else {
-                                // draw message received
-                                //<div class="message right">
-                                //    <img src="/emails/images/avatar.png" alt="">
-                                //    <div>
-                                //        <a href="#" title="">Second User</a> says:
-                                //        <span class="pull-right">2 minutes ago</span>
-                                //        <div>
-                                //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                                //        </div>
-                                //    </div>
-                                //</div>
-            
-                                div = $('<div class="message right"></div>');
-                                img = $('<img src="/emails/images/avatar.png" alt="">');
-                                div.append(img);
-                                div2 = $('<div></div>');
-                                a = $('<a href="#" title="">'+d.name+'</a>');
-                                div2.append(a);
-                                div2.append(' says: ');
-                                span = $('<span class="pull-right">'+d.create_time+'</span>');
-                                div2.append(span);
-                                div2.append('<br>');
-                                div2.append(d.simplified_body);
-                                div.append(div2);
-                                $('.chats').append(div);
-                            }
+                            draw_delivery(res.deliveries[i]);
                         }
+                        // set focus on textarea.body - TODO: this is not working!
+                        //$('#body').focus();
                     } else {
                         $('.chats').html('Error loading conversation.');
                     }

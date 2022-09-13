@@ -35,10 +35,9 @@ BlackStack::Extensions.append :i2p
 BlackStack::Extensions.append :leads
 BlackStack::Extensions.append :emails
 
-
-d = BlackStack::Emails::Delivery.where(:id=>'6a7b6345-6934-4a1f-b8d7-fc5ce3ef4adb').first
-puts d.simplified_body
-exit(0)
+#d = BlackStack::Emails::Delivery.where(:id=>'6a7b6345-6934-4a1f-b8d7-fc5ce3ef4adb').first
+#puts d.simplified_body
+#exit(0)
 
 l = BlackStack::LocalLogger.new('./receive.log')
 

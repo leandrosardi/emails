@@ -16,6 +16,7 @@ module BlackStack
             # - https://stackoverflow.com/questions/2505104/html-to-plain-text-with-ruby
             # - https://github.com/github/email_reply_parser
             # 
+            # Also, remove open tracking pixel
             def simplified_body
                 lines = EmailReplyParser.parse_reply(self.body).split("\n")                
 
@@ -45,7 +46,14 @@ module BlackStack
                     end
                 end
                 
-                lines.join("\n")
+                # remove anchor tag with URL equal than self.pixel_url
+                ret = lines.join("\n")
+                html = Nokogiri::HTML(ret)
+                html.css("a[href='#{self.pixel_url}']").each { |a| a.remove }
+                ret = html.text
+                
+                # return the result
+                ret 
             end
 
             # return a hash descriptor of this object
@@ -216,8 +224,10 @@ module BlackStack
             def after_create
                 # call the parent class save method.
                 super
-                # this trigger is for sent emails only.
+                # this trigger is for replies from the leads.
                 return if self.is_response
+                # this trigger is not for manually created deliveries.
+                return if self.is_single
                 # apply pixel for tracking opens.
                 self.body += self.pixel
                 # apply tracking links.
@@ -274,6 +284,7 @@ module BlackStack
                 r.id_address = self.id_address # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
                 r.id_conversation = self.id_conversation
                 r.is_response = true # very important flag!
+                r.in_reply_to = self.message_id
                 r.save
                 # track - write history in eml_log
                 self.job.track('reply')
