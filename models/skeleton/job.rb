@@ -69,7 +69,7 @@ module BlackStack
             # increment the counter of an event in the timeline of the campaign
             # event must be ['sent', 'open', 'click', 'bounce', 'unsubscribe', 'complaint']
             def track(event_name)
-                raise "unknown event" if !['sent', 'open', 'click', 'bounce', 'unsubscribe', 'complaint'].include?(event_name)
+                raise "unknown event" if !BlackStack::Emails::Delivery::LOG_TYPES.include?(event_name)
                 # get unique key: id_campaign, year, month, day, hour, minute
                 # TODO: get a more reusable way to get year, month, day, hour, minute.
                 cid = self.id_campaign.to_guid
@@ -92,12 +92,12 @@ module BlackStack
                     (
                         id, id_campaign, create_time, 
                         year, month, day, hour, minute, 
-                        stat_sents, stat_opens, stat_clicks, stat_bounces, stat_unsubscribes, stat_complaints
+                        stat_sents, stat_opens, stat_clicks, stat_bounces, stat_unsubscribes, stat_complaints, stat_replys
                     )
                     VALUES (
                         '#{guid}', '#{cid}', '#{dt}',
                         #{year}, #{month}, #{day}, #{hour}, #{minute},
-                        0, 0, 0, 0, 0, 0
+                        0, 0, 0, 0, 0, 0, 0
                     ) ON CONFLICT DO NOTHING;
 
                     -- insert the record eml_address_timeline
@@ -107,12 +107,12 @@ module BlackStack
                     (
                         id, id_address, id_campaign, create_time, 
                         year, month, day, hour, minute, 
-                        stat_sents, stat_opens, stat_clicks, stat_bounces, stat_unsubscribes, stat_complaints
+                        stat_sents, stat_opens, stat_clicks, stat_bounces, stat_unsubscribes, stat_complaints, stat_replys
                     )
                     VALUES (
                         '#{guid}', '#{aid}', '#{cid}', '#{dt}',
                         #{year}, #{month}, #{day}, #{hour}, #{minute},
-                        0, 0, 0, 0, 0, 0
+                        0, 0, 0, 0, 0, 0, 0
                     ) ON CONFLICT DO NOTHING;
 
                     -- increment the counter of the event in the eml_campaign_timeline snapshot

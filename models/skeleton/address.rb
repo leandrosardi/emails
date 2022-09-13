@@ -113,7 +113,7 @@ module BlackStack
             end
 
             # update object from a hash descriptor
-            def to_h
+            def to_hash
                 {
                     :id => self.id,
                     :create_time => self.create_time,
@@ -149,7 +149,7 @@ module BlackStack
 
             # return true if the user's account already has an MTA record with these settings
             def exists?
-                !BlackStack::Emails::Address.exists?(self.to_h).nil?
+                !BlackStack::Emails::Address.exists?(self.to_hash).nil?
             end
 
             # test the the login to the imap server

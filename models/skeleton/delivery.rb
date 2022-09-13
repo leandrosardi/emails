@@ -3,8 +3,71 @@ module BlackStack
         class Delivery < Sequel::Model(:eml_delivery)
             many_to_one :job, :class=>:'BlackStack::Emails::Job', :key=>:id_job
             many_to_one :lead, :class=>:'Leads::FlLead', :key=>:id_lead
+            many_to_one :user, :class=>:'BlackStack::Emails::User', :key=>:id_user
+            many_to_one :address, :class=>:'BlackStack::Emails::Address', :key=>:id_address
 
-            LOG_TYPES = ['pending', 'failed', 'sent', 'open', 'click', 'unsubscribe']
+            LOG_TYPES = ['pending', 'failed', 'sent', 'open', 'click', 'unsubscribe', 'bounce', 'complaint', 'reply']
+
+            # return a plain text version of the body
+            # fix known problems of email_reply_parser gem: https://github.com/github/email_reply_parser#known-issues
+            # - remove the mime lines
+            # - remove the signature
+            # references: 
+            # - https://stackoverflow.com/questions/2505104/html-to-plain-text-with-ruby
+            # - https://github.com/github/email_reply_parser
+            # 
+            def simplified_body
+                lines = EmailReplyParser.parse_reply(self.body).split("\n")                
+
+                # remove the mime lines
+                lines=lines.drop(1) if lines[0] =~ /^\-\-[a-zA-Z0-9]+$/
+                lines=lines.drop(1) if lines[0] =~ /^Content-Type: (.*)$/
+                lines=lines.drop(1) if lines[0] =~ /^Content-Transfer-Encoding: (.*)$/
+
+                # remove the signature
+                n = lines.size
+                if n>=1
+                    lines.pop if lines[n-1] =~ /^wrote:$/i
+                end
+
+                n = lines.size
+                if n>=2
+                    if lines[n-2] =~ /^On(.*)\=$/i
+                        lines.pop 
+                        lines.pop
+                    end
+                end # if n>=2
+
+                n = lines.size
+                if n>=1
+                    if lines[n-1] =~ /^On (.*)\<#{Regexp.escape(self.address.address)}\>$/i
+                        lines.pop 
+                    end
+                end
+                
+                lines.join("\n")
+            end
+
+            # return a hash descriptor of this object
+            def to_hash
+                {
+                    :id => self.id,
+                    :id_job => self.id_job,
+                    :id_lead => self.id_lead,
+                    :create_time => self.create_time,
+                    :email => self.email,
+                    :subject => self.subject,
+                    :body => body,
+                    :simplified_body => self.simplified_body,
+                    :message_id => self.message_id,
+                    :is_response => self.is_response,
+                    :id_conversation => self.id_conversation,
+                    # valid if is_response is true only.
+                    :id_user => self.id_user,
+                    :id_address => self.id_address,
+                    :name => self.name,
+                }
+            end
 
             def self.log_type_color(type)
                 raise "Invalid log type #{type}." unless LOG_TYPES.include?(type)
@@ -22,6 +85,12 @@ module BlackStack
                         ret = 'pink'
                     when 'unsubscribe'
                         ret = 'orange'
+                    when 'bounce'
+                        ret = 'red'
+                    when 'complaint'
+                        ret = 'red'
+                    when 'reply'
+                        ret = 'purple'
                 end
                 ret
             end
@@ -147,6 +216,8 @@ module BlackStack
             def after_create
                 # call the parent class save method.
                 super
+                # this trigger is for sent emails only.
+                return if self.is_response
                 # apply pixel for tracking opens.
                 self.body += self.pixel
                 # apply tracking links.
@@ -197,16 +268,19 @@ module BlackStack
                 r.name = from_name
                 r.email = from_email
                 r.subject = subject
-                r.body = EmailReplyParser.parse_reply(body)
+                r.body = body
                 r.message_id = message_id
                 r.id_user = self.id_user # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
                 r.id_address = self.id_address # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
                 r.id_conversation = self.id_conversation
                 r.is_response = true # very important flag!
                 r.save
+                # track - write history in eml_log
+                self.job.track('reply')
+                self.track('reply')
                 # return 
                 r
-            end # def insert_reply(from_name, from_email, date, message_id, body)
+            end # def insert_reply(subject, from_name, from_email, date, message_id, body)
 
         end # class Delivery
     end # Emails

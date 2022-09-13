@@ -36,3 +36,10 @@ alter table eml_delivery add column if not exists "name" varchar(500) null;
 -- to process the inboxes, we need to know the last id processed
 alter table eml_address add column if not exists imap_inbox_last_id varchar(500) null;
 alter table eml_address add column if not exists imap_spam_last_id varchar(500) null;
+
+
+
+-- track replies
+alter table eml_campaign add column if not exists stat_replys bigint not null default 0;
+alter table eml_campaign_timeline add column if not exists stat_replys bigint not null default 0;
+alter table eml_address_timeline add column if not exists stat_replys bigint not null default 0;

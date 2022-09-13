@@ -82,7 +82,7 @@ module BlackStack
             end
 
             # return a hash descriptor from the object attributes
-            def to_h
+            def to_hash
                 {
                     :id=>self.id,
                     :create_time=>self.create_time,
@@ -120,7 +120,7 @@ module BlackStack
 
             # return true if the user's account already has an MTA record with these settings
             def exists?
-                !BlackStack::Emails::Mta.exists?(self.to_h).nil?
+                !BlackStack::Emails::Mta.exists?(self.to_hash).nil?
             end
         end # class Mta
     end # module Emails

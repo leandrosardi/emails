@@ -5,6 +5,7 @@ q = "
     select 
         d.id as id_delivery,
         d.create_time,
+        d.id_conversation, 
 
         c.id as id_campaign,
         c.name as campaign_name,
@@ -62,7 +63,10 @@ q = "
                 %>
                 <div class='ticket'>
                     <span class="label label-green">reply</span>
-                    <a href="#" title=""><%=row[:lead_name].to_s.encode_html%><span><%=row[:lead_position].to_s.encode_html%> | <%=row[:lead_company].to_s.encode_html%></span></a>
+                    <a href="#" title="<%=row[:lead_name].to_s.encode_html%>" class='load-conversation' data-id-conversation='<%=row[:id_conversation].to_s%>'>
+                        <%=row[:lead_name].to_s.encode_html%>
+                        <span><%=row[:lead_position].to_s.encode_html%> | <%=row[:lead_company].to_s.encode_html%></span>
+                    </a>
                     <img src="/emails/images/avatar.png" alt="Avatar">
                     <span class="opened-by">
                         <%
@@ -91,139 +95,29 @@ q = "
 
 	<div class="span8 box">
         <div class='widget-chat chats-contaier'>
-        <div class='chats'>
-            <div class="message">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Sarah Connor</a> says:
-                    <span class="pull-right">2 minutes ago</span>
+            <div class='chats'>
+                <div class="message left">
+                    <img src="/emails/images/avatar.png" alt="">
                     <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                        <button class="btn btn-mini btn-link">expand</button>
+                        <a href="#" title="">Sarah Connor</a> says:
+                        <span class="pull-right">2 minutes ago</span>
+                        <div>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                            <button class="btn btn-mini btn-link">expand</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="message right">
+                    <img src="/emails/images/avatar.png" alt="">
+                    <div>
+                        <a href="#" title="">Second User</a> says:
+                        <span class="pull-right">2 minutes ago</span>
+                        <div>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-            <div class="message right">
-                <img src="/emails/images/avatar.png" alt="">
-                <div>
-                    <a href="#" title="">Second User</a> says:
-                    <span class="pull-right">2 minutes ago</span>
-                    <div>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
-                    </div>
-                </div>
-            </div>
-        </div>
         </div>
 
         <div class='reply'>
@@ -236,45 +130,166 @@ q = "
 
 
 <script> 
-    // design the edit like a chat box.
-    // reference: https://www.tiny.cloud/blog/build-a-chat-app-with-our-wysiwyg-editor/
-    tinymce.init({
-        height: 100,
-        selector: '#body',
-        plugins: "emoticons hr image link lists table autoresize", 
-        toolbar: "bold italic link image emoticons | formatgroup paragraphgroup insertgroup | mySendButton",
-        autosave_restore_when_empty: false,
-        toolbar_groups: {
-            formatgroup: {
-                icon: 'format',
-                tooltip: 'Formatting',
-                items: 'bold italic underline strikethrough | forecolor backcolor | superscript subscript | removeformat'
-            },
-            paragraphgroup: {
-                icon: 'paragraph',
-                tooltip: 'Paragraph format',
-                items: 'h1 h2 h3 | bullist numlist | alignleft aligncenter alignright | indent outdent'
-            },
-            insertgroup: {
-                icon: 'plus',
-                tooltip: 'Insert',
-                items: 'undo redo link image emoticons hr'
-            }
-        },
-        skin: 'outside',
-        toolbar_location: 'top',
-        menubar: false,
-        statusbar: false,
-        placeholder: 'Type your message here',
-        setup: function (editor) {
-            editor.ui.registry.addButton("mySendButton", {
-                tooltip: "Send Message",
-                text: "Send",
-                onAction: function () {
-                    alert(editor.getContent());
-                    editor.resetContent();
+    $(document).ready(function() {
+        // design the edit like a chat box.
+        // reference: https://www.tiny.cloud/blog/build-a-chat-app-with-our-wysiwyg-editor/
+        tinymce.init({
+            height: 100,
+            selector: '#body',
+            plugins: "emoticons hr image link lists table autoresize", 
+            toolbar: "bold italic link image emoticons | formatgroup paragraphgroup insertgroup | mySendButton",
+            autosave_restore_when_empty: false,
+            toolbar_groups: {
+                formatgroup: {
+                    icon: 'format',
+                    tooltip: 'Formatting',
+                    items: 'bold italic underline strikethrough | forecolor backcolor | superscript subscript | removeformat'
                 },
+                paragraphgroup: {
+                    icon: 'paragraph',
+                    tooltip: 'Paragraph format',
+                    items: 'h1 h2 h3 | bullist numlist | alignleft aligncenter alignright | indent outdent'
+                },
+                insertgroup: {
+                    icon: 'plus',
+                    tooltip: 'Insert',
+                    items: 'undo redo link image emoticons hr'
+                }
+            },
+            skin: 'outside',
+            toolbar_location: 'top',
+            menubar: false,
+            statusbar: false,
+            placeholder: 'Type your message here',
+            setup: function (editor) {
+                editor.ui.registry.addButton("mySendButton", {
+                    tooltip: "Send Message",
+                    text: "Send",
+                    onAction: function () {
+                        alert(editor.getContent());
+                        editor.resetContent();
+                    },
+                });
+            },
+        });
+
+        // load conversation
+        $('.load-conversation').click(function(e) {
+            // get conversation id
+            vid = $(this).data('id-conversation');
+            // show loading legend
+            $('.chats').html('Loading...');
+            // post ajax call to /ajax/emails/load_deliveries.json
+            $.ajax({
+                url: '/ajax/emails/load_deliveries.json',
+                type: 'POST',
+                data: {
+                    vid: vid,
+                },
+                success: function(data) {
+                    res = JSON.parse(data);
+                    if (res.status == 'success') {
+                        // empty the chats
+                        $('.chats').html('');
+                        // iterate the conversations
+                        for (let i = 0; i<res.deliveries.length; i++) { 
+                            // get the delivery
+                            d = res.deliveries[i];
+                            // draw different if it is a message sent or a message received
+                            if ( d.is_response == false ) {
+                                // draw message sent
+                                //<div class="message left">
+                                //    <img src="/emails/images/avatar.png" alt="">
+                                //    <div>
+                                //        <a href="#" title="">Sarah Connor</a> says:
+                                //        <span class="pull-right">2 minutes ago</span>
+                                //        <div>
+                                //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                                //            <button class="btn btn-mini btn-link">expand</button>
+                                //        </div>
+                                //    </div>
+                                //</div>
+            
+                                div = $('<div class="message left"></div>');
+                                img = $('<img src="/emails/images/avatar.png" alt="">');
+                                div.append(img);
+                                div2 = $('<div></div>');
+                                a = $('<a href="#" title="">'+d.from_name+'</a>');
+                                div2.append(a);
+                                div2.append(' says: ');
+                                span = $('<span class="pull-right">'+d.create_time+'</span>');
+                                div2.append(span);
+                                div2.append('<br>');
+                                div2.append(d.simplified_body);
+                                div.append(div2);
+                                $('.chats').append(div);
+
+                            } else {
+                                // draw message received
+                                //<div class="message right">
+                                //    <img src="/emails/images/avatar.png" alt="">
+                                //    <div>
+                                //        <a href="#" title="">Second User</a> says:
+                                //        <span class="pull-right">2 minutes ago</span>
+                                //        <div>
+                                //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                                //        </div>
+                                //    </div>
+                                //</div>
+            
+                                div = $('<div class="message right"></div>');
+                                img = $('<img src="/emails/images/avatar.png" alt="">');
+                                div.append(img);
+                                div2 = $('<div></div>');
+                                a = $('<a href="#" title="">'+d.from_name+'</a>');
+                                div2.append(a);
+                                div2.append(' says: ');
+                                span = $('<span class="pull-right">'+d.create_time+'</span>');
+                                div2.append(span);
+                                div2.append('<br>');
+                                div2.append(d.simplified_body);
+                                div.append(div2);
+                                $('.chats').append(div);
+                            }
+                        }
+                    } else {
+                        $('.chats').html('Error loading conversation.');
+                    }
+                },
+                error: function(data) {
+                    $('.chats').html('Error loading conversation.');
+                }
             });
-        },
+        });
+    });
+</script>
+
+I am trying to use the tinymce editor to send messages in a chat box. I have the editor working, but I am having trouble sending the message. I am using the editor in a chat box, so I want to send the message when the user clicks on the send button. I have the button working, but I am not sure how to get the message to send. I am using the following code to send the message: alert(editor.getContent()); editor.resetContent(); But I am not sure how to get the message to send. I am using the following code to send the message: alert(editor.getContent()); editor.resetContent(); But I am not sure how to get the message to send. I am using the following code to send the message: alert(editor.getContent()); editor.resetContent(); But I am not sure how to get the message to send. I am using the following
+
+                            } else {
+                                // draw message received
+                                //<div class="message right">
+                                //    <img src="/emails/images/avatar.png" alt="">
+                                //    <div>
+                                //        <a href="#" title="">Second User</a> says:
+                                //        <span class="pull-right">2 minutes ago</span>
+                                //        <div>
+                                //            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+                                //        </div>
+                                //    </div>
+                                //</div>
+            
+                            }
+                        }
+                        
+                    } else {
+                        alert('Error: ' + res.message);
+                    }
+                },
+                error: function(data) {
+                    alert('Error: ' + data.message);
+                }
+            });
+        });
     });
 </script>
