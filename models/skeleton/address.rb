@@ -324,7 +324,7 @@ module BlackStack
                     in_reply_to = envelope.in_reply_to.to_s.gsub(/^</, '').gsub(/>$/, '') # use this parameter to track a conversation thread
 
                     subject = envelope.subject
-                    body = imap.fetch(id, "BODY[TEXT]")[0].attr["BODY[TEXT]"]
+                    body = imap.fetch(id, "BODY[]")[0].attr["BODY[]"]
                     
                     # check if this message_id is is the latest processed
                     #if message_id == addr[track_field.to_sym]
