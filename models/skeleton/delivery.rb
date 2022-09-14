@@ -8,54 +8,91 @@ module BlackStack
 
             LOG_TYPES = ['pending', 'failed', 'sent', 'open', 'click', 'unsubscribe', 'bounce', 'complaint', 'reply']
 
-            # return a plain text version of the body
+            # return either plain-text or html version of the body, assuming it is the full mime content.
             # fix known problems of email_reply_parser gem: https://github.com/github/email_reply_parser#known-issues
             # - remove the mime lines
             # - remove the signature
+            # concatenate all the lines finishing with `=`
+            # 
             # references: 
             # - https://stackoverflow.com/questions/2505104/html-to-plain-text-with-ruby
             # - https://github.com/github/email_reply_parser
             # 
             # Also, remove open tracking pixel
-            def simplified_body
-                lines = EmailReplyParser.parse_reply(self.body).split("\n")                
-
-                # remove the mime lines
-                lines=lines.drop(1) if lines[0] =~ /^\-\-[a-zA-Z0-9]+$/
-                lines=lines.drop(1) if lines[0] =~ /^Content-Type: (.*)$/
-                lines=lines.drop(1) if lines[0] =~ /^Content-Transfer-Encoding: (.*)$/
-
-                # remove the signature
-                n = lines.size
-                if n>=1
-                    lines.pop if lines[n-1] =~ /^wrote:$/i
-                end
-
-                n = lines.size
-                if n>=2
-                    if lines[n-2] =~ /^On(.*)\=$/i
-                        lines.pop 
-                        lines.pop
+            def simplified_body(type='text/html')
+                # validate type is either text/html or text/plain
+                raise 'type should either text/html or text/plain. Other values are not supported yet.' unless ['text/html', 'text/plain'].include?(type)
+                # process the body, assuming it is the full mime content
+                s = body
+                did_i_found_the_content_part_i_want = false # auxuliar flag
+                ret = ''
+                email = EmailReplyParser.read(s)
+                email.fragments.each { |f|
+                    # convert fragment object to string
+                    f = f.to_s
+                    # if a new content part is starting
+                    if f =~ /^Content\-Type\:/
+                        # check if this is the content part i want
+                        if !did_i_found_the_content_part_i_want
+                            # activate the flag, to start collecting the content
+                            if f.to_s =~ /^Content\-Type\: #{Regexp.escape(type)}/
+                                did_i_found_the_content_part_i_want = true 
+                            end
+                        else
+                            # I have colectingthe content, so I return it
+                            return ret
+                        end
                     end
-                end # if n>=2
+                    if did_i_found_the_content_part_i_want
+                        # split the lines
+                        lines = f.split("\n")                
+            
+                        # remove the mime lines
+                        lines=lines.drop(1) if lines[0] =~ /^\-\-[a-zA-Z0-9]+$/
+                        lines=lines.drop(1) if lines[0] =~ /^Content-Type: (.*)$/
+                        lines=lines.drop(1) if lines[0] =~ /^Content-Transfer-Encoding: (.*)$/
 
-                n = lines.size
-                if n>=1
-                    if lines[n-1] =~ /^On (.*)\<#{Regexp.escape(self.address.address)}\>$/i
-                        lines.pop 
+                        # lines below work for `plain/text` only.
+                        # remove the signature
+                        n = lines.size
+                        if n>=1
+                            lines.pop if lines[n-1] =~ /^wrote:$/i
+                        end
+
+                        n = lines.size
+                        if n>=2
+                            if lines[n-2] =~ /^On(.*)\=$/i
+                                lines.pop 
+                                lines.pop
+                            end
+                        end # if n>=2
+
+                        n = lines.size
+                        if n>=1
+                            if lines[n-1] =~ /^On (.*)\<#{Regexp.escape(self.address.address)}\>$/i
+                                lines.pop 
+                            end
+                        end
+
+                        # add the content to the ret variable
+                        ret += lines.join("\n")
                     end
-                end
-                
-                # remove anchor tag with URL equal than self.pixel_url
-                ret = lines.join("\n")
-                ret.gsub!(/#{Regexp.escape(self.pixel)}/, '')
-                          
-                # return the result
-                ret 
+                }
+            
+                # concatenate all the lines finishing with `=`
+                ret = ret.gsub(/\=\n/, '')
+            
+                # return the content
+                return ret
             end
-
+            
             # return a hash descriptor of this object
             def to_hash
+                # getting a simplified version of the body
+                simplified = self.simplified_body('text/html')
+                simplified = self.simplified_body('text/plain') if simplified.nil? || simplified.empty?
+                simplified = self.body if simplified.nil? || simplified.empty?
+                # build the hash
                 {
                     :id => self.id,
                     :id_job => self.id_job,
@@ -64,7 +101,7 @@ module BlackStack
                     :email => self.email,
                     :subject => self.subject,
                     :body => body,
-                    :simplified_body => self.simplified_body,
+                    :simplified_body => self.is_response ? simplified : self.body,
                     :message_id => self.message_id,
                     :is_response => self.is_response,
                     :id_conversation => self.id_conversation,
