@@ -2,7 +2,7 @@
 # load preferences
 name = @login.user.preference('emails.campaign.new.name', '', nil)
 subject = @login.user.preference('emails.campaign.new.subject', '', nil)
-replyto = @login.user.preference('emails.campaign.new.replyto', '', @login.user.email)
+replyto = @login.user.preference('emails.campaign.new.replyto', '', '') #@login.user.email)
 fromname = @login.user.preference('emails.campaign.new.fromname', '', @login.user.name)
 body = @login.user.preference('emails.campaign.new.body', '', nil)
 id_export = @login.user.preference('emails.campaign.new.id_export', '', nil)
