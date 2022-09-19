@@ -12,6 +12,14 @@ module BlackStack
                 OpenSSL::SSL::VERIFY_CLIENT_ONCE
             ]
 
+            # this ugly patch is to save the situation when the hash is submited by an HTML form, where all the values are strings.
+            def self.format_descriptor_received_from_html_form(h)
+                h[:enable_starttls_auto] = true if h[:enable_starttls_auto].to_s == 'true'
+                h[:enable_starttls_auto] = false if h[:enable_starttls_auto].to_s == 'false'
+                h[:openssl_verify_mode] = h[:openssl_verify_mode].to_i if !h[:openssl_verify_mode].nil?
+                h
+            end
+
             # validate hash descriptor
             # TODO: move this to a base module, in order to  develop a stub-skeleton/rpc model.
             def self.validate_descriptor(h)
@@ -21,6 +29,8 @@ module BlackStack
                 errors << 'h is not a hash' unless h.is_a?(Hash)
                 # if h is a hash
                 if h.is_a?(Hash)
+                    # this ugly patch is to save the situation when the hash is submited by an HTML form, where all the values are strings.
+                    h = BlackStack::Emails::Mta.format_descriptor_received_from_html_form(h)
                     # validate: id_user is mandatory
                     errors << 'id_user is mandatory' unless h[:id_user] 
                     # validate: smtp_address is mandatory
@@ -54,7 +64,7 @@ module BlackStack
                     errors << 'enable_starttls_auto is not a boolean' if h[:enable_starttls_auto] && !h[:enable_starttls_auto].is_a?(TrueClass) && !h[:enable_starttls_auto].is_a?(FalseClass)
 
                     # validate: if :openssl_verify_mode it must be a valid value
-                    errors << "openssl_verify_mode is not a valid value (#{VERIFY_MODES})" if h[:openssl_verify_mode] && !VERIFY_MODES.include?(h[:openssl_verify_mode])        
+                    errors << "openssl_verify_mode (#{h[:openssl_verify_mode].to_s}) is not a valid value (#{VERIFY_MODES})" if h[:openssl_verify_mode] && !VERIFY_MODES.include?(h[:openssl_verify_mode])        
                 end # if h.is_a?(Hash)
                 # return
                 return errors.uniq
@@ -62,6 +72,8 @@ module BlackStack
 
             # map a hash descriptor to the object attributes
             def initialize(h)
+                # this ugly patch is to save the situation when the hash is submited by an HTML form, where all the values are strings.
+                h = BlackStack::Emails::Mta.format_descriptor_received_from_html_form(h)
                 # create Sequel object
                 super()
                 # validate h

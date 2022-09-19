@@ -7,12 +7,12 @@ module BlackStack
             # types
             TYPE_GMAIL = 0
             TYPE_YAHOO = 1 # pending to develop
-            TYPE_HOTMAIL = 2 # pending to develop
+            TYPE_OUTLOOK = 2 # pending to develop
             TYPE_GENERIC = 3 # generic MTA
 
             # return array of valid types for an address
             def self.types
-                [TYPE_GMAIL, TYPE_YAHOO, TYPE_HOTMAIL, TYPE_GENERIC]
+                [TYPE_GMAIL, TYPE_YAHOO, TYPE_OUTLOOK, TYPE_GENERIC]
             end
 
             # return a descriptive string for a type
@@ -22,7 +22,7 @@ module BlackStack
                     'Gmail'
                 when TYPE_YAHOO
                     'Yahoo'
-                when TYPE_HOTMAIL
+                when TYPE_OUTLOOK
                     'Hotmail'
                 when TYPE_GENERIC
                     'Generic'

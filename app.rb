@@ -54,6 +54,14 @@ get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
 end
 
+get "/emails/addresses/new/gmail", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_gmail_address", :layout => :"/views/layouts/core"
+end
+
+get "/emails/addresses/new/outlook", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_outlook_address", :layout => :"/views/layouts/core"
+end
+
 get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
 end
