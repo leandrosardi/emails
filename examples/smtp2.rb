@@ -5,7 +5,7 @@
 # Step 1. Access here and get both: IMAP and SMTP connection parameters.
 # https://outlook.live.com/mail/0/options/mail/accounts
 # Activate POP3.
-
+#
 # Step 2. Turn On 2-step Verification
 # https://support.microsoft.com/en-us/account-billing/how-to-use-two-step-verification-with-your-microsoft-account-c7910146-672f-01e9-50a0-93b4585e7eb4
 # 
