@@ -306,7 +306,7 @@ module BlackStack
         
                 # Gettin latest 1000 messages received, in reverse order (newest first)
                 l.logs "Getting latest #{limit.to_s} messages... "
-                ids = imap.search(["SUBJECT", '*']).reverse[0..limit]
+                ids = imap.search(["SUBJECT", addr.mta.search_all_wildcard]).reverse[0..limit]
                 l.logf "done (#{ids.size.to_s} messages)"
                 
                 # iterate the messages
@@ -316,7 +316,7 @@ module BlackStack
                     envelope = imap.fetch(id, "ENVELOPE")[0].attr["ENVELOPE"]
                     # getting the parameters
                     from_name = envelope.from[0].name
-                    from_email = envelope.from[0].mailbox + '@' + envelope.from[0].host 
+                    from_email = envelope.from[0].mailbox.to_s + '@' + envelope.from[0].host.to_s 
                     date = envelope.date
 
                     # TODO: develop a normalization function for mail.message_id

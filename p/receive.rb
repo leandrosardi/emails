@@ -51,11 +51,11 @@ while (true)
     addrs.each { |addr|
         # process the inbox
         l.logs "Process address inbox of #{addr.address}... "
-        addr.receive('Inbox', 'imap_inbox_last_id', l, 25)
+        addr.receive(addr.mta.inbox_label, 'imap_inbox_last_id', l, 25)
         l.done
 
         l.logs "Process address spam of #{addr.address}... "
-        addr.receive('Spam', 'imap_spam_last_id', l, 25)
+        addr.receive(addr.mta.spam_label, 'imap_spam_last_id', l, 25)
         l.done
     }
 
