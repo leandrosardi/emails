@@ -18,19 +18,24 @@ require 'email_reply_parser'
 
 imap = Net::IMAP.new("outlook.office365.com", 993, true)
 
-res = imap.login('leandrosardi2005@hotmail.com', '********')
+res = imap.login('leandrosardi2005@hotmail.com', '****')
 p res.name
 
 # To list all of your mailboxes
 #res = imap.list("", "*")
 #res.each { |mailbox| puts mailbox.name }
+#exit(0)
 
 # To choose one mailbox Read-only:
 res = imap.examine("Inbox")
 p res.name
 
+# To choose one mailbox Read-only:
+#res = imap.examine("Junk")
+#p res.name
+
 # Searching email messages
-res = imap.search(["SUBJECT", '']).reverse[0..1]
+res = imap.search(["SUBJECT", '']).reverse[0..2]
 p res.inspect
 
 # ids of the messages that match with the search

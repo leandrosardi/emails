@@ -15,23 +15,24 @@ require 'email_reply_parser'
 
 imap = Net::IMAP.new("imap.googlemail.com", 993, true)
 
-res = imap.login('sardi.leandro.daniel@gmail.com', '********')
+res = imap.login('sardi.leandro.daniel@gmail.com', '****')
 p res.name
 
 # To list all of your mailboxes
 #res = imap.list("", "*")
 #res.each { |mailbox| puts mailbox.name }
+#exit(0)
 
 # To choose one mailbox Read-only:
-res = imap.examine("[Gmail]/Todos")
+res = imap.examine("Inbox")
 p res.name
 
 # To choose one mailbox Read-and-write:
-#res = imap.select("INBOX")
+#res = imap.select("[Gmail]/Spam")
 #p res.name
 
 # Searching email messages
-res = imap.search(["SUBJECT", '"This is the begining of a great friendship"'])
+res = imap.search(["SUBJECT", '*']).reverse[0..2]
 p res.inspect
 
 # ids of the messages that match with the search
@@ -57,7 +58,7 @@ ids.each { |id|
     # get the actual email message that the person just wrote, excluding any quoted text
     # https://github.com/github/email_reply_parser
     # reference: https://stackoverflow.com/questions/7978987/get-the-actual-email-message-that-the-person-just-wrote-excluding-any-quoted-te
-    p EmailReplyParser.parse_reply(body)
+    #p EmailReplyParser.parse_reply(body)
 }
 
 imap.logout
