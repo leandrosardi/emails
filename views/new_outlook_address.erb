@@ -50,6 +50,10 @@
             <!-- address regarding paramaters --!>
             <input type='hidden' name='type' value='<%=BlackStack::Emails::Address::TYPE_OUTLOOK.to_s%>' />
 
+            <input type='hidden' name='inbox_label' value='Inbox' />
+            <input type='hidden' name='spam_label' value='Junk' />
+            <input type='hidden' name='search_all_wildcard' value='' />
+
             <p>Email Address</p>
             <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='' /><br/>
 

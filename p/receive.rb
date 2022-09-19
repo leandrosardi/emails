@@ -55,7 +55,7 @@ while (true)
         l.done
 
         l.logs "Process address spam of #{addr.address}... "
-        addr.receive('[Gmail]/Spam', 'imap_spam_last_id', l, 25)
+        addr.receive('Spam', 'imap_spam_last_id', l, 25)
         l.done
     }
 

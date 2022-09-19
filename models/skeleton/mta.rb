@@ -91,6 +91,9 @@ module BlackStack
                 self.authentication = h[:authentication] || 'plain'
                 self.enable_starttls_auto = h[:enable_starttls_auto] || true
                 self.openssl_verify_mode = h[:openssl_verify_mode] || OpenSSL::SSL::VERIFY_NONE
+                self.inbox_label = h[:inbox_label]
+                self.spam_label = h[:spam_label]
+                self.search_all_wildcard = h[:search_all_wildcard]
             end
 
             # return a hash descriptor from the object attributes
