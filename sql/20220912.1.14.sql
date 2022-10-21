@@ -1,9 +1,3 @@
-/*
-select *
-from eml_address
-order by create_time desc
-*/
-
 -- https://github.com/leandrosardi/emails/issues/14
 
 -- message_id of delivered email.
