@@ -1,0 +1,23 @@
+<!-- NavBar -->
+<div class="mynavbar mysticky">
+	<section class="row-fluid">	
+		<div class="span12">
+			<%=nav3("Emails", "/emails", "Leads", "/emails/leads", "Upload")%>
+		</div>
+	</section>
+</div>
+
+<!-- Single Panel -->
+<section class="row-fluid">
+	<div class="span12 box">
+        <h3>CSV Parameters</h3>
+		<p>Upload a CSV file with the following parameters:</p>
+
+        <h3>CSV File</h3>
+		<p>Paste the CSV content here:</p>
+		<textarea id="csv_content" name="csv_content" class="span12" rows="10"></textarea>
+
+		<button id="btn_upload" class="btn btn-primary">Upload</button>
+		<a id="btn_cancel" class="btn" href='/emails/leads'>Cancel</a>
+    </div>
+</section>
