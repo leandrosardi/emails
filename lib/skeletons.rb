@@ -1,4 +1,5 @@
 require 'extensions/emails/models/skeleton/address'
+require 'extensions/emails/models/skeleton/mta'
 
 require 'extensions/emails/models/skeleton/campaign'
 require 'extensions/emails/models/skeleton/followup'
@@ -16,4 +17,3 @@ require 'extensions/emails/models/skeleton/job'
 require 'extensions/emails/models/skeleton/link'
 require 'extensions/emails/models/skeleton/user'
 require 'extensions/emails/models/skeleton/account'
-require 'extensions/emails/models/skeleton/mta'

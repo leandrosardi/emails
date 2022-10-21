@@ -61,7 +61,11 @@ module BlackStack
             # leads in the export list.
             # note that may exist leads added after the campaign planning.
             def total_leads
-                DB["SELECT COUNT(*) AS n FROM fl_export_lead WHERE id_export = '#{self.id_export}'"].first[:n]
+                DB["
+                    SELECT COUNT(el.*) AS n 
+                    FROM fl_export_lead el
+                    WHERE id_export = '#{self.campaign.id_export}'
+                "].first[:n]
             end
 
             # total number of deliveries planned for this campaign
@@ -70,7 +74,7 @@ module BlackStack
                     SELECT COUNT(*) AS n 
                     FROM eml_job j
                     JOIN eml_delivery d on j.id=d.id_job 
-                    WHERE j.id_campaign = '#{self.id}'
+                    WHERE j.id_followup = '#{self.id}'
                 "].first[:n]
             end
 
@@ -88,6 +92,16 @@ module BlackStack
             def clicks_ratio
                 t = self.stat_sents
                 t == 0 ? 0 : ((self.stat_clicks.to_f / t.to_f) * 100.to_f).to_i
+            end
+
+            def replies_ratio
+                t = self.stat_sents
+                t == 0 ? 0 : ((self.stat_replies.to_f / t.to_f) * 100.to_f).to_i
+            end
+
+            def positive_replies_ratio
+                t = self.stat_sents
+                t == 0 ? 0 : ((self.stat_positive_replies.to_f / t.to_f) * 100.to_f).to_i
             end
 
             def unsubscribes_ratio
@@ -218,14 +232,14 @@ module BlackStack
                 j
             end
 
-            # return an array of active campaigns with jobs pending delivery
+            # return an array of active followups with jobs pending delivery
             def self.pendings
                 ret = []
                 q = "
                     SELECT DISTINCT c.id
-                    FROM eml_campaign c
+                    FROM eml_followup c
                     JOIN eml_job j ON (
-                        c.id = j.id_campaign AND
+                        c.id = j.id_followup AND
                         j.delivery_start_time IS NULL AND -- job should not be started yet
                         j.planning_time < current_timestamp -- job should be planned to be started
                     )

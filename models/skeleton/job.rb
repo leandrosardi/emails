@@ -72,7 +72,7 @@ module BlackStack
                 raise "unknown event" if !BlackStack::Emails::Delivery::LOG_TYPES.include?(event_name)
                 # get unique key: id_campaign, year, month, day, hour, minute
                 # TODO: get a more reusable way to get year, month, day, hour, minute.
-                cid = self.id_campaign.to_guid
+                cid = self.followup.id_campaign.to_guid
                 aid = self.planning_id_address.to_guid
                 dt = now # example: 2022-01-01 00:00:00
                 year = dt[0..3]

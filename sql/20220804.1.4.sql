@@ -117,6 +117,8 @@ create table IF NOT EXISTS eml_campaign (
     stat_complaints bigint not null -- how many emails were complained
 );
 
+alter table eml_campaign add column if not exists stat_positive_replies bigint not null;
+
 -- list of emails that will be sent by a campaign, based on rules
 create table IF NOT EXISTS eml_followup (
     id uuid not null primary key,
@@ -144,8 +146,19 @@ create table IF NOT EXISTS eml_followup (
     stat_replies bigint not null, -- how many emails were replied
     stat_bounces bigint not null, -- how many emails were bounced
     stat_unsubscribes bigint not null, -- how many emails were unsubscribed
-    stat_complaints bigint not null -- how many emails were complained    
+    stat_complaints bigint not null, -- how many emails were complained
+    -- pampa: add planning fields to the campaign.
+    planning_reservation_id uuid null,
+    planning_reservation_time timestamp null,
+    planning_reservation_times int null,
+    planning_start_time timestamp null,
+    planning_end_time timestamp null,
+    planning_success boolean null,
+    planning_error_description varchar(8000) null
+ 
 );
+
+alter table eml_followup add column if not exists stat_positive_replies bigint not null;
 
 -- addresses used by a campaign to deliver emails
 create table IF NOT EXISTS eml_outreach (
@@ -280,15 +293,6 @@ create table IF NOT EXISTS eml_unsubscribe (
     id_delivery uuid not null references eml_delivery(id), 
     create_time TIMESTAMP NOT NULL
 );
-
--- add planning fields to the campaign.
-alter table eml_campaign add column if not exists planning_reservation_id uuid null;
-alter table eml_campaign add column if not exists planning_reservation_time timestamp null;
-alter table eml_campaign add column if not exists planning_reservation_times int null;
-alter table eml_campaign add column if not exists planning_start_time timestamp null;
-alter table eml_campaign add column if not exists planning_end_time timestamp null;
-alter table eml_campaign add column if not exists planning_success boolean null;
-alter table eml_campaign add column if not exists planning_error_description varchar(8000) null;
 
 -- timeline snapshot of deliveries.
 create table IF NOT EXISTS eml_campaign_timeline (
