@@ -16,7 +16,20 @@ get "/emails/login", :agent => /(.*)/ do
     erb :"/extensions/emails/views/login", :layout => :"/views/layouts/public"
 end
 
-# internal app screens
+# internal app screens - leads upload
+get "/emails/leads/upload", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/upload_leads", :layout => :"/views/layouts/core"
+end
+
+get "/emails/leads/upload/matching", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/upload_leads_matching", :layout => :"/views/layouts/core"
+end
+
+get "/emails/leads/upload/jobs", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/upload_leads_jobs", :layout => :"/views/layouts/core"
+end
+
+# internal app screens - campaigns
 get "/emails/campaigns", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/campaigns", :layout => :"/views/layouts/core"
 end

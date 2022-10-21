@@ -15,12 +15,16 @@ alter table fl_data add column if not exists verify_success boolean null; -- if 
 alter table fl_data add column if not exists verify_error_description text null; -- if the verification was not successful, the error message
 
 -- adapt cs-leads to allow user to upload his/her own leads
-create table if not exists eml_upload_leads (
+create table if not exists eml_upload_leads_job (
     id uuid not null primary key,
     id_user uuid not null references "user"(id), -- who registered this account
     create_time timestamp not null, -- when registered this account
-    -- the list to import
+    -- the list to import the ledas
     id_export uuid not null references fl_export(id),
+    -- configurations
+    skip_existing_emails boolean not null default true, -- if true, skip the emails that already exists in the list
+    separator_char varchar(1) not null default ',', -- the separator char
+    enclosure_char varchar(1) not null default '"', -- the enclosure char
     -- the content of the file
     content text not null, 
     -- import status
@@ -30,16 +34,24 @@ create table if not exists eml_upload_leads (
     import_start_time timestamp null, -- when the import started
     import_end_time timestamp null, -- when the import ended
     import_success boolean null, -- if the import was successful
-    import_error_description text null -- if the import was not successful, the error message
+    import_error_description text null, -- if the import was not successful, the error message
+    -- stats
+    stat_total_rows bigint null,
+    stat_imported_rows bigint null,
+    stat_skipped_rows bigint null,
+    stat_error_rows bigint null,
+    stat_verified_rows bigint null
 );
+
+ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_job uuid NULL references eml_upload_leads_job(id); -- if not null, the lead was imported by a user
 
 create table if not exists eml_upload_leads_mapping (
     id uuid not null primary key,
-    id_upload_leads uuid not null references eml_upload_leads(id), -- who registered this account
+    id_upload_leads_job uuid not null references eml_upload_leads_job(id), -- who registered this account
     create_time timestamp not null, -- when registered this account
     colnum int not null, -- the column number
     field varchar(500) not null, -- the field name (fname, lname, cname, or any other name that will be used as merge-tag)
-    unique(id_upload_leads, colnum)
+    unique(id_upload_leads_job, colnum)
 );
 
 -- https://github.com/leandrosardi/emails/issues/31
@@ -48,13 +60,19 @@ create table if not exists eml_mta (
     id uuid not null primary key,
     id_user uuid not null references "user"(id),
     create_time timestamp not null,
+    -- connection parameters
     smtp_address varchar(500) not null,
     smtp_port int not null,
     imap_port int not null,
     imap_address varchar(500) not null,
+    -- connection parameters
     "authentication" varchar(500) not null,
     enable_starttls_auto boolean not null,
-    openssl_verify_mode varchar(500) not null
+    openssl_verify_mode varchar(500) not null,
+    -- parameters to process IMAP
+    inbox_label varchar(500) not null default 'Inbox',
+    spam_label varchar(500) not null default 'Spam',
+    search_all_wildcard varchar(500) not null default ''
 );
 
 --
@@ -69,9 +87,12 @@ create table IF NOT EXISTS eml_address (
     "address" varchar(500) not null, -- example: ceo123@gmail.com
     "password" varchar(500) not null, -- the password of the email account
     -- true if I am willing to rent this account to other users of the platform
-    shared boolean not null, -- 
+    shared boolean not null, 
     -- if address is allowed or not for sending emails
     "enabled" boolean not null, -- if the account is enabled
+    -- to process the inboxes, we need to know the last id processed
+    imap_inbox_last_id varchar(500) null,
+    imap_spam_last_id varchar(500) null,
     -- stealth
     max_deliveries_per_day int not null, -- how many emails per day can deliver
     delivery_interval_min_minutes int not null, -- how many minutes to wait between emails
@@ -85,7 +106,15 @@ create table IF NOT EXISTS eml_campaign (
     create_time timestamp not null, -- when registered this
     -- header settings
     "name" varchar(255) not null, -- name of the campaign
-    id_export uuid not null references fl_export(id) -- id of the export that will be used to send the emails
+    id_export uuid not null references fl_export(id), -- id of the export that will be used to send the emails
+    -- statistics of the campaign
+    stat_sents bigint not null, -- how many emails were sent
+    stat_opens bigint not null, -- how many emails were opened
+    stat_clicks bigint not null, -- how many emails were clicked
+    stat_replies bigint not null, -- how many emails were replied
+    stat_bounces bigint not null, -- how many emails were bounced
+    stat_unsubscribes bigint not null, -- how many emails were unsubscribed
+    stat_complaints bigint not null -- how many emails were complained
 );
 
 -- list of emails that will be sent by a campaign, based on rules
@@ -112,6 +141,7 @@ create table IF NOT EXISTS eml_followup (
     stat_sents bigint not null, -- how many emails were sent
     stat_opens bigint not null, -- how many emails were opened
     stat_clicks bigint not null, -- how many emails were clicked
+    stat_replies bigint not null, -- how many emails were replied
     stat_bounces bigint not null, -- how many emails were bounced
     stat_unsubscribes bigint not null, -- how many emails were unsubscribed
     stat_complaints bigint not null -- how many emails were complained    
@@ -186,7 +216,7 @@ create table IF NOT EXISTS eml_link (
 
 create table IF NOT EXISTS eml_job (
     id uuid not null primary key,
-    id_campaign uuid not null references eml_campaign(id), 
+    id_followup uuid not null references eml_followup(id), 
     create_time TIMESTAMP NOT NULL,
     delivery_start_time TIMESTAMP NULL,
     delivery_end_time TIMESTAMP NULL,
@@ -209,13 +239,28 @@ create table IF NOT EXISTS eml_delivery (
     delivery_start_time TIMESTAMP NULL,
     delivery_end_time TIMESTAMP NULL,
     delivery_success boolean null,
-    delivery_error_description varchar(8000) null
+    delivery_error_description varchar(8000) null,
+    -- one lead may have more than 1 email address, so I have to specify the email address to deliver the email to.
+    email varchar(500) not null,
+    "subject" varchar(8000) not null,
+    body text not null,
+    -- message_id of delivered email.
+    message_id varchar(500) null,
+    -- create a id_conversation for a delivery when it receives the first response.
+    id_conversation uuid null,
+    -- record responses from leads in the delivery table
+    is_response boolean not null default false,
+    -- deliveries from manually written emails need to register the id_user
+    id_user uuid references "user"(id) null,
+    -- deliveries from manually written emails need to register the id_address
+    id_address uuid references eml_address(id) null,
+    -- incoming messages (replies) include the name of the sender
+    "name" varchar(500) null,
+    -- track if an email is single email
+    is_single boolean not null default false,
+    -- record in in_reply_to for both: sent and received emails.
+    in_reply_to varchar(500) null
 );
-
--- one lead may have more than 1 email address, so I have to specify the email address to deliver the email to.
-alter table eml_delivery add column if not exists email varchar(500) not null;
-alter table eml_delivery add column if not exists subject varchar(8000) not null;
-alter table eml_delivery add column if not exists body text not null;
 
 create table IF NOT EXISTS eml_open (
     id uuid not null primary key,
@@ -250,14 +295,17 @@ create table IF NOT EXISTS eml_campaign_timeline (
     id uuid not null primary key,
     id_campaign uuid not null references eml_campaign(id), 
     create_time TIMESTAMP NOT NULL,
+    -- 
     year int not null,
     month int not null,
     day int not null,
     hour int not null,
     minute int not null,
+    -- stats
     stat_sents bigint not null,
     stat_opens bigint not null,
     stat_clicks bigint not null,
+    stat_replies bigint not null, -- how many emails were replied
     stat_bounces bigint not null,
     stat_unsubscribes bigint not null,
     stat_complaints bigint not null,
@@ -279,6 +327,7 @@ create table IF NOT EXISTS eml_address_timeline (
     stat_sents bigint not null,
     stat_opens bigint not null,
     stat_clicks bigint not null,
+    stat_replies bigint not null, -- how many emails were replied
     stat_bounces bigint not null,
     stat_unsubscribes bigint not null,
     stat_complaints bigint not null,
