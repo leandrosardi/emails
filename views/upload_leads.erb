@@ -1,3 +1,8 @@
+<%
+max_lines = 10000
+account = BlackStack::Leads::Account.where(:id=>@login.user.id_account).first
+%>
+
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
@@ -10,14 +15,74 @@
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span12 box">
-        <h3>CSV Parameters</h3>
+		<h3>Upload Leads</h3>
 		<p>Upload a CSV file with the following parameters:</p>
+		<br/>
 
-        <h3>CSV File</h3>
+		<p>Choose an Export List to Upload your Leads</p>
+		<select id="id_export">
+			<option value="">(Create New Export List)</option>
+			<%
+			account.exports.sort_by { |e| e.filename }.each do |export|
+				%>
+				<option value="<%=export.id%>"><%=export.filename.encode_html%></option>
+				<%
+			end
+			%>
+		</select>
+
+		<p>Write the name if the new Export List</p>
+		<input type="text" id="filename" placeholder="Filename" />
+
 		<p>Paste the CSV content here:</p>
-		<textarea id="csv_content" name="csv_content" class="span12" rows="10"></textarea>
-
-		<button id="btn_upload" class="btn btn-primary">Upload</button>
-		<a id="btn_cancel" class="btn" href='/emails/leads'>Cancel</a>
+		<textarea id="csv_content" name="csv_content" class="span12 select-all" rows="10"></textarea>
+		<div class="theCount">Lines: <span id="linesUsed">0</span> (max allowed: <%=max_lines.to_label%>) <div>
+		<br/>
+		<button id="upload" class="btn btn-primary">Upload</button>
+		<a id="cancel" class="btn" href='/emails/leads'>Cancel</a>
     </div>
 </section>
+
+<script>
+var lines = <%=max_lines.to_s%>;
+var linesUsed = $('#linesUsed');
+
+// enable or disable the input#filename if the select#id_export has chosen the (Create new Export List) option.
+function enableFilename() {
+	var id_export = $('#id_export').val();
+	if (id_export == '') {
+		$('#filename').removeAttr('disabled');
+		$('#filename').focus();
+	} else {
+		$('#filename').attr('disabled', 'disabled');
+	}
+}
+
+// validate the CSV content has not more than X lines
+function validateCSV() {
+	newLines = $('#csv_content').val().split("\n").length;
+	linesUsed.text(newLines);
+	if (newLines > lines) {
+		linesUsed.css('color', 'red');
+		$('#upload').attr('disabled', 'disabled');
+	} else {
+		linesUsed.css('color', 'green');
+		$('#upload').removeAttr('disabled');
+		$('#csv').focus();
+	}
+}
+
+$(document).ready(function(){
+    // validate CSV on any change on the textarea#csv_content
+	$('#csv_content').on('keyup keydown change', function(e) {
+		validateCSV()
+    });
+	// enable or disable the input#filename when select#id_export changes
+	$('#id_export').on('change', function(e) {
+		enableFilename();
+	});
+	// apply validations
+	validateCSV();
+	enableFilename();
+});
+</script>
