@@ -14,6 +14,8 @@ alter table fl_data add column if not exists verify_end_time timestamp null; -- 
 alter table fl_data add column if not exists verify_success boolean null; -- if the verification was successful
 alter table fl_data add column if not exists verify_error_description text null; -- if the verification was not successful, the error message
 
+alter table fl_data add column if not exists custom_field_name varchar(500) null; -- if the verification was not successful, the error message
+
 -- adapt cs-leads to allow user to upload his/her own leads
 create table if not exists eml_upload_leads_job (
     id uuid not null primary key,
@@ -49,10 +51,22 @@ create table if not exists eml_upload_leads_mapping (
     id uuid not null primary key,
     id_upload_leads_job uuid not null references eml_upload_leads_job(id), -- who registered this account
     create_time timestamp not null, -- when registered this account
-    colnum int not null, -- the column number
-    field varchar(500) not null, -- the field name (fname, lname, cname, or any other name that will be used as merge-tag)
+    column int not null, -- the column number
+    data_type int not null, -- the data type from Leads::FlData
+    custom_field_name varchar(500) not null, -- the name of the column for custom fields
     unique(id_upload_leads_job, colnum)
 );
+
+create table if not exists eml_upload_leads_row (
+    id uuid not null primary key,
+    id_upload_leads_job uuid not null references eml_upload_leads_job(id), -- who registered this account
+    line_number bigint not null, -- the line number
+    "line" varchar(8000) not null, -- the line content
+    import_success bool null, -- if null, then it is pending to be imported
+    import_error_description text null
+);
+
+--ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_line uuid NULL references eml_upload_leads_line(id); -- if not null, the lead was imported by a user
 
 -- https://github.com/leandrosardi/emails/issues/31
 -- register SMTP servers
@@ -139,6 +153,9 @@ create table IF NOT EXISTS eml_followup (
     sequence_number int not null, -- the order of the followup
     delay_days int not null, -- how many days to wait before sending the email, just after the rule has been raised
     --trigger_event int not null, -- 0 - email sent and don't reply, 1 - open and don't reply, 2 - click and don't reply, 3 - reply
+    -- statistics of the spintax variation
+    stat_subject_spintax_variations bigint not null, -- how many spintax variations can I get from the subject
+    stat_body_spintax_variations bigint not null, -- how many spintax variations can I get from the body
     -- statistics of the campaign
     stat_sents bigint not null, -- how many emails were sent
     stat_opens bigint not null, -- how many emails were opened
@@ -298,6 +315,8 @@ create table IF NOT EXISTS eml_unsubscribe (
 create table IF NOT EXISTS eml_campaign_timeline (
     id uuid not null primary key,
     id_campaign uuid not null references eml_campaign(id), 
+    id_job uuid not null references eml_job(id), 
+    id_followup uuid not null references eml_followup(id), 
     create_time TIMESTAMP NOT NULL,
     -- 
     year int not null,
@@ -313,7 +332,7 @@ create table IF NOT EXISTS eml_campaign_timeline (
     stat_bounces bigint not null,
     stat_unsubscribes bigint not null,
     stat_complaints bigint not null,
-    CONSTRAINT uk_timeline UNIQUE (id_campaign, year, month, day, hour, minute)
+    CONSTRAINT uk_timeline UNIQUE (id_campaign, id_job, id_followup, year, month, day, hour, minute)
 );
 
 -- timeline snapshot of deliveries.
@@ -348,6 +367,7 @@ create table IF NOT EXISTS eml_log (
     id_lead uuid not null references fl_lead(id),
     id_delivery uuid not null references eml_delivery(id), 
     id_job uuid not null references eml_job(id), 
+    id_followup uuid not null references eml_followup(id),
     id_campaign uuid not null references eml_campaign(id),
     lead_name varchar(8000) not null,
     planning_time timestamp not null, -- useful for for pending deliveries

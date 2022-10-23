@@ -17,15 +17,15 @@ get "/emails/login", :agent => /(.*)/ do
 end
 
 # internal app screens - leads upload
-get "/emails/leads/upload", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/upload_leads", :layout => :"/views/layouts/core"
+get "/emails/leads/uploads/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_upload_leads", :layout => :"/views/layouts/core"
 end
 
-get "/emails/leads/upload/matching", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/upload_leads_matching", :layout => :"/views/layouts/core"
+post "/emails/leads/uploads/new/matching", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/matching_upload_leads", :layout => :"/views/layouts/core"
 end
 
-get "/emails/leads/upload/jobs", :auth => true, :agent => /(.*)/ do
+get "/emails/leads/uploads", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/upload_leads_jobs", :layout => :"/views/layouts/core"
 end
 
