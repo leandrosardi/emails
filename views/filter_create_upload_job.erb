@@ -73,9 +73,9 @@ begin
         DB.disconnect
     }
 
-    redirect "/emails/leads/uploads/new?msg="+ CGI::escape("New Leads-Upload Job Created.")
+    redirect "/emails/leads/uploads?msg="+ CGI::escape("New Leads-Upload Job Created.")
 rescue => e
     # return errors
-    redirect "/emails/leads/uploads/new?err="+ CGI::escape(e.message)
+    redirect "/emails/leads/uploads?err="+ CGI::escape(e.message)
 end
 %>

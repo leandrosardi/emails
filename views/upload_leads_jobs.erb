@@ -5,7 +5,7 @@ all = "
     j.create_time,
     e.id as id_export,
     e.filename as filename,
-    j.import_success as imported, -- null: pending, false: failed, true: success
+    j.ingest_success as ingested, -- null: pending, false: failed, true: success
     j.stat_total_rows,
     j.stat_imported_rows, 
     --j.stat_skipped_rows,
@@ -80,7 +80,9 @@ q = "
       <thead>
         <th style='width:75px;'>Creation</th>
         <th style='width:auto;'>Export</th>
-        <th style='width:75px;'>Import</th> <!-- bulk or manual export ? -->
+        <!--
+        <th style='width:75px;'>Ingestion</th>
+        -->
         <th style='width:75px; text-align:right;'>Total<br/>Leads</th>
         <th style='width:75px; text-align:right;''>Imported<br/>Leads</th>
         <th style='width:75px; text-align:right;'>Failed<br/>Leads</th>
@@ -104,10 +106,12 @@ q = "
           <tr>
             <td class='fix'><%=row[:create_time].to_s[0..9].encode_html%></td>
             <td class='fix'><a href='/emails/leads?id_export=<%=row[:id_export].to_guid%>'><%=row[:filename].to_s.encode_html%></td>
-            <td class='fix'><%=row[:import_success].nil? ? "<span class='badge badge-gray' title='It is pending to import the rows into the database.'>pending</span>" : ( row[:import_success] ? "<span class='badge badge-green' title='Imported'>done</span>" : "<span class='badge badge-red' title='Import Failed'>error</span>" )%></td>
-            <td class='fix' style='text-align:right;'><%=row[:import_success] && !row[:stat_total_rows].nil? ? row[:stat_total_rows].to_i.to_label : '-'%></td>
-            <td class='fix' style='text-align:right;'><%=row[:import_success] && !row[:stat_imported_rows].nil? ? row[:stat_imported_rows].to_i.to_label : '-'%></td>
-            <td class='fix' style='text-align:right;'><%=row[:import_success] && !row[:stat_error_rows].nil? ? row[:stat_error_rows].to_i.to_label : '-'%></td>
+            <!--
+            <td class='fix'><%=row[:ingest_success].nil? ? "<span class='badge badge-gray' title='It is pending to ingested the rows into the database.'>pending</span>" : ( row[:ingest_success] ? "<span class='badge badge-green' title='Imported'>done</span>" : "<span class='badge badge-red' title='Import Failed'>error</span>" )%></td>
+            -->
+            <td class='fix' style='text-align:right;'><%=row[:ingest_success] && !row[:stat_total_rows].nil? ? row[:stat_total_rows].to_i.to_label : '-'%></td>
+            <td class='fix' style='text-align:right;'><%=row[:ingest_success] && !row[:stat_imported_rows].nil? ? row[:stat_imported_rows].to_i.to_label : '-'%></td>
+            <td class='fix' style='text-align:right;'><%=row[:ingest_success] && !row[:stat_error_rows].nil? ? row[:stat_error_rows].to_i.to_label : '-'%></td>
             <td class='fix' style='text-align:right;'><%=progress%>%</td>
           </tr>
           <%

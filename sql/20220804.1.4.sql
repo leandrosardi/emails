@@ -30,22 +30,18 @@ create table if not exists eml_upload_leads_job (
     -- the content of the file
     content text not null, 
     -- import status
-    import_reservation_id uuid null, -- if not null, the import is in progress
-    import_reservation_times int null, -- how many times the import was reserved
-    import_reservation_time timestamp null, -- when the import was reserved
-    import_start_time timestamp null, -- when the import started
-    import_end_time timestamp null, -- when the import ended
-    import_success boolean null, -- if the import was successful
-    import_error_description text null, -- if the import was not successful, the error message
+    ingest_reservation_id uuid null, -- if not null, the import is in progress
+    ingest_reservation_times int null, -- how many times the import was reserved
+    ingest_reservation_time timestamp null, -- when the import was reserved
+    ingest_start_time timestamp null, -- when the import started
+    ingest_end_time timestamp null, -- when the import ended
+    ingest_success boolean null, -- if the import was successful
+    ingest_error_description text null, -- if the import was not successful, the error message
     -- stats
     stat_total_rows bigint null,
     stat_imported_rows bigint null,
-    stat_skipped_rows bigint null,
-    stat_error_rows bigint null,
-    stat_verified_rows bigint null
+    stat_error_rows bigint null
 );
-
-ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_job uuid NULL references eml_upload_leads_job(id); -- if not null, the lead was imported by a user
 
 create table if not exists eml_upload_leads_mapping (
     id uuid not null primary key,
@@ -63,14 +59,23 @@ create table if not exists eml_upload_leads_row (
     line_number bigint not null, -- the line number
     "line" varchar(8000) not null, -- the line content
     -- import status
-    mapping_reservation_id uuid null, -- if not null, the import is in progress
-    mapping_reservation_times int null, -- how many times the import was reserved
-    mapping_reservation_time timestamp null, -- when the import was reserved
-    mapping_start_time timestamp null, -- when the import started
-    mapping_end_time timestamp null, -- when the import ended
-    mapping_success boolean null, -- if the import was successful
-    mapping_error_description text null -- if the import was not successful, the error message
+    import_reservation_id uuid null, -- if not null, the import is in progress
+    import_reservation_times int null, -- how many times the import was reserved
+    import_reservation_time timestamp null, -- when the import was reserved
+    import_start_time timestamp null, -- when the import started
+    import_end_time timestamp null, -- when the import ended
+    import_success boolean null, -- if the import was successful
+    import_error_description text null -- if the import was not successful, the error message
 );
+
+create table if not exists eml_upload_leads_row_aux (
+    id uuid null,
+    id_upload_leads_job uuid null, -- who registered this account
+    line_number bigint null, -- the line number
+    "line" varchar(8000) not null -- the line content
+);
+
+ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_job uuid NULL references eml_upload_leads_job(id); -- if not null, the lead was imported by a user
 
 ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_row uuid NULL references eml_upload_leads_row(id); -- if not null, the lead was imported by a user
 

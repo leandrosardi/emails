@@ -27,6 +27,24 @@ module BlackStack
         def self.mergetags
             @@mergetags
         end
+
+        # return true if the domain get any random address as valid
+        def self.catch_all?(domain)
+            EmailVerifier.config do |config|
+                config.verifier_email = "leandro.sardi@expandedventure.com"
+            end
+            EmailVerifier.check("#{guid}@#{domain}")
+        end
+
+        # verify an email address
+        def self.verify(email)
+            domain = email.split('@').last
+            EmailVerifier.config do |config|
+                config.verifier_email = "leandro.sardi@expandedventure.com"
+            end
+            EmailVerifier.check(email) && !BlackStack::Omnivore.catch_all?(domain)
+        end
+
 # Removed because of https://github.com/leandrosardi/emails/issues/31
 =begin
         # GoogleConfig module
