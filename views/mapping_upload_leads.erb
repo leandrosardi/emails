@@ -30,8 +30,10 @@ end
 	<div class="span12 box">
 		<h3>Upload Leads</h3>
 		<p>Setup the mapping of columns from your CSV to our Database:</p>
-		<br/>
 
+		<br/>
+		<br/>
+		<p><b>Export Lists</b>: <%= id_export.to_s.empty? ? "#{filename.encode_html} <i style='color:green;'>(new)</i>" : Leads::FlExport.where(:id=>id_export).first.filename.encode_html %></p>
 		<form method='post' action='/emails/filter_create_upload_job'>
 			<table class="table">
 				<tr>

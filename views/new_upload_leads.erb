@@ -25,7 +25,7 @@ csv_content = @login.user.preference('emails.leads.upload.csv_content', '', para
 
 		<form method='post' action='/emails/leads/uploads/mapping'>
 			<p>Choose an Export List to Upload your Leads</p>
-			<select id="id_export">
+			<select id="id_export" name="id_export">
 				<option value="" <%=id_export.to_s.empty? ? 'selected' : ''%>>(Create New Export List)</option>
 				<%
 				account.exports.sort_by { |e| e.filename }.each do |export|
@@ -37,7 +37,7 @@ csv_content = @login.user.preference('emails.leads.upload.csv_content', '', para
 			</select>
 
 			<p>Write the name if the new Export List</p>
-			<input type="text" id="filename" placeholder="Filename" value='<%=filename.encode_html%>' />
+			<input type="text" id="filename" name="filename" placeholder="Filename" value='<%=filename.encode_html%>' />
 
 			<p>Paste the CSV content here: <i>(tab separated)</i></p>
 			<textarea id="csv_content" name="csv_content" class="span12 select-all" rows="10"><%=csv_content.encode_html%></textarea>
