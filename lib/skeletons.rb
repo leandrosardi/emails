@@ -17,4 +17,5 @@ require 'extensions/emails/models/skeleton/delivery'
 require 'extensions/emails/models/skeleton/job'
 require 'extensions/emails/models/skeleton/link'
 require 'extensions/emails/models/skeleton/user'
+
 require 'extensions/emails/models/skeleton/account'

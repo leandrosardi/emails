@@ -5,6 +5,6 @@ module BlackStack
             many_to_one :campaign, :class=>:'BlackStack::Emails::Campaign', :key=>:id_campaign
             
 
-        end # class UploadLeadsJob
+        end # class Schedule
     end # Emails
 end # BlackStack

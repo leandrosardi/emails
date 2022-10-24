@@ -38,9 +38,11 @@ while (true)
     l.logf "done (#{rows.size})"
 
     # number of columns that each line must have
-    l.logs "Get number of columns that each line must have... "
-    colcount = rows[0].split("\t").size
-    l.logf "done (#{colcount})"
+    if rows.size > 0
+        l.logs "Get number of columns that each line must have... "
+        colcount = rows[0].line.split("\t").size
+        l.logf "done (#{colcount})"
+    end
 
     # for each row
     rows.each { |row|
@@ -53,7 +55,7 @@ while (true)
         begin
             # import row
             l.logs "Import row... "
-            row.import(l)
+            row.import(colcount, l)
             l.done
 
             # update eml_upload_leads_job
@@ -65,7 +67,7 @@ while (true)
             row.save
             l.done    
         rescue => e
-            l.logf "error (#{e.message})"
+            l.logf "error: #{e.to_console}"
 
             row.import_success = false
             row.import_error_description = e.message

@@ -51,6 +51,7 @@ BlackStack::Extensions::add ({
                 gem install --no-document net-imap -v 0.2.3;
                 gem install --no-document email_reply_parser -v 0.5.10;
                 gem install --no-document csv -v 3.2.2;
+                gem install --no-document verify_email_addresses -v 0.1.0;
             ",
             :sudo => true,
         }],

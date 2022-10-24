@@ -3,6 +3,7 @@ require 'mail'
 require 'net/imap'
 require 'csv'
 require 'email_reply_parser'
+require 'email_verifier'
 
 module BlackStack
     module Emails
@@ -42,7 +43,7 @@ module BlackStack
             EmailVerifier.config do |config|
                 config.verifier_email = "leandro.sardi@expandedventure.com"
             end
-            EmailVerifier.check(email) && !BlackStack::Omnivore.catch_all?(domain)
+            EmailVerifier.check(email) && !BlackStack::Emails.catch_all?(domain)
         end
 
 # Removed because of https://github.com/leandrosardi/emails/issues/31
