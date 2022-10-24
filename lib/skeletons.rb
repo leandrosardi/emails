@@ -8,6 +8,7 @@ require 'extensions/emails/models/skeleton/outreach'
 
 require 'extensions/emails/models/skeleton/uploadleadsjob'
 require 'extensions/emails/models/skeleton/uploadleadsmapping'
+require 'extensions/emails/models/skeleton/uploadleadsrow'
 
 require 'extensions/emails/models/skeleton/click'
 require 'extensions/emails/models/skeleton/open'

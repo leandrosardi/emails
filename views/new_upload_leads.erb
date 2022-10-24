@@ -90,5 +90,13 @@ $(document).ready(function(){
 	// apply validations
 	validateCSV();
 	enableFilename();
+	// select all on focus on #filename
+	$('#filename').on('focus', function(e) {
+		$(this).select();
+	});
+	// select all on focus on #csv_content
+	$('#csv_content').on('focus', function(e) {
+		$(this).select();
+	});
 });
 </script>

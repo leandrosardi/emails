@@ -26,7 +26,7 @@ post "/emails/leads/uploads/mapping", :auth => true, :agent => /(.*)/ do
 end
 
 post "/emails/filter_create_upload_job", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/filter_create_upload_job", :layout => :"/views/layouts/core"
+    erb :"/extensions/emails/views/filter_create_upload_job"
 end
 
 get "/emails/leads/uploads", :auth => true, :agent => /(.*)/ do
