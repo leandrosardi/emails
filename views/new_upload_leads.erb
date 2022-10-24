@@ -1,13 +1,17 @@
 <%
 max_lines = 10000
 account = BlackStack::Leads::Account.where(:id=>@login.user.id_account).first
+
+id_export = @login.user.preference('emails.leads.upload.id_export', '', params[:id_export])
+filename = @login.user.preference('emails.leads.upload.filename', '', params[:filename])
+csv_content = @login.user.preference('emails.leads.upload.csv_content', '', params[:csv_content])
 %>
 
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span12">
-			<%=nav3("Emails", "/emails", "Leads", "/emails/leads", "Upload")%>
+		<%=nav4("Emails", "/emails", "Leads", "/emails/leads", "Uploads", "/emails/leads/uploads", "New")%>
 		</div>
 	</section>
 </div>
@@ -19,28 +23,30 @@ account = BlackStack::Leads::Account.where(:id=>@login.user.id_account).first
 		<p>Upload a CSV file with the following parameters:</p>
 		<br/>
 
-		<p>Choose an Export List to Upload your Leads</p>
-		<select id="id_export">
-			<option value="">(Create New Export List)</option>
-			<%
-			account.exports.sort_by { |e| e.filename }.each do |export|
-				%>
-				<option value="<%=export.id%>"><%=export.filename.encode_html%></option>
+		<form method='post' action='/emails/leads/uploads/mapping'>
+			<p>Choose an Export List to Upload your Leads</p>
+			<select id="id_export">
+				<option value="" <%=id_export.to_s.empty? ? 'selected' : ''%>>(Create New Export List)</option>
 				<%
-			end
-			%>
-		</select>
+				account.exports.sort_by { |e| e.filename }.each do |export|
+					%>
+					<option value="<%=export.id%>" <%=id_export.to_s==export.id.to_guid ? 'selected' : ''%>><%=export.filename.encode_html%></option>
+					<%
+				end
+				%>
+			</select>
 
-		<p>Write the name if the new Export List</p>
-		<input type="text" id="filename" placeholder="Filename" />
+			<p>Write the name if the new Export List</p>
+			<input type="text" id="filename" placeholder="Filename" value='<%=filename.encode_html%>' />
 
-		<p>Paste the CSV content here:</p>
-		<textarea id="csv_content" name="csv_content" class="span12 select-all" rows="10"></textarea>
-		<div class="theCount">Lines: <span id="linesUsed">0</span> (max allowed: <%=max_lines.to_label%>) <div>
-		<br/>
-		<button id="upload" class="btn btn-primary">Upload</button>
-		<a id="cancel" class="btn" href='/emails/leads'>Cancel</a>
-    </div>
+			<p>Paste the CSV content here: <i>(tab separated)</i></p>
+			<textarea id="csv_content" name="csv_content" class="span12 select-all" rows="10"><%=csv_content.encode_html%></textarea>
+			<div class="theCount">Lines: <span id="linesUsed">0</span> (max allowed: <%=max_lines.to_label%>) <div>
+			<br/>
+			<button id="upload" class="btn btn-primary">Upload</button>
+			<a id="cancel" class="btn" href='/emails/leads'>Cancel</a>
+		</form>
+	</div>
 </section>
 
 <script>

@@ -1,6 +1,7 @@
 require "fileutils"
 require 'mail'
 require 'net/imap'
+require 'csv'
 require 'email_reply_parser'
 
 module BlackStack

@@ -21,12 +21,20 @@ get "/emails/leads/uploads/new", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_upload_leads", :layout => :"/views/layouts/core"
 end
 
-post "/emails/leads/uploads/new/matching", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/matching_upload_leads", :layout => :"/views/layouts/core"
+post "/emails/leads/uploads/mapping", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/mapping_upload_leads", :layout => :"/views/layouts/core"
+end
+
+post "/emails/filter_create_upload_job", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/filter_create_upload_job", :layout => :"/views/layouts/core"
 end
 
 get "/emails/leads/uploads", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/upload_leads_jobs", :layout => :"/views/layouts/core"
+end
+
+get "/emails/leads/uploads/:id", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/upload_leads_job", :layout => :"/views/layouts/core"
 end
 
 # internal app screens - campaigns
