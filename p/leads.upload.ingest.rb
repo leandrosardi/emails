@@ -29,7 +29,7 @@ BlackStack::Extensions.append :i2p
 BlackStack::Extensions.append :leads
 BlackStack::Extensions.append :emails
 
-l = BlackStack::LocalLogger.new('./import.ingest.log')
+l = BlackStack::LocalLogger.new('./leads.upload.ingest.log')
 
 while (true)
     # active jobs, pending pending of ingestion
