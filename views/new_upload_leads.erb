@@ -39,7 +39,7 @@ csv_content = @login.user.preference('emails.leads.upload.csv_content', '', para
 			<p>Write the name if the new Export List</p>
 			<input type="text" id="filename" name="filename" placeholder="Filename" value='<%=filename.encode_html%>' />
 
-			<p>Paste the CSV content here: <i>(tab separated)</i></p>
+			<p>Paste the CSV content here: <i style='color:blue;'>(tab separated)</i></p>
 			<textarea id="csv_content" name="csv_content" class="span12 select-all" rows="10"><%=csv_content.encode_html%></textarea>
 			<div class="theCount">Lines: <span id="linesUsed">0</span> (max allowed: <%=max_lines.to_label%>) <div>
 			<br/>
