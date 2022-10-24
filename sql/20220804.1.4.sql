@@ -51,10 +51,10 @@ create table if not exists eml_upload_leads_mapping (
     id uuid not null primary key,
     id_upload_leads_job uuid not null references eml_upload_leads_job(id), -- who registered this account
     create_time timestamp not null, -- when registered this account
-    column int not null, -- the column number
+    "column" int not null, -- the column number
     data_type int not null, -- the data type from Leads::FlData
     custom_field_name varchar(500) not null, -- the name of the column for custom fields
-    unique(id_upload_leads_job, colnum)
+    unique(id_upload_leads_job, "column")
 );
 
 create table if not exists eml_upload_leads_row (
@@ -62,11 +62,17 @@ create table if not exists eml_upload_leads_row (
     id_upload_leads_job uuid not null references eml_upload_leads_job(id), -- who registered this account
     line_number bigint not null, -- the line number
     "line" varchar(8000) not null, -- the line content
-    import_success bool null, -- if null, then it is pending to be imported
-    import_error_description text null
+    -- import status
+    mapping_reservation_id uuid null, -- if not null, the import is in progress
+    mapping_reservation_times int null, -- how many times the import was reserved
+    mapping_reservation_time timestamp null, -- when the import was reserved
+    mapping_start_time timestamp null, -- when the import started
+    mapping_end_time timestamp null, -- when the import ended
+    mapping_success boolean null, -- if the import was successful
+    mapping_error_description text null -- if the import was not successful, the error message
 );
 
---ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_line uuid NULL references eml_upload_leads_line(id); -- if not null, the lead was imported by a user
+ALTER TABLE fl_lead ADD COLUMN IF NOT EXISTS id_upload_leads_row uuid NULL references eml_upload_leads_row(id); -- if not null, the lead was imported by a user
 
 -- https://github.com/leandrosardi/emails/issues/31
 -- register SMTP servers
@@ -171,8 +177,7 @@ create table IF NOT EXISTS eml_followup (
     planning_start_time timestamp null,
     planning_end_time timestamp null,
     planning_success boolean null,
-    planning_error_description varchar(8000) null
- 
+    planning_error_description varchar(8000) null 
 );
 
 alter table eml_followup add column if not exists stat_positive_replies bigint not null;
