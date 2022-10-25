@@ -25,8 +25,8 @@ post "/emails/leads/uploads/mapping", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/mapping_upload_leads", :layout => :"/views/layouts/core"
 end
 
-post "/emails/filter_create_upload_job", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/filter_create_upload_job"
+post "/emails/filter_new_upload_job", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_new_upload_job"
 end
 
 get "/emails/leads/uploads", :auth => true, :agent => /(.*)/ do
@@ -53,9 +53,44 @@ end
 get "/emails/campaigns/:gid/:report", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
 end
-=begin
+
+get "emails/campaigns/:id/schedules/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_schedule", :layout => :"/views/layouts/core"
+end
+get "emails/campaigns/:id/schedules/:sid/edit", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/edit_schedule", :layout => :"/views/layouts/core"
+end
+post "emails/filter_new_schedule", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_new_schedule"
+end
+get "emails/filter_delete_schedule", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_delete_schedule"
+end
+post "emails/filter_edit_schedule", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_edit_schedule"
+end
+
+get "emails/campaigns/:id/followups/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_followup", :layout => :"/views/layouts/core"
+end
+get "emails/campaigns/:id/followups/:fid/edit", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/edit_followup", :layout => :"/views/layouts/core"
+end
+post "emails/filter_new_followup", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_new_followup"
+end
+get "emails/filter_delete_followup", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_delete_followup"
+end
+post "emails/filter_edit_followup", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_edit_followup"
+end
+
 get "/emails/campaigns/:gid/sent", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign?report=sents", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/replies", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=replies", :layout => :"/views/layouts/core"
 end
 get "/emails/campaigns/:gid/opens", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign?report=opens", :layout => :"/views/layouts/core"
@@ -66,7 +101,7 @@ end
 get "/emails/campaigns/:gid/unsubscribes", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign?report=unsubscribes", :layout => :"/views/layouts/core"
 end
-=end
+
 get "/emails/addresses", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/addresses", :layout => :"/views/layouts/core"
 end

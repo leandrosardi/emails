@@ -2,6 +2,15 @@ module BlackStack
     module Emails
         # inherit from BlackStack::MySaaS::Account
         class Account < BlackStack::MySaaS::Account
+
+            # return array of Tag objects, each one linked to this account thru the table user.
+            def tags
+                self.users.map{ |u|
+                    BlackStack::Emails::User.where(:id=>u.id).first.tags
+                }.flatten
+            end
+
+            # return array of MTA objects, each one linked to this account thru the table user.
             def mtas
                 self.users.map{ |u|
                     BlackStack::Emails::User.where(:id=>u.id).first.mtas

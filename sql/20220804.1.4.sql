@@ -125,6 +125,22 @@ create table IF NOT EXISTS eml_address (
     unique("address")
 );
 
+create table IF NOT EXISTS eml_tag (
+    id uuid not null primary key,
+    id_user uuid not null references "user"(id), -- who registered this account
+    create_time timestamp not null, -- when registered this account
+    "name" varchar(500) not null -- the name of the tag    
+);
+
+create table IF NOT EXISTS eml_address_tag (
+    id uuid not null primary key,
+    id_user uuid not null references "user"(id), -- who registered this account
+    create_time timestamp not null, -- when registered this account
+    id_address uuid not null references eml_address(id), -- the email address
+    id_tag uuid not null references eml_tag(id), -- the tag
+    unique(id_address, id_tag)
+);
+
 create table IF NOT EXISTS eml_campaign (
     id uuid not null primary key,
     id_user uuid not null references "user"(id), -- who registered this

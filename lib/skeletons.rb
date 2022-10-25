@@ -1,6 +1,9 @@
 require 'extensions/emails/models/skeleton/address'
 require 'extensions/emails/models/skeleton/mta'
 
+require 'extensions/emails/models/skeleton/tag'
+require 'extensions/emails/models/skeleton/addresstag'
+
 require 'extensions/emails/models/skeleton/campaign'
 require 'extensions/emails/models/skeleton/followup'
 require 'extensions/emails/models/skeleton/schedule'

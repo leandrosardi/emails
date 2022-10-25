@@ -61,7 +61,17 @@ module BlackStack
                 t = self.total_deliveries
                 t == 0 ? 0 : ((self.stat_sents.to_f / t.to_f) * 100.to_f).to_i
             end
-            
+
+            def replies_ratio
+                t = self.stat_sents
+                t == 0 ? 0 : ((self.stat_replies.to_f / t.to_f) * 100.to_f).to_i
+            end
+
+            def positive_replies_ratio
+                t = self.stat_sents
+                t == 0 ? 0 : ((self.stat_positive_replies.to_f / t.to_f) * 100.to_f).to_i
+            end
+
             def opens_ratio
                 t = self.stat_sents
                 t == 0 ? 0 : ((self.stat_opens.to_f / t.to_f) * 100.to_f).to_i

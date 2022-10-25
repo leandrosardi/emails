@@ -3,12 +3,18 @@ module BlackStack
         class Address < Sequel::Model(:eml_address)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
             many_to_one :mta, :class=>:'BlackStack::Emails::Mta', :key=>:id_mta
+            one_to_many :addresstags, :class=>:'BlackStack::Emails::AddressTag', :key=>:id_address
 
             # types
             TYPE_GMAIL = 0
             TYPE_YAHOO = 1 # pending to develop
             TYPE_OUTLOOK = 2 # pending to develop
             TYPE_GENERIC = 3 # generic MTA
+
+            # return array of Tag object, each one linked to this account thru the table eml_address_tag
+            def tags
+                self.addresstags.map { |at| at.tag }
+            end
 
             # return array of valid types for an address
             def self.types

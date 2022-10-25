@@ -26,6 +26,10 @@ q = "
 		<div class="span6">
 		    <%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", name)%>
 		</div>
+		<div class="span6" style='text-align:right;'>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/schedules/new'><i class='icon-calendar'></i> Add Schedule</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/followups/new'><i class='icon-envelope'></i> Add FollowUp</a>
+		</div>
 	</section>
 </div>
 
