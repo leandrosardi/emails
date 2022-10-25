@@ -38,7 +38,7 @@ q = "
         a.max_deliveries_per_day,
         a.delivery_interval_min_minutes,
         a.delivery_interval_max_minutes
-    order by a.address
+    order by a.create_time desc
 "
 %>
 
@@ -134,8 +134,8 @@ q = "
 
         <div>
             <form action="/emails/filter_edit_addresses" method="post">
-                <input type="text" id="selected_ids" name='selected_ids' class='selected-ids' value='<%=selected_ids.to_s%>'>
-                <input type="text" id="tags_selected" name='tags_selected' value='<%=tags_selected.to_s%>'>
+                <input type="hidden" id="selected_ids" name='selected_ids' class='selected-ids' value='<%=selected_ids.to_s%>'>
+                <input type="hidden" id="tags_selected" name='tags_selected' value='<%=tags_selected.to_s%>'>
                 <div class="radio">
                     <label>
                         <input type="checkbox" class='enable-input' data-input='max_deliveries_per_day' id="edit_max_deliveries_per_day" name="edit_max_deliveries_per_day" <%=edit_max_deliveries_per_day ? 'checked' : ''%>> 

@@ -195,6 +195,13 @@ get "/emails/filter_edit_address", :auth => true do
     erb :"/extensions/emails/views/filter_edit_address"
 end
 
+post "/emails/filter_edit_addresses", :auth => true do
+    erb :"/extensions/emails/views/filter_edit_addresses"
+end
+get "/emails/filter_edit_addresses", :auth => true do
+    erb :"/extensions/emails/views/filter_edit_addresses"
+end
+
 get "/emails/filter_delete_address", :auth => true do
     erb :"/extensions/emails/views/filter_delete_address"
 end

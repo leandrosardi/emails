@@ -121,7 +121,7 @@ module BlackStack
                 self.password = h[:password]
                 self.shared = h[:shared] || false
                 self.max_deliveries_per_day = h[:max_deliveries_per_day] || 50
-                self.enabled = h[:enabled] || true
+                self.enabled = h[:enabled] || false
                 self.max_deliveries_per_day = h[:max_deliveries_per_day] || 10
                 self.delivery_interval_min_minutes = h[:delivery_interval_min_minutes] || 5
                 self.delivery_interval_max_minutes = h[:delivery_interval_max_minutes] || 15

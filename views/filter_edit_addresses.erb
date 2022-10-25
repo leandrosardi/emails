@@ -1,0 +1,23 @@
+<%
+edit_max_deliveries_per_day = @login.user.preference('emails.addresses.edit_max_deliveries_per_day', false, paras[:edit_max_deliveries_per_day])
+edit_delivery_interval_min_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_min_minutes', false, paras[:edit_delivery_interval_min_minutes])
+edit_delivery_interval_max_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_max_minutes', false, paras[:edit_delivery_interval_max_minutes])
+edit_tags = @login.user.preference('emails.addresses.edit_tags', false, paras[:edit_tags])
+
+max_deliveries_per_day = @login.user.preference('emails.addresses.max_deliveries_per_day', 10, paras[:max_deliveries_per_day])
+delivery_interval_min_minutes = @login.user.preference('emails.addresses.delivery_interval_min_minutes', 5, paras[:delivery_interval_min_minutes])
+delivery_interval_max_minutes = @login.user.preference('emails.addresses.delivery_interval_max_minutes', 15, paras[:delivery_interval_max_minutes])
+
+selected_ids = @login.user.preference('emails.addresses.selected_ids', '', paras[:selected_ids])
+tags_selected = @login.user.preference('emails.addresses.tags_selected', '', paras[:tags_selected])
+
+err = []
+begin
+    
+    # return
+    redirect "/emails/addresses?msg="+ CGI::escape('Addresses updated.')
+rescue => e
+    # return errors
+    redirect "/emails/addresses?err="+ CGI::escape(e.message)
+end
+%>
