@@ -1,4 +1,17 @@
 <%
+edit_max_deliveries_per_day = @login.user.preference('emails.addresses.edit_max_deliveries_per_day', false, nil)
+edit_delivery_interval_min_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_min_minutes', false, nil)
+edit_delivery_interval_max_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_max_minutes', false, nil)
+edit_tags = @login.user.preference('emails.addresses.edit_tags', false, nil)
+
+max_deliveries_per_day = @login.user.preference('emails.addresses.max_deliveries_per_day', 10, nil)
+delivery_interval_min_minutes = @login.user.preference('emails.addresses.delivery_interval_min_minutes', 5, nil)
+delivery_interval_max_minutes = @login.user.preference('emails.addresses.delivery_interval_max_minutes', 15, nil)
+tags = @login.user.preference('emails.addresses.tags', '', nil)
+
+# existing tags 
+account_tags = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first.tags
+
 q = "
     select 
         a.id, 
@@ -6,10 +19,23 @@ q = "
         a.shared,
         a.enabled,
         a.create_time,
-        a.max_deliveries_per_day
+        a.max_deliveries_per_day,
+        a.delivery_interval_min_minutes,
+        a.delivery_interval_max_minutes,
+        a.stat_tags
     from eml_address a
+    left join eml_address_tag at on at.id_address = a.id
     join \"user\" u on ( u.id_account='#{@login.user.id_account}' and u.id=a.id_user )
     where a.delete_time is null
+    group by
+        a.id, 
+        a.address, 
+        a.shared,
+        a.enabled,
+        a.create_time,
+        a.max_deliveries_per_day,
+        a.delivery_interval_min_minutes,
+        a.delivery_interval_max_minutes
     order by a.address
 "
 %>
@@ -22,6 +48,7 @@ q = "
 		</div>
 		<div class="span6" style='text-align:right;'>
 		    <a class='btn btn-blue' href='/emails/addresses/new'><i class='icon-plus'></i> Add</a>
+            <button type="button" class="btn btn-blue" data-toggle="modal" id='open_edit_addresses_modal' data-target=".edit_addresses" title='Edit Selected Addresses'><i class='icon-pencil'></i> Edit</button>
 		</div>
 	</section>
 </div>
@@ -31,11 +58,15 @@ q = "
 	<div class="span12 box">
         <table class="table table-striped" style="table-layout: fixed; width: 100%;">
             <thead>
+                <th style="width:24px;"><input type='checkbox' class='select-all-rows'></th>
                 <th style="width:auto;">Address</th>
                 <th style="width:90px;">Creation</th>
-                <th style="width:60px;">Shared</th>
-                <th style="width:60px;">Enabled</th>
-                <th style="width:60px;text-align:right;">Deliveries<br/>Per Day</th>
+                <th style="width:50px;">Shared</th>
+                <th style="width:50px;">Enabled</th>
+                <th style="width:70px;text-align:right;">Tags</th>
+                <th style="width:50px;text-align:right;">Daily<br/>Quota</th>
+                <th style="width:50px;text-align:right;">Min.<br/>Minutes</th>
+                <th style="width:50px;text-align:right;">Max.<br/>Minutes</th>
                 <th style="width:24px;"><!-- edit --></th>
                 <th style="width:24px;"><!-- delete --></th>
             </thead>
@@ -50,11 +81,23 @@ q = "
                     color2 = row[:enabled] ? "green" : "gray"
                 %>
                 <tr>
+                    <th><input type='checkbox' class='select-row' data-id='<%=row[:id].to_guid%>' /></th>
                     <td class="fix" title="<%=row[:address].to_s.encode_html%>"><a href='/emails/addresses/<%=row[:id].to_guid%>/edit'><%=row[:address].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:create_time].to_s.encode_html%>"><%=row[:create_time].to_s[0..9]%></td>
                     <td class="fix" title="<%=shared%>"><span class='badge badge-<%=color%>'><%=shared%></span></td>
                     <td class="fix" title="<%=enabled%>"><span class='badge badge-<%=color2%>'><%=enabled%></span></td>
+                    <td class="fix" style="text-align:right;" title="<%=row[:tags].to_i.to_label%>">
+                        <%
+                        row[:stat_tags].to_s.split(",").each do |tag|
+                            %>
+                            <span class='badge badge-blue'><%=tag.encode_html%></span>
+                            <%
+                        end
+                        %>
+                    </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:max_deliveries_per_day].to_i.to_label%>"><%=row[:max_deliveries_per_day].to_i.to_label%></td>
+                    <td class="fix" style="text-align:right;" title="<%=row[:delivery_interval_min_minutes].to_i.to_label%>"><%=row[:delivery_interval_min_minutes].to_i.to_label%></td>
+                    <td class="fix" style="text-align:right;" title="<%=row[:delivery_interval_max_minutes].to_i.to_label%>"><%=row[:delivery_interval_max_minutes].to_i.to_label%></td>
                     <td class="fix" style="text-align:right;"><a title='Edit' href='/emails/addresses/<%=row[:id].to_guid%>/edit'><i class='icon-pencil'></i></a></td>
                     <td class="fix" style="text-align:right;"><a title='Delete' href='/emails/filter_delete_address?aid=<%=row[:id].to_guid%>'><i class='icon-trash'></i></a></td>
                 </tr>
@@ -76,3 +119,138 @@ q = "
         </table>
     </div>
 </section>
+
+<!-- Modal Exports Leads-->
+<div class="modal fade edit_addresses" >
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Edit Addresses</h3>
+    </div>
+
+    <div class="modal-body">
+        <p>Check the Parameters you Want to Edit.</p>
+
+        <div>
+            <form action="/emails/filter_edit_addresses" method="post">
+                <input type="text" id="selected-ids" name='selected-ids' class='selected-ids'>
+                <input type="text" id="tags_selected" name='tags_selected'>
+                <div class="radio">
+                    <label>
+                        <input type="checkbox" class='enable-input' data-input='max_deliveries_per_day' id="edit_max_deliveries_per_day" name="edit_max_deliveries_per_day" <%=edit_max_deliveries_per_day ? 'checked' : ''%>> 
+                        Max. Deliveries Per Day 
+                        <input type="number" class='select-all-on-focus' id="max_deliveries_per_day" name="max_deliveries_per_day" placeholder="Write a number here." value='<%=max_deliveries_per_day.to_i.to_s%>' />
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="checkbox" class='enable-input' data-input='delivery_interval_min_minutes' id="edit_delivery_interval_min_minutes" name="edit_delivery_interval_min_minutes" <%=edit_delivery_interval_min_minutes ? 'checked' : ''%>> 
+                        Min. Minutes Between Deliveries
+                        <input type="number" class='select-all-on-focus' id="delivery_interval_min_minutes" name="delivery_interval_min_minutes" placeholder="Write a number here." value='<%=delivery_interval_min_minutes.to_i.to_s%>' />
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="checkbox" class='enable-input' data-input='delivery_interval_max_minutes'  id="edit_delivery_interval_max_minutes" name="edit_delivery_interval_max_minutes" <%=edit_delivery_interval_max_minutes ? 'checked' : ''%>> 
+                        Max. Minutes Between Deliveries 
+                        <input type="number" class='select-all-on-focus' id="delivery_interval_max_minutes" name="delivery_interval_max_minutes" placeholder="Write a number here." value='<%=delivery_interval_max_minutes.to_i.to_s%>' />
+                    </label>
+                </div>
+            </form>
+
+            <div class="radio">
+                <label>
+                    <input type="checkbox" class='enable-input' data-input='keyword'  id="edit_tags" name="edit_tags" <%=edit_tags ? 'checked' : ''%>> 
+                    Tags <div id='tags_container'></div>
+                </label>
+            </div>
+
+
+        </div>    
+    </div>
+    <div class="modal-footer">
+        <a href="#" data-dismiss="modal" class="btn btn-close">Close</a>
+        <button type="submit" id="edit_addresses" class="btn btn-primary">Save</button>
+    </div>
+</div>
+
+<script>
+    var tags_container = document.getElementById('tags_container');
+
+    // for a checkbox .enable-input, enable or disable the inbout with the id in its field data-input, if such a checkbox is checked or unchecked.
+    function enableInput(chk, focus=false) {
+        if ($(chk).is(':checked')) {
+            $('#' + $(chk).data('input')).removeAttr('disabled');
+            if (focus==true) {
+                $('#' + $(chk).data('input')).focus();
+            }
+        } else {
+            $('#' + $(chk).data('input')).attr('disabled', 'disabled');
+        }
+    }
+
+    // for each checkbox .enable-input, enable or disable the inbout with the id in its field data-input, if such a checkbox is checked or unchecked.
+    function enableInputs() {
+        $('.enable-input').each(function() {
+            enableInput(this);
+        });
+    }
+
+    // update the hidden field with id tags_selected with the list of tags in the input filterJs tags_container
+    function update_hidden_fields() {
+        let i = 0; 
+        let s = '';
+        filtersJs.getPositiveValues(tags_container).forEach(function(value) {
+            if (i>0) { s += ','; }
+            s += value.trim();
+            i++;
+        });
+        $('#tags_selected').val(s);      
+    }
+
+    $(document).ready(function() {
+        enableSelectRows({
+            afterCallback: function() {
+                // do nothing
+            },
+        });
+
+        // enable or disable inputs when checkboxes are checked or unchecked
+        $('.enable-input').change(function() {
+            enableInput(this, true);
+        });
+
+        // use filtersjs to draw a filter of tags in element with id tags
+        filtersJs.draw(tags_container, {
+            label: '',
+            allowed_positive_keywords: true, // default value: true
+            allowed_negative_keywords: false, // default value: false
+            allowed_values: [
+              <%=account_tags.size == 0 ? '' : "'"+account_tags.map { |t| t.name }.join("', '")+"'"%>
+            ],
+            // catch event: update hidden textfield when filter is changed    
+            on_add_value: function (value) {
+              update_hidden_fields();
+            },
+            // catch event: update hidden textfield when filter is changed    
+            on_remove_value: function (value) {
+              update_hidden_fields();
+            },
+        });
+      
+        // add tags to the filter
+        <%
+        tags.split(",").each { |tag|
+        %>
+            filtersJs.addValue(tags, '<%=tag%>', true)
+        <%
+        }
+        %>
+
+        // enable or disable inputs
+        enableInputs();
+
+        // hide modals when show the page
+        // use the .hide() method, in order to don't get the modal blocking other elements behind them.
+        $('.edit_addresses').hide();
+    });
+</script>

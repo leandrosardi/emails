@@ -141,6 +141,8 @@ create table IF NOT EXISTS eml_address_tag (
     unique(id_address, id_tag)
 );
 
+alter table eml_address add column if not exists stat_tags varchar(8000) null;
+
 create table IF NOT EXISTS eml_campaign (
     id uuid not null primary key,
     id_user uuid not null references "user"(id), -- who registered this
