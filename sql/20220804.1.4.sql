@@ -405,3 +405,6 @@ alter table eml_address drop column if exists max_emails_per_hour;
 
 -- enable or disable accounts
 alter table eml_address add column if not exists "enabled" boolean not null default true;
+
+-- correction: CSV content is stored in the storage folder of the account.
+alter table eml_upload_leads_job drop column if exists content;

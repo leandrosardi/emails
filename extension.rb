@@ -36,6 +36,7 @@ BlackStack::Extensions::add ({
     # add a folder to the storage from where user can download the exports.
     :storage_folders => [
         { :name => 'emails.pictures', },
+        { :name => 'emails.leads.uploads', },
         # removed becuase of the issue https://github.com/leandrosardi/emails/issues/31
         #{ :name => 'emails.google.tokens', },
     ],

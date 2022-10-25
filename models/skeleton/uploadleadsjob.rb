@@ -23,8 +23,14 @@ module BlackStack
 
                 # TODO: vaidate the file has not more than `batchsize` lines.
 
-                # TODO: Do work on the remaining files & directories
-                crdbpath = '........' # self.name.gsub(BlackStack::Omnivore.crdb_node_folder, '')    
+                log.logs "Upload CSV to CRDB Cloud..."
+                command = "cockroach userfile upload #{self.user.account.storage_sub_folder('emails.leads.uploads')}/#{self.id.to_guid}.csv /#{self.id.to_guid}.csv --url \"#{BlackStack::CRDB.connection_string}\""
+puts
+puts
+puts command
+exit(0)
+                res = `#{command}`
+                log.logs res
 
                 # import all files to the database,
                 # making the 3 queries below in a single transaction.
@@ -32,7 +38,7 @@ module BlackStack
                 log.logs "Ingesting file..."
                 DB.execute("
                     truncate table eml_upload_leads_row_aux;
-                    import into eml_upload_leads_row_aux (\"line\") DELIMITED data('nodelocal://1/#{crdbpath.to_sql}') with fields_terminated_by=E'\\b', fields_enclosed_by='';
+                    import into eml_upload_leads_row_aux (\"line\") DELIMITED data('userfile:///#{self.id.to_guid}.csv') with fields_terminated_by=E'\\b', fields_enclosed_by='';
                     update eml_upload_leads_row_aux set id=gen_random_uuid(), id_upload_leads_job='#{self.id.to_sql}';
                     insert into eml_upload_leads_row (id, id_upload_leads_job, \"line\") select id, id_file, value from eml_upload_leads_row_aux;
                     truncate table eml_upload_leads_row_aux;

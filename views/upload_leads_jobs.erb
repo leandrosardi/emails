@@ -60,11 +60,13 @@ q = "
   </section>
   <section class='span6'>
     <form action="/emails/leads/uploads" method="get">
+      <a class="btn btn-blue btn-medium pull-right" href='/emails/leads/uploads/new'>
+        <i class='icon-cloud-upload'></i> Upload
+      </a>  
       <div class="pull-right">
         <div class="span8">
           <input type='text' class='input-block-level select-all-on-focus' id='name' name='name' value='<%=filter_search%>'/>
         </div>
-
         <button class="btn btn-blue btn-medium btn-submit" style="margin-left: 2px;" type="submit" onclick="">
           <i class='icon-search'></i> Search
         </button>

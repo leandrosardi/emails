@@ -38,12 +38,12 @@ while (true)
     l.logf "done (#{jobs.size})"
 
     # for each job
-    jobs.each { |job|
+    jobs.each { |j|
         # 
         j.ingest_start_time = now
         j.save
         # 
-        job.ingest(l)
+        j.ingest(l)
         # 
         j.ingest_end_time = now
         j.save
