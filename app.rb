@@ -114,8 +114,8 @@ get "/emails/addresses/new/gmail", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_gmail_address", :layout => :"/views/layouts/core"
 end
 
-get "/emails/addresses/new/outlook", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/new_outlook_address", :layout => :"/views/layouts/core"
+get "/emails/addresses/new/hotmail", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_hotmail_address", :layout => :"/views/layouts/core"
 end
 
 get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do

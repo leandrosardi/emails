@@ -1,3 +1,11 @@
+<%
+# load preferences
+first_name = @login.user.preference('emails.address.gmail.new.first_name', '', nil)
+last_name = @login.user.preference('emails.address.gmail.new.last_name', '', nil)
+address = @login.user.preference('emails.address.gmail.new.address', '', nil)
+password = @login.user.preference('emails.address.gmail.new.password', '', nil)
+%>
+
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
@@ -56,12 +64,17 @@
             <input type='hidden' name='spam_label' value='[Gmail]/Spam' />
             <input type='hidden' name='search_all_wildcard' value='*' />
 
+            <p>First Name</p>
+            <input class='input input-block-level' type="text" id="first_name" name='first_name' placeholder="Example: John" value='<%=first_name%>' /><br/>
+
+            <p>Last Name</p>
+            <input class='input input-block-level' type="text" id="last_name" name='last_name' placeholder="Example: Connor" value='<%=last_name%>' /><br/>
 
             <p>Email Address</p>
-            <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='' /><br/>
+            <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='<%=address%>' /><br/>
 
             <p>App Password</p>
-            <input class='input input-block-level' type="text" id="password" name='password' placeholder="Example: atdzebbqlslovjxt" value='' /><br/>
+            <input class='input input-block-level' type="text" id="password" name='password' placeholder="Example: atdzebbqlslovjxt" value='<%=password%>' /><br/>
 
             <button type="submit" class="btn btn-blue">Submit</button>
         </form>

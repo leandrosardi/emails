@@ -8,7 +8,7 @@ module BlackStack
             # types
             TYPE_GMAIL = 0
             TYPE_YAHOO = 1 # pending to develop
-            TYPE_OUTLOOK = 2 # pending to develop
+            TYPE_HOTMAIL = 2 # pending to develop
             TYPE_GENERIC = 3 # generic MTA
 
             # return array of Tag object, each one linked to this account thru the table eml_address_tag
@@ -18,7 +18,7 @@ module BlackStack
 
             # return array of valid types for an address
             def self.types
-                [TYPE_GMAIL, TYPE_YAHOO, TYPE_OUTLOOK, TYPE_GENERIC]
+                [TYPE_GMAIL, TYPE_YAHOO, TYPE_HOTMAIL, TYPE_GENERIC]
             end
 
             # return a descriptive string for a type
@@ -28,7 +28,7 @@ module BlackStack
                     'Gmail'
                 when TYPE_YAHOO
                     'Yahoo'
-                when TYPE_OUTLOOK
+                when TYPE_HOTMAIL
                     'Hotmail'
                 when TYPE_GENERIC
                     'Generic'
@@ -56,6 +56,10 @@ module BlackStack
                     errors << 'id_mta is mandatory' unless h[:id_mta]
                     # validate: type is mandatory
                     errors << 'type is mandatory' unless h[:type]
+                    # validate: first_name is mandatory
+                    errors << 'first_name is mandatory' unless h[:first_name]
+                    # validate: last_name is mandatory
+                    errors << 'last_name is mandatory' unless h[:last_name]
                     # validate: address is mandatory
                     errors << 'address is mandatory' unless h[:address]
                     # validate: password is mandatory
@@ -111,11 +115,16 @@ module BlackStack
                 self.id_user = h[:id_user]
                 self.id_mta = h[:id_mta]
                 self.type = h[:type].to_i
+                self.first_name = h[:first_name]
+                self.last_name = h[:last_name]
                 self.address = h[:address]
                 self.password = h[:password]
                 self.shared = h[:shared] || false
                 self.max_deliveries_per_day = h[:max_deliveries_per_day] || 50
                 self.enabled = h[:enabled] || true
+                self.max_deliveries_per_day = h[:max_deliveries_per_day] || 10
+                self.delivery_interval_min_minutes = h[:delivery_interval_min_minutes] || 5
+                self.delivery_interval_max_minutes = h[:delivery_interval_max_minutes] || 15
             end
 
             # update object from a hash descriptor

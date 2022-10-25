@@ -1,8 +1,16 @@
+<%
+# load preferences
+first_name = @login.user.preference('emails.address.hotmail.new.first_name', '', nil)
+last_name = @login.user.preference('emails.address.hotmail.new.last_name', '', nil)
+address = @login.user.preference('emails.address.hotmail.new.address', '', nil)
+password = @login.user.preference('emails.address.hotmail.new.password', '', nil)
+%>
+
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span12">
-    		<%=nav4("Emails", "/emails", "Addresses", "/emails/addresses", "New", "/emails/addresses/new", "Outlook")%>
+    		<%=nav4("Emails", "/emails", "Addresses", "/emails/addresses", "New", "/emails/addresses/new", "Hotmail")%>
 		</div>
 	</section>
 </div>
@@ -10,11 +18,11 @@
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span6 box">            
-        <h3>Steps to Add a Outlook Address</h3>
+        <h3>Steps to Add a Hotmail Address</h3>
 
         <p>An app password is a long, randomly generated password that you provide only once instead of your regular password when signing in to an app or device</p>
 
-        <p>Follow the steps below to get a <b>app password</b> for your Outlook address.</p>
+        <p>Follow the steps below to get a <b>app password</b> for your Hotmail address.</p>
 
         <p><b>Step 1:</b> Go <a href='https://outlook.live.com/mail/0/options/mail/accounts' target='_window'>here</a>, enable POP3 and save changes.</p>
 
@@ -32,7 +40,7 @@
 
 	<div class="span6 box">            
         <form method='post' action='/emails/filter_new_address'>
-            <h3>Add a Outlook Address</h3>
+            <h3>Add a Hotmail Address</h3>
 
             <!-- common paramaters --!>
             <input type='hidden' name='id_user' value='<%=@login.id_user%>' />
@@ -48,17 +56,23 @@
             <input type='hidden' name='openssl_verify_mode' value='<%=OpenSSL::SSL::VERIFY_NONE%>' />
             
             <!-- address regarding paramaters --!>
-            <input type='hidden' name='type' value='<%=BlackStack::Emails::Address::TYPE_OUTLOOK.to_s%>' />
+            <input type='hidden' name='type' value='<%=BlackStack::Emails::Address::TYPE_HOTMAIL.to_s%>' />
 
             <input type='hidden' name='inbox_label' value='Inbox' />
             <input type='hidden' name='spam_label' value='Junk' />
             <input type='hidden' name='search_all_wildcard' value='' />
 
+            <p>First Name</p>
+            <input class='input input-block-level' type="text" id="first_name" name='first_name' placeholder="Example: John" value='<%=first_name%>' /><br/>
+
+            <p>Last Name</p>
+            <input class='input input-block-level' type="text" id="last_name" name='last_name' placeholder="Example: Connor" value='<%=last_name%>' /><br/>
+
             <p>Email Address</p>
-            <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='' /><br/>
+            <input class='input input-block-level' type="text" id="address" name='address' placeholder="Example: my_name@gmail.com" value='<%=address%>' /><br/>
 
             <p>App Password</p>
-            <input class='input input-block-level' type="text" id="password" name='password' placeholder="Example: atdzebbqlslovjxt" value='' /><br/>
+            <input class='input input-block-level' type="text" id="password" name='password' placeholder="Example: atdzebbqlslovjxt" value='<%=password%>' /><br/>
 
             <button type="submit" class="btn btn-blue">Submit</button>
         </form>

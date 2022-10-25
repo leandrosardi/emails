@@ -1,4 +1,4 @@
-# This example is about sending emails using Outlook's SMTP.
+# This example is about sending emails using Hotmail's SMTP.
 #
 # Follow the steps below to generate a 2-step authentication token in your Gmail account.
 # 

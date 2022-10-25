@@ -1,4 +1,4 @@
-# This example is about grabbing Outlooks's Inbox using IMAP.
+# This example is about grabbing Hotmails's Inbox using IMAP.
 #
 # 
 # Step 1. Access here and get both: IMAP and SMTP connection parameters.
