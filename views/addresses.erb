@@ -7,7 +7,9 @@ edit_tags = @login.user.preference('emails.addresses.edit_tags', false, nil)
 max_deliveries_per_day = @login.user.preference('emails.addresses.max_deliveries_per_day', 10, nil)
 delivery_interval_min_minutes = @login.user.preference('emails.addresses.delivery_interval_min_minutes', 5, nil)
 delivery_interval_max_minutes = @login.user.preference('emails.addresses.delivery_interval_max_minutes', 15, nil)
-tags = @login.user.preference('emails.addresses.tags', '', nil)
+
+selected_ids = @login.user.preference('emails.addresses.selected_ids', '', nil)
+tags_selected = @login.user.preference('emails.addresses.tags_selected', '', nil)
 
 # existing tags 
 account_tags = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first.tags
@@ -128,12 +130,12 @@ q = "
     </div>
 
     <div class="modal-body">
-        <p>Check the Parameters you Want to Edit.</p>
+        <p><i class='icon-info-sign'></i> Check the Parameters you Want to Edit.</p>
 
         <div>
             <form action="/emails/filter_edit_addresses" method="post">
-                <input type="text" id="selected-ids" name='selected-ids' class='selected-ids'>
-                <input type="text" id="tags_selected" name='tags_selected'>
+                <input type="text" id="selected_ids" name='selected_ids' class='selected-ids' value='<%=selected_ids.to_s%>'>
+                <input type="text" id="tags_selected" name='tags_selected' value='<%=tags_selected.to_s%>'>
                 <div class="radio">
                     <label>
                         <input type="checkbox" class='enable-input' data-input='max_deliveries_per_day' id="edit_max_deliveries_per_day" name="edit_max_deliveries_per_day" <%=edit_max_deliveries_per_day ? 'checked' : ''%>> 
@@ -160,7 +162,7 @@ q = "
             <div class="radio">
                 <label>
                     <input type="checkbox" class='enable-input' data-input='keyword'  id="edit_tags" name="edit_tags" <%=edit_tags ? 'checked' : ''%>> 
-                    Tags <div id='tags_container'></div>
+                    Tags - <i class='icon-warning-sign'></i> Current tags will be removed from selected addresses <div id='tags_container'></div>
                 </label>
             </div>
 
@@ -239,15 +241,18 @@ q = "
       
         // add tags to the filter
         <%
-        tags.split(",").each { |tag|
+        tags_selected.split(",").each { |tag|
         %>
-            filtersJs.addValue(tags, '<%=tag%>', true)
+            filtersJs.addValue(tags_container, '<%=tag%>', true)
         <%
         }
         %>
 
         // enable or disable inputs
         enableInputs();
+
+        // update the hidden fields of the form.
+        update_hidden_fields();
 
         // hide modals when show the page
         // use the .hide() method, in order to don't get the modal blocking other elements behind them.
