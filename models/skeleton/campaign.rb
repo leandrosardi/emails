@@ -6,6 +6,39 @@ module BlackStack
             one_to_many :followups, :class=>"BlackStack::Emails::Followup", :key=>:id_campaign
             one_to_many :schedules, :class=>"BlackStack::Emails::Schedule", :key=>:id_campaign
             one_to_many :outreaches, :class=>"BlackStack::Emails::Outreach", :key=>:id_campaign
+            
+            # statuses of email campaigns: draft, sent, etc.
+            STATUS_ON = 1
+            STATUS_OFF = 2
+
+            # statuses of email campaigns: draft, sent, etc.
+            def self.statuses
+                [STATUS_ON, STATUS_OFF]
+            end
+
+            # can edit if there is not any followup who can't edit
+            def can_edit?
+                self.followups.select { |f| !f.can_edit? }.first.nil?
+            end
+
+            # if is ON if any followup is ON
+            def status
+                self.followups.select { |f| !f.status == BlackStack::Emails::FollowUp::STATUS_ON }.first.nil? ? STATUS_OFF : STATUS_ON
+            end 
+
+            # if is ON if any followup is ON
+            def status_name
+                self.status == STATUS_ON ? 'on' : 'off'
+            end
+
+            def status_color
+                case self.status
+                when STATUS_ON
+                    'green'
+                when STATUS_OFF
+                    'gray'
+                end
+            end
 
             # leads in the export list.
             # note that may exist leads added after the campaign planning.

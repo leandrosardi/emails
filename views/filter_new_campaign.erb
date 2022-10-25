@@ -3,39 +3,17 @@ err = []
 begin
     # map parameters
     name = params[:name]
-    subject = params[:subject]
-    replyto = params[:replyto]
-    fromname = params[:fromname]
     id_export = params[:id_export]
-    body = params[:body]
 
     # load preferences
     @login.user.preference('emails.campaign.new.name', '', name)
-    @login.user.preference('emails.campaign.new.subject', '', subject)
-    @login.user.preference('emails.campaign.new.replyto', '', replyto)
-    @login.user.preference('emails.campaign.new.body', '', body)
     @login.user.preference('emails.campaign.new.id_export', '', id_export)
 
     # validate: the name is not empty
     err << "Name is required." if name.empty?
 
-    # valdiate: the subject is not empty
-    err << "Subject is required." if subject.empty?
-
-    # validate: the replyto is not empty
-    #err << "Reply-To is required." if replyto.empty?
-
-    # validate: the fromname is not empty
-    err << "From Name is required." if fromname.empty?
-
     # validate: the id_export is not empty
     err << "Export is required." if id_export.empty?
-
-    # validate: the body is not empty
-    err << "Body is required." if body.empty?
-
-    # validate: if replyto is not empty, it must be a valid email address
-    err << "Reply-To is not a valid email address." if !replyto.empty? && !replyto.email?
 
     # if any error happened, return to the edition screen
     raise err.join("\n") if err.size > 0
@@ -47,54 +25,15 @@ begin
     o.create_time = now
     o.name = name
     o.id_export = id_export
-    o.subject = subject
-    o.body = body
-    o.from_email = '' # not neccessary when working with gmail accounts
-    o.from_name = fromname
-    o.reply_to = replyto
-    o.type = BlackStack::Emails::Campaign::TYPE_HTML
-    o.status = BlackStack::Emails::Campaign::STATUS_DRAFT
     # stats
+    o.stat_replies = 0
+    o.stat_positive_replies = 0
     o.stat_sents = 0
     o.stat_opens = 0
     o.stat_clicks = 0
     o.stat_bounces = 0
     o.stat_unsubscribes = 0
     o.stat_complaints = 0
-    # schedule
-    o.schedule_start_time = now
-    o.schedule_hour_0 = true
-    o.schedule_hour_1 = true
-    o.schedule_hour_2 = true
-    o.schedule_hour_3 = true
-    o.schedule_hour_4 = true
-    o.schedule_hour_5 = true
-    o.schedule_hour_6 = true
-    o.schedule_hour_7 = true
-    o.schedule_hour_8 = true
-    o.schedule_hour_9 = true
-    o.schedule_hour_10 = true
-    o.schedule_hour_11 = true
-    o.schedule_hour_12 = true
-    o.schedule_hour_13 = true
-    o.schedule_hour_14 = true
-    o.schedule_hour_15 = true
-    o.schedule_hour_16 = true
-    o.schedule_hour_17 = true
-    o.schedule_hour_18 = true
-    o.schedule_hour_19 = true
-    o.schedule_hour_20 = true
-    o.schedule_hour_21 = true
-    o.schedule_hour_22 = true
-    o.schedule_hour_23 = true
-    o.schedule_day_0 = true
-    o.schedule_day_1 = true
-    o.schedule_day_2 = true
-    o.schedule_day_3 = true
-    o.schedule_day_4 = true
-    o.schedule_day_5 = true
-    o.schedule_day_6 = true
-    o.schedule_day_7 = true
     # save
     o.save
 

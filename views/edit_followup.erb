@@ -1,0 +1,146 @@
+<%
+# load preferences
+gid = params[:gid]
+o = BlackStack::Emails::Campaign.where(:id=>gid).first
+name = o.name
+id_export = o.id_export
+# put fields in readonly mode ?
+disabled = o.can_edit? ? '' : 'disabled'
+%>
+
+<%
+q = "
+    select 
+        e.id as id,
+        e.filename as filename
+    from fl_export e
+    join \"user\" u on (u.id=e.id_user and u.id_account='#{@login.user.id_account}')
+    --where e.delete_time is null
+    order by e.filename
+"
+%>
+
+<!-- NavBar -->
+<div class="mynavbar mysticky">
+	<section class="row-fluid">	
+		<div class="span6">
+		    <%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", name)%>
+		</div>
+		<div class="span6" style='text-align:right;'>
+            <%
+            if o.can_play?
+                %>
+                <a class="btn btn-green" href='/emails/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
+                <%
+            elsif o.can_pause?
+                %>
+                <a class="btn btn-gray" href='/emails/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Pause</a>
+                <%
+            end
+            %>
+		    <a class='btn btn-blue' href='/emails/campaigns/new'><i class='icon-plus'></i> New</a>
+		</div>
+	</section>
+</div>
+
+<!-- Single Panel -->
+<section class="row-fluid">
+	<div class="span12 box">
+		<form method='post' action='/emails/filter_edit_campaign' class="form-horizontal">
+            <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
+
+            <div class="control-group">
+                <label class="control-label" for="status"><b>Status</b></label>
+                <div class="controls">
+                    <span class='badge badge-<%=o.status_color%>'><%=o.status_name%></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="name">Name</label>
+                <div class="controls">
+                    <input type="text" id="name" name='name' placeholder="Name" value='<%=name.to_s.encode_html%>' />
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="export">Export List</label>
+                <div class="controls">
+                    <select type="text" id="id_export" name='id_export' placeholder="Export List" <%=disabled%> >
+                        <option value=''></option>
+                        <%
+                        DB[q].each { |row|
+                            selected = id_export.to_s == row[:id].to_s ? "selected" : ""
+                            %>
+                            <option value='<%=row[:id].to_s.to_guid%>' <%=selected%>><%=row[:filename].to_s.encode_html%></option>
+                            <%
+                            GC.start
+                            DB.disconnect
+                        }
+                        %>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <button type="submit" class="btn btn-blue">Save</button>
+                    <%
+                    if o.can_play?
+                        %>
+                        <a class="btn btn-green" href='/emails/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
+                        <%
+                    elsif o.can_pause?
+                        %>
+                        <a class="btn btn-gray" href='/emails/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Pause</a>
+                        <%
+                    end
+                    %>
+                    <a class="btn btn-gray" href='/emails/filter_test_campaign?gid=<%=gid%>' title='You will receive a test email in your inbox <%=@login.user.email.encode_html%>'><i class='icon-envelope'></i> Send Test Email to Me</a>
+                </div>
+            </div>
+        </form>
+	</div>
+</section>
+
+<script> 
+    tinymce.init({
+        selector: '#body',
+        plugins: "emoticons hr image link lists table", 
+        toolbar: "undo redo | bold italic image emoticons | formatgroup paragraphgroup insertgroup | <%=BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.join(' ')%>",
+        autosave_restore_when_empty: false,
+        toolbar_groups: {
+            formatgroup: {
+                icon: 'format',
+                tooltip: 'Formatting',
+                items: 'bold italic underline strikethrough | forecolor backcolor | superscript subscript | removeformat'
+            },
+            paragraphgroup: {
+                icon: 'paragraph',
+                tooltip: 'Paragraph format',
+                items: 'h1 h2 h3 | bullist numlist | alignleft aligncenter alignright | indent outdent'
+            },
+            insertgroup: {
+                icon: 'plus',
+                tooltip: 'Insert',
+                items: 'link image emoticons hr'
+            }
+        },
+        skin: 'outside',
+        toolbar_location: 'bottom',
+        menubar: false,
+        statusbar: false,
+        readonly: <%=o.can_edit? ? 'false' : 'true'%>,
+        setup: function (editor) {
+            <%
+            BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.each { |tag|
+                %>
+                editor.ui.registry.addButton('<%=tag%>', {
+                    text: '{<%=tag%>}',
+                    onAction: function (_) {
+                        editor.insertContent('{<%=tag%>}');
+                    }
+                });
+                <%
+            }
+            %>
+        },
+    });
+</script>
