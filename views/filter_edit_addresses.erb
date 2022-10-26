@@ -20,54 +20,48 @@ begin
     # validation: there is one or more ids
     errs << 'No addresses selected' if ids.empty?
 
+    # if tags exist, they must have alpha chars only
+    errs << 'Tags must have alpha chars only' if !tags.empty? && !tags.all?{|t| t.match(/^[a-zA-Z]+$/i)}
 
     # validation: if edit_max_deliveries_per_day is 'on', then max_deliveries_per_day must a number
-    errs << 'Max deliveries per day must be a number' if edit_max_deliveries_per_day && max_deliveries_per_day.to_i.to_s != max_deliveries_per_day
+#    errs << 'Max deliveries per day must be a number' if edit_max_deliveries_per_day && max_deliveries_per_day.to_i.to_s != max_deliveries_per_day
 
     # validation: if edit_delivery_interval_min_minutes is 'on', then delivery_interval_min_minutes must a number
-    errs << 'Delivery interval min minutes must be a number' if edit_delivery_interval_min_minutes && delivery_interval_min_minutes.to_i.to_s != delivery_interval_min_minutes
+#    errs << 'Delivery interval min minutes must be a number' if edit_delivery_interval_min_minutes && delivery_interval_min_minutes.to_i.to_s != delivery_interval_min_minutes
 
     # validation: if edit_delivery_interval_max_minutes is 'on', then delivery_interval_max_minutes must a number
-    errs << 'Delivery interval max minutes must be a number' if edit_delivery_interval_max_minutes && delivery_interval_max_minutes.to_i.to_s != delivery_interval_max_minutes
-
+#    errs << 'Delivery interval max minutes must be a number' if edit_delivery_interval_max_minutes && delivery_interval_max_minutes.to_i.to_s != delivery_interval_max_minutes
 
     # validation: if edit_max_deliveries_per_day is 'on', then max_deliveries_per_day must equal or greater than 0
     errs << 'Max deliveries per day must be equal or greater than 0' if edit_max_deliveries_per_day && max_deliveries_per_day.to_i < 0
 
     # validation: if edit_delivery_interval_min_minutes is 'on', then delivery_interval_min_minutes must equal or greater than 0
-    errs << 'Delivery interval min minutes must be equal or greater than 0' if edit_delivery_interval_min_minutes && delivery_interval_min_minutes.to_i < 0
+    errs << '"Interval min minutes" must be equal or greater than 0' if edit_delivery_interval_min_minutes && delivery_interval_min_minutes.to_i < 0
 
     # validation: if edit_delivery_interval_max_minutes is 'on', then delivery_interval_max_minutes must equal or greater than 0
-    errs << 'Delivery interval max minutes must be equal or greater than 0' if edit_delivery_interval_max_minutes && delivery_interval_max_minutes.to_i < 0
+    errs << '"Interval max minutes" must be equal or greater than 0' if edit_delivery_interval_max_minutes && delivery_interval_max_minutes.to_i < 0
 
 
     # validation: if edit_delivery_interval_min_minutes is 'on', then delivery_interval_min_minutes must equal or less than 1440
-    errs << 'Delivery interval min minutes must be equal or less than 1440' if edit_delivery_interval_min_minutes && delivery_interval_min_minutes.to_i > 1440
+    errs << '"Interval min minutes" must be equal or less than 1440' if edit_delivery_interval_min_minutes && delivery_interval_min_minutes.to_i > 1440
 
     # validation: if edit_delivery_interval_max_minutes is 'on', then delivery_interval_max_minutes must equal or less than 1440
-    errs << 'Delivery interval max minutes must be equal or less than 1440' if edit_delivery_interval_max_minutes && delivery_interval_max_minutes.to_i > 1440
+    errs << '"Interval max minutes" must be equal or less than 1440' if edit_delivery_interval_max_minutes && delivery_interval_max_minutes.to_i > 1440
 
 
     # validation: if edit_delivery_interval_min_minutes is 'on', then delivery_interval_min_minutes must equal or less than delivery_interval_max_minutes
-    errs << 'Delivery interval min minutes must be equal or less than delivery interval max minutes' if edit_delivery_interval_min_minutes && edit_delivery_interval_max_minutes && delivery_interval_min_minutes.to_i > delivery_interval_max_minutes.to_i
+    errs << '"Interval min minutes" must be equal or less than "Interval max minutes"' if edit_delivery_interval_min_minutes && edit_delivery_interval_max_minutes && delivery_interval_min_minutes.to_i > delivery_interval_max_minutes.to_i
 
 
     # validation: if edit_delivery_interval_min_minutes is 'on', then edit_delivery_interval_max_minutes must be 'on'
-    errs << 'Delivery interval max minutes must be on if delivery interval min minutes is on' if edit_delivery_interval_min_minutes && edit_delivery_interval_max_minutes != 'on'
+    errs << '"Interval max minutes" is required if "Interval min minutes" is specified' if edit_delivery_interval_min_minutes && !edit_delivery_interval_max_minutes
 
     # validation: if edit_delivery_interval_max_minutes is 'on', then edit_delivery_interval_min_minutes must be 'on'
-    errs << 'Delivery interval min minutes must be on if delivery interval max minutes is on' if edit_delivery_interval_max_minutes && edit_delivery_interval_min_minutes != 'on'
-
-
-    # validation: if edit_delivery_interval_min_minutes is NOT 'on', then edot_delivery_interval_max_minutes must be NOT 'on'
-    errs << 'Delivery interval max minutes must be off if delivery interval min minutes is off' if edit_delivery_interval_min_minutes != 'on' && edit_delivery_interval_max_minutes
-
-    # validation: if edit_delivery_interval_max_minutes is NOT 'on', then edit_delivery_interval_min_minutes must be NOT 'on'
-    errs << 'Delivery interval min minutes must be off if delivery interval max minutes is off' if edit_delivery_interval_max_minutes != 'on' && edit_delivery_interval_min_minutes
+    errs << '"Interval min minutes" is required if "Interval max minutes" is specified' if edit_delivery_interval_max_minutes && !edit_delivery_interval_min_minutes
 
 
     # if any error happneed, the raise them
-#   raise errs.join('<br/>') unless errs.empty?
+   raise errs.join(".\n") unless errs.empty?
 
     # building the query
     q = "UPDATE eml_address SET "

@@ -11,6 +11,9 @@ delivery_interval_max_minutes = @login.user.preference('emails.addresses.deliver
 selected_ids = @login.user.preference('emails.addresses.selected_ids', '', nil)
 tags_selected = @login.user.preference('emails.addresses.tags_selected', '', nil)
 
+ids = selected_ids.split(',')
+tags = tags_selected.split(',')
+
 # existing tags 
 account_tags = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first.tags
 
@@ -80,10 +83,10 @@ q = "
                     shared = row[:shared] ? "Yes" : "No"
                     color = row[:shared] ? "blue" : "gray"
                     enabled = row[:enabled] ? "Yes" : "No"
-                    color2 = row[:enabled] ? "green" : "gray"
+                    color2 = row[:enabled] ? "green" : "gray"                    
                 %>
                 <tr>
-                    <th><input type='checkbox' class='select-row' data-id='<%=row[:id].to_guid%>' /></th>
+                    <th><input type='checkbox' class='select-row' data-id='<%=row[:id].to_guid%>' <%=ids.include?(row[:id].to_guid) ? 'checked' : ''%> /></th>
                     <td class="fix" title="<%=row[:address].to_s.encode_html%>"><a href='/emails/addresses/<%=row[:id].to_guid%>/edit'><%=row[:address].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:create_time].to_s.encode_html%>"><%=row[:create_time].to_s[0..9]%></td>
                     <td class="fix" title="<%=shared%>"><span class='badge badge-<%=color%>'><%=shared%></span></td>
@@ -92,7 +95,7 @@ q = "
                         <%
                         row[:stat_tags].to_s.split(",").each do |tag|
                             %>
-                            <span class='badge badge-blue'><%=tag.encode_html%></span>
+                            <span class='badge badge-<%=BlackStack::Emails::Tag.color(tag)%>'><%=tag.encode_html%></span>
                             <%
                         end
                         %>
