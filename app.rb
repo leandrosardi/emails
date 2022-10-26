@@ -63,9 +63,6 @@ end
 get "/emails/filter_delete_schedule", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/filter_delete_schedule"
 end
-post "/emails/filter_edit_schedule", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/filter_edit_schedule"
-end
 
 
 get "/emails/campaigns/:gid/followups", :auth => true, :agent => /(.*)/ do

@@ -7,44 +7,21 @@ daynames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'S
 
 q = "
     select 
-        s.id, 
-        s.name, 
-        s.create_time,
-        s.schedule_hour_0,
-        s.schedule_hour_1,
-        s.schedule_hour_2,
-        s.schedule_hour_3,
-        s.schedule_hour_4,
-        s.schedule_hour_5,
-        s.schedule_hour_6,
-        s.schedule_hour_7,
-        s.schedule_hour_8,
-        s.schedule_hour_9,
-        s.schedule_hour_10,
-        s.schedule_hour_11,
-        s.schedule_hour_12,
-        s.schedule_hour_13,
-        s.schedule_hour_14,
-        s.schedule_hour_15,
-        s.schedule_hour_16,
-        s.schedule_hour_17,
-        s.schedule_hour_18,
-        s.schedule_hour_19,
-        s.schedule_hour_20,
-        s.schedule_hour_21,
-        s.schedule_hour_22,
-        s.schedule_hour_23,
-        s.schedule_day_0,
-        s.schedule_day_1,
-        s.schedule_day_2,
-        s.schedule_day_3,
-        s.schedule_day_4,
-        s.schedule_day_5,
-        s.schedule_day_6
-    from eml_schedule s
-    where s.id_campaign='#{gid}'
-    and s.delete_time is null
-    order by s.create_time desc
+        g.id as gid,
+        g.name as campaign_name,
+        f.id, 
+        f.name, 
+        f.create_time,
+        f.subject,
+        f.type, -- 0 - plain text, 1 - html
+        f.status,
+        f.sequence_number,
+        f.delay_days
+    from eml_followup f
+    join eml_campaign g on g.id=f.id_campaign
+    where f.id_campaign='#{gid}'
+    and f.delete_time is null
+    order by f.sequence_number, f.create_time desc
 "
 %>
 
@@ -52,10 +29,10 @@ q = "
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span6">
-		    <%=nav4("Emails", "/emails", "Campaigns", "/emails/campaigns", g.name, "/emails/campaigns/#{g.id.to_guid}/edit", "Schedules")%>
+		    <%=nav4("Emails", "/emails", "Campaigns", "/emails/campaigns", g.name, "/emails/campaigns/#{g.id.to_guid}/edit", "FollowUps")%>
 		</div>
 		<div class="span6" style='text-align:right;'>
-		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid%>/schedules/new'><i class='icon-plus'></i> New</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid%>/followups/new'><i class='icon-plus'></i> New</a>
 		</div>
 	</section>
 </div>
@@ -65,9 +42,15 @@ q = "
 	<div class="span12 box">
         <table class="table table-striped" style="table-layout: fixed; width: 100%;">
             <thead>
-                <th style="width:auto;">Name</th>
-                <th style="width:175px;">Days</th>
-                <th style="width:350px;">Hours <a class='btn-mini' href='/settings/account'>GMT <%=timezone.offset%></a></th>
+                <th style="width:120px;">Name</th>
+                <th style="width:60px;">Creation</th>
+                <th style="width:auto;">Subject</th>
+                <th style="width:120px;">Campaign</th>
+                <th style="width:36px;">Type</th>
+                <th style="width:36px;">Status</th>
+                <th style="width:60px;text-align:right;">#<br/>Sequence</th>
+                <th style="width:60px;text-align:right;">Delay<br/>Days</th>
+                <th style="width:14px;"><!-- edit icon --></th>
                 <th style="width:14px;"><!-- delete icon --></th>
             </thead>
             <tbody>
@@ -78,6 +61,7 @@ q = "
                 %>
                 <tr>
                     <td class="fix" title="<%=row[:name].to_s.encode_html%>"><%=row[:name].to_s.encode_html%></td>
+                    <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
                     <td class="fix">
                         <%
                         7.times do |i|
@@ -111,7 +95,7 @@ q = "
                 <tr>
                     <td colspan="11" class="fix" align='center' style='text-align:center;'>
                         No campaigns found.</br>
-                        <a href='/emails/campaigns/<%=gid%>/schedules/new'>Create a new schedule here.</a>
+                        <a href='/emails/campaigns/<%=gid%>/followups/new'>Create a new followup here.</a>
                     </td>
                 <tr>
                 <%

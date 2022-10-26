@@ -205,6 +205,8 @@ create table IF NOT EXISTS eml_followup (
 
 alter table eml_followup add column if not exists stat_positive_replies bigint not null;
 
+alter table eml_followup add column if not exists delete_time timestamp null;
+
 -- addresses used by a campaign to deliver emails
 create table IF NOT EXISTS eml_outreach (
     id uuid not null primary key,
