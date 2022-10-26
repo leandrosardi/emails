@@ -10,7 +10,7 @@ daynames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'S
 day = []
 hour = []
 7.times { |i| day[i] = @login.user.preference("emails.campaign.#{gid}.schedules.day_#{i}", false, nil) }
-23.times { |i| hour[i] = @login.user.preference("emails.campaign.#{gid}.schedules.hour_#{i}", false, nil) }
+24.times { |i| hour[i] = @login.user.preference("emails.campaign.#{gid}.schedules.hour_#{i}", false, nil) }
 %>
 
 <!-- NavBar -->
@@ -29,7 +29,7 @@ hour = []
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span12 box">
-		<form method='post' action='/emails/filter_edit_campaign' class="form-horizontal">
+		<form method='post' action='/emails/filter_new_schedule' class="form-horizontal">
             <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
 
             <div class="control-group">
@@ -48,10 +48,12 @@ hour = []
                         %>
                         <tr>
                             <td>
-                                <input type="checkbox" id="day_<%=i%>" name='day_<%=i%>' value='1' <%=day[i] ? 'checked' : ''%> /><br/>
-                            </td>
-                            <td>
-                                <span><%=daynames[i]%></span>
+                                <div class="control-group">
+                                    <label class="control-label" for="day_<%=i%>"><%=daynames[i]%></label>
+                                    <div class="controls">            
+                                        <input type="checkbox" id="day_<%=i%>" name='day_<%=i%>' <%=day[i] ? 'checked' : ''%> /><br/>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <%
@@ -74,37 +76,22 @@ hour = []
                     6.times { |i|
                         %>
                         <tr>
+                        <%
+                        4.times { |j|
+                            k = i*4+j
+                            %>
                             <td>
-                                <input type="checkbox" id="hour_<%=i%>" name='hour_<%=i%>' <%=hour[i] ? 'checked' : ''%> /><br/>
-                            </td>
-                            <td>
-                                <span><%=i%> Hs.</span>
-                            </td>
-                            <td style='width:20px;'></td>
-
-                            <td>
-                                <input type="checkbox" id="hour_<%=(i+6).to_s%>" name='hour_<%=(i+6).to_s%>' <%=hour[i+6] ? 'checked' : ''%> /><br/>
-                            </td>
-                            <td>
-                                <span><%=(i+6).to_s%> Hs.</span>
+                                <div class="control-group">
+                                    <label class="control-label" for="hour_<%=k.to_s%>"><%=k.to_s%> Hs.</label>
+                                    <div class="controls">
+                                        <input type="checkbox" id="hour_<%=k.to_s%>" name='hour_<%=k.to_s%>' <%=hour[i+j] ? 'checked' : ''%> /><br/>
+                                    </div>
+                                </div>
                             </td>
                             <td style='width:20px;'></td>
-
-                            <td>
-                                <input type="checkbox" id="hour_<%=(i+12).to_s%>" name='hour_<%=(i+12).to_s%>' <%=hour[i+12] ? 'checked' : ''%> /><br/>
-                            </td>
-                            <td>
-                                <span><%=(i+12).to_s%> Hs.</span>
-                            </td>
-                            <td style='width:20px;'></td>
-
-                            <td>
-                                <input type="checkbox" id="hour_<%=(i+18).to_s%>" name='hour_<%=(i+18).to_s%>' <%=hour[i+18] ? 'checked' : ''%> /><br/>
-                            </td>
-                            <td>
-                                <span><%=(i+18).to_s%> Hs.</span>
-                            </td>
-                            <td style='width:20px;'></td>
+                            <%
+                        }
+                        %>
                         </tr>
                         <%
                     }

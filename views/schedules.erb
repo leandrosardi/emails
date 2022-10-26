@@ -1,6 +1,9 @@
 <%
 gid = params[:gid]
 g = BlackStack::Emails::Campaign.where(:id=>gid).first
+timezone = @login.user.account.timezone
+daychars = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+daynames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 q = "
     select 
@@ -40,6 +43,7 @@ q = "
         s.schedule_day_6
     from eml_schedule s
     where s.id_campaign='#{gid}'
+    and s.delete_time is null
     order by s.create_time desc
 "
 %>
@@ -61,9 +65,9 @@ q = "
 	<div class="span12 box">
         <table class="table table-striped" style="table-layout: fixed; width: 100%;">
             <thead>
-                <th style="width:120px;">Name</th>
-                <th style="width:100px;">Days</th>
-                <th style="width:200px;">Hours</th>
+                <th style="width:auto;">Name</th>
+                <th style="width:175px;">Days</th>
+                <th style="width:350px;">Hours <a class='btn-mini' href='/settings/account'>GMT <%=timezone.offset%></a></th>
                 <th style="width:14px;"><!-- delete icon --></th>
             </thead>
             <tbody>
@@ -73,22 +77,27 @@ q = "
                     i += 1
                 %>
                 <tr>
-                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=o.id.to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
+                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=g.id.to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
                     <td class="fix">
                         <%
                         7.times do |i|
                             %>
-                            <span class="label label-<%=row["schedule_day_#{i}"] ? 'blue' : 'gray'%>"><%=i.to_s%></span>
+                            <span class="label label-<%=row["schedule_day_#{i}".to_sym] ? 'blue' : 'gray'%>" title='<%=daynames[i]%>'><%=daychars[i]%></span>
                             <%
                         end
                         %>
                     </td>
                     <td class="fix">
                         <%
-                        23.times do |i|
+                        24.times do |i|
                             %>
-                            <span class="label label-<%=row["schedule_hour_#{i}"] ? 'blue' : 'gray'%>"><%=i.to_s%></span>
+                            <span class="label label-<%=row["schedule_hour_#{i}".to_sym] ? 'blue' : 'gray'%>" style='width:12px;text-align:center;'><%=i.to_s%></span>
                             <%
+                            if i == 11
+                                %>
+                                <br/>
+                                <%
+                            end
                         end
                         %>
                     </td>

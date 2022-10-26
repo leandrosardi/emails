@@ -256,9 +256,10 @@ create table IF NOT EXISTS eml_schedule (
     schedule_day_3 boolean not null, -- true if the campaign is scheduled at 3 day
     schedule_day_4 boolean not null, -- true if the campaign is scheduled at 4 day
     schedule_day_5 boolean not null, -- true if the campaign is scheduled at 5 day
-    schedule_day_6 boolean not null, -- true if the campaign is scheduled at 6 day
-    schedule_day_7 boolean not null -- true if the campaign is scheduled at 7 day
+    schedule_day_6 boolean not null -- true if the campaign is scheduled at 6 day
 );
+
+alter table eml_schedule add column if not exists delete_time timestamp null;
 
 -- each URL in the body is replaced by this link
 -- filter for tracking clicks receive 2 parameters: id of the link and id of the lead.
