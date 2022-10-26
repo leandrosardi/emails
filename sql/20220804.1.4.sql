@@ -211,10 +211,9 @@ create table IF NOT EXISTS eml_outreach (
     id_user uuid not null references "user"(id), -- who registered this
     create_time timestamp not null, -- when registered this
     -- header settings
-    "name" varchar(255) not null, -- name of the campaign
     id_campaign uuid not null references eml_campaign(id), -- id of the export that will be used to send the emails
-    id_address uuid not null references eml_address(id), -- id of the address that will be used to send the emails
-    unique(id_campaign, id_address)
+    id_tag uuid not null references eml_tag(id), -- all addresses with this tag will be used for this campaign
+    unique(id_campaign, id_tag)
 );
 
 -- days and hours when the campaign will be sent

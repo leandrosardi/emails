@@ -1,0 +1,123 @@
+<%
+# load preferences
+gid = params[:gid]
+g = BlackStack::Emails::Campaign.where(:id=>gid).first
+name = @login.user.preference("emails.campaign.#{gid}.schedules.name", '', nil)
+timezone = @login.user.account.timezone
+
+daynames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+day = []
+hour = []
+7.times { |i| day[i] = @login.user.preference("emails.campaign.#{gid}.schedules.day_#{i}", false, nil) }
+23.times { |i| hour[i] = @login.user.preference("emails.campaign.#{gid}.schedules.hour_#{i}", false, nil) }
+%>
+
+<!-- NavBar -->
+<div class="mynavbar mysticky">
+	<section class="row-fluid">	
+		<div class="span6">
+            <%=nav5("Emails", "/emails", "Campaigns", "/emails/campaigns", g.name, "/emails/campaigns/#{g.id.to_guid}/edit", "Schedules", "/emails/campaigns/#{g.id.to_guid}/schedules", "New")%>
+		</div>
+		<div class="span6" style='text-align:right;'>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/schedules'><i class='icon-calendar'></i> Schedules</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/followups'><i class='icon-envelope'></i> FollowUps</a>
+		</div>
+	</section>
+</div>
+
+<!-- Single Panel -->
+<section class="row-fluid">
+	<div class="span12 box">
+		<form method='post' action='/emails/filter_edit_campaign' class="form-horizontal">
+            <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
+
+            <div class="control-group">
+                <label class="control-label" for="name">Name</label>
+                <div class="controls">
+                    <input type="text" id="name" name='name' placeholder="Name" value='<%=name.to_s.encode_html%>' />
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="name">Days</label>
+                <div class="controls">
+                    <table>
+                    <%
+                    7.times { |i|
+                        %>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="day_<%=i%>" name='day_<%=i%>' value='1' <%=day[i] ? 'checked' : ''%> /><br/>
+                            </td>
+                            <td>
+                                <span><%=daynames[i]%></span>
+                            </td>
+                        </tr>
+                        <%
+                    }
+                    %>
+                    </table>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="name">
+                    Hours<br/> 
+                    <b>GMT <%=timezone.offset%></b><br/>
+                    (<%=timezone.short_description%>)<br/>
+                    <a class='btn-mini' href='/settings/account'>Change your timezone here</a>
+                </label>
+                <div class="controls">
+                    <table>
+                    <%
+                    6.times { |i|
+                        %>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="hour_<%=i%>" name='hour_<%=i%>' <%=hour[i] ? 'checked' : ''%> /><br/>
+                            </td>
+                            <td>
+                                <span><%=i%> Hs.</span>
+                            </td>
+                            <td style='width:20px;'></td>
+
+                            <td>
+                                <input type="checkbox" id="hour_<%=(i+6).to_s%>" name='hour_<%=(i+6).to_s%>' <%=hour[i+6] ? 'checked' : ''%> /><br/>
+                            </td>
+                            <td>
+                                <span><%=(i+6).to_s%> Hs.</span>
+                            </td>
+                            <td style='width:20px;'></td>
+
+                            <td>
+                                <input type="checkbox" id="hour_<%=(i+12).to_s%>" name='hour_<%=(i+12).to_s%>' <%=hour[i+12] ? 'checked' : ''%> /><br/>
+                            </td>
+                            <td>
+                                <span><%=(i+12).to_s%> Hs.</span>
+                            </td>
+                            <td style='width:20px;'></td>
+
+                            <td>
+                                <input type="checkbox" id="hour_<%=(i+18).to_s%>" name='hour_<%=(i+18).to_s%>' <%=hour[i+18] ? 'checked' : ''%> /><br/>
+                            </td>
+                            <td>
+                                <span><%=(i+18).to_s%> Hs.</span>
+                            </td>
+                            <td style='width:20px;'></td>
+                        </tr>
+                        <%
+                    }
+                    %>
+                    </table>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                    <button type="submit" class="btn btn-blue">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>

@@ -11,6 +11,11 @@ module BlackStack
             STATUS_ON = 1
             STATUS_OFF = 2
 
+            # return array of tag objects, connected to this campaign thru the :outreaches attribute
+            def tags()
+                self.outreaches.map { |o| o.tag }.uniq
+            end
+
             # statuses of email campaigns: draft, sent, etc.
             def self.statuses
                 [STATUS_ON, STATUS_OFF]

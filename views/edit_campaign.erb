@@ -6,6 +6,8 @@ name = o.name
 id_export = o.id_export
 # put fields in readonly mode ?
 disabled = o.can_edit? ? '' : 'disabled'
+# getting account 
+account = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first
 %>
 
 <%
@@ -27,8 +29,8 @@ q = "
 		    <%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", name)%>
 		</div>
 		<div class="span6" style='text-align:right;'>
-		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/schedules/new'><i class='icon-calendar'></i> Add Schedule</a>
-		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/followups/new'><i class='icon-envelope'></i> Add FollowUp</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/schedules'><i class='icon-calendar'></i> Schedules</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/<%=gid.to_guid%>/followups'><i class='icon-envelope'></i> FollowUps</a>
 		</div>
 	</section>
 </div>
@@ -38,6 +40,7 @@ q = "
 	<div class="span12 box">
 		<form method='post' action='/emails/filter_edit_campaign' class="form-horizontal">
             <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
+            <input type="hidden" id="tags" name='tags' value='<%=o.tags.map { |t| t.name }.join(',')%>'>
 
             <div class="control-group">
                 <label class="control-label" for="status"><b>Status</b></label>
@@ -51,6 +54,7 @@ q = "
                     <input type="text" id="name" name='name' placeholder="Name" value='<%=name.to_s.encode_html%>' />
                 </div>
             </div>
+
             <div class="control-group">
                 <label class="control-label" for="export">Export List</label>
                 <div class="controls">
@@ -69,11 +73,63 @@ q = "
                     </select>
                 </div>
             </div>
+
+            <div class="control-group">
+                <p><i class='icon-info-sign'></i> Add the tags of the accounts you want to use to run this campaign.</p>
+                <label class="control-label" for="keyword">Tags</label>
+                <div id='tags_container' style='width:500px'></div>
+            </div>
+
             <div class="control-group">
                 <div class="controls">
                     <button type="submit" class="btn btn-blue">Save</button>
                 </div>
             </div>
         </form>
-	</div>
+    </div>
 </section>
+
+<script>
+    var tags_container = document.getElementById('tags_container');
+
+    function update_hidden_fields() {
+        // update hidden fields
+        let i = 0; 
+        let s = '';
+        filtersJs.getPositiveValues(tags_container).forEach(function(value) {
+            if (i>0) { s += ','; }
+            s += value.trim();
+            i++;
+        });
+        $('#tags').val(s);      
+    }
+
+    $(document).ready(function() {  
+        // use filtersjs to draw a filter of tags in element with id tags
+        filtersJs.draw(tags_container, {
+            label: '',
+            allowed_positive_keywords: true, // default value: true
+            allowed_negative_keywords: false, // default value: false
+            allowed_values: [
+                <%=account.tags.size==0 ? '' : "'"+account.tags.map { |t| t.name.downcase }.join("','")+"'" %>
+            ],
+            // catch event: update hidden textfield when filter is changed    
+            on_add_value: function (value) {
+                update_hidden_fields();
+            },
+            // catch event: update hidden textfield when filter is changed    
+            on_remove_value: function (value) {
+                update_hidden_fields();
+            },
+        });
+
+        // add tags to the filter
+        <%
+        o.outreaches.each { |t|
+        %>
+            filtersJs.addValue(tags_container, '<%=t.tag.name.downcase%>', true)
+        <%
+        }
+        %>
+    });
+</script>
