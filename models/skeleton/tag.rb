@@ -3,7 +3,7 @@ module BlackStack
         class Tag < Sequel::Model(:eml_tag)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
 
-            COLORS = ['orange','yellow','blue','purple','black']
+            COLORS = ['orange','blue','purple','black']
 
             def self.color(name)
                 COLORS[name.hash % COLORS.length]

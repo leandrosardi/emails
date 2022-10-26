@@ -1,9 +1,15 @@
 <%
+search_keyword = @login.user.preference('emails.addresses.search_keyword', '', params[:search_keyword])
+
+edit_shared = @login.user.preference('emails.addresses.edit_shared', false, nil)
+edit_enabled = @login.user.preference('emails.addresses.edit_enabled', false, nil)
 edit_max_deliveries_per_day = @login.user.preference('emails.addresses.edit_max_deliveries_per_day', false, nil)
 edit_delivery_interval_min_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_min_minutes', false, nil)
 edit_delivery_interval_max_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_max_minutes', false, nil)
 edit_tags = @login.user.preference('emails.addresses.edit_tags', false, nil)
 
+shared = @login.user.preference('emails.addresses.shared', false, nil)
+enabled = @login.user.preference('emails.addresses.enabled', false, nil)
 max_deliveries_per_day = @login.user.preference('emails.addresses.max_deliveries_per_day', 10, nil)
 delivery_interval_min_minutes = @login.user.preference('emails.addresses.delivery_interval_min_minutes', 5, nil)
 delivery_interval_max_minutes = @login.user.preference('emails.addresses.delivery_interval_max_minutes', 15, nil)
@@ -17,9 +23,11 @@ tags = tags_selected.split(',')
 # existing tags 
 account_tags = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first.tags
 
-q = "
+all = "
     select 
         a.id, 
+        a.first_name,
+        a.last_name,
         a.address, 
         a.shared,
         a.enabled,
@@ -32,6 +40,18 @@ q = "
     left join eml_address_tag at on at.id_address = a.id
     join \"user\" u on ( u.id_account='#{@login.user.id_account}' and u.id=a.id_user )
     where a.delete_time is null
+"
+
+all += " 
+    and (
+        lower(a.address) like '%#{search_keyword.downcase}%' or
+        lower(a.first_name) like '%#{search_keyword.downcase}%' or
+        lower(a.last_name) like '%#{search_keyword.downcase}%' or
+        lower(a.stat_tags) like '%#{search_keyword.downcase}%' 
+    )
+" unless search_keyword.empty?
+
+all += "
     group by
         a.id, 
         a.address, 
@@ -43,6 +63,33 @@ q = "
         a.delivery_interval_max_minutes
     order by a.create_time desc
 "
+
+# TODO: use re-utilizable function here.
+page_size = 25
+total_rows = DB[all].count
+if total_rows>0
+  total_pages = (total_rows.to_f/page_size.to_f).ceil
+  # if there is a GET parameters `number` on the URL, update the user preference regarding the page number on this screen
+  # then, get user preferences regarding the page number on this screen
+  page_number = @login.user.preference("emails.addresses.pagination.page", 1, params[:number].nil? ? nil : params[:number].to_i)
+  # pagination correction to prevent glitches
+  page_number = 1 if page_number < 1
+  page_number = total_pages if page_number > total_pages
+  # calculate info for showing at the bottom of the table
+  from_row = (page_number.to_i-1) * page_size.to_i + 1
+  to_row = [page_number*page_size, total_rows].min
+else
+  total_pages = 1
+  page_number = 1
+  from_row = 0
+  to_row = 0
+end
+
+q = "
+"+all+"
+  LIMIT #{page_size.to_s}
+  OFFSET #{((page_number.to_i - 1) * page_size.to_i).to_s}
+"
 %>
 
 <!-- NavBar -->
@@ -52,46 +99,62 @@ q = "
 		    <%=nav2("Emails", "/emails", "Addresses")%>
 		</div>
 		<div class="span6" style='text-align:right;'>
-		    <a class='btn btn-blue' href='/emails/addresses/new'><i class='icon-plus'></i> Add</a>
-            <button type="button" class="btn btn-blue" data-toggle="modal" id='open_edit_addresses_modal' data-target=".edit_addresses" title='Edit Selected Addresses'><i class='icon-pencil'></i> Edit</button>
-		</div>
+            <form action="/emails/addresses" method="get">
+                <div class="pull-right">
+                    <div class="span8">
+                        <input type='text' class='input-block-level select-all-on-focus' id='search_keyword' name='search_keyword' value='<%=search_keyword.encode_html%>' />
+                    </div>
+                    <button class="btn btn-blue btn-medium btn-submit" style="margin-left: 2px;" type="submit" onclick="">
+                        <i class='icon-search'></i> Search
+                    </button>
+                </div>    
+
+                <a class='btn btn-blue' href='/emails/addresses/new'><i class='icon-plus'></i> Add</a>
+                <button type="button" class="btn btn-blue" data-toggle="modal" id='open_edit_addresses_modal' data-target=".edit_addresses" title='Edit Selected Addresses'><i class='icon-pencil'></i> Edit</button>
+            </form>
+        </div>
 	</section>
 </div>
 
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span12 box">
+        <p><b>Records:</b> <%=from_row.to_label%> to <%=to_row.to_label%> <b>of</b> <%=total_rows.to_label%></p>
         <table class="table table-striped" style="table-layout: fixed; width: 100%;">
             <thead>
                 <th style="width:24px;"><input type='checkbox' class='select-all-rows'></th>
+                <th style="width:50px;">First<br/>Name</th>
+                <th style="width:50px;">Last<br/>Name</th>
                 <th style="width:auto;">Address</th>
-                <th style="width:90px;">Creation</th>
-                <th style="width:50px;">Shared</th>
-                <th style="width:50px;">Enabled</th>
-                <th style="width:70px;text-align:right;">Tags</th>
+                <th style="width:60px;">Creation</th>
+                <th style="width:40px;">Shared</th>
+                <th style="width:40px;">Enabled</th>
+                <th style="width:50px;text-align:right;">Tags</th>
                 <th style="width:50px;text-align:right;">Daily<br/>Quota</th>
                 <th style="width:50px;text-align:right;">Min.<br/>Minutes</th>
                 <th style="width:50px;text-align:right;">Max.<br/>Minutes</th>
-                <th style="width:24px;"><!-- edit --></th>
-                <th style="width:24px;"><!-- delete --></th>
+                <th style="width:14px;"><!-- edit --></th>
+                <th style="width:14px;"><!-- delete --></th>
             </thead>
             <tbody>
                 <%
                 i = 0
                 DB[q].all do |row|
                     i += 1
-                    shared = row[:shared] ? "Yes" : "No"
+                    value_shared = row[:shared] ? "Yes" : "No"
                     color = row[:shared] ? "blue" : "gray"
-                    enabled = row[:enabled] ? "Yes" : "No"
+                    value_enabled = row[:enabled] ? "Yes" : "No"
                     color2 = row[:enabled] ? "green" : "gray"                    
                 %>
                 <tr>
                     <th><input type='checkbox' class='select-row' data-id='<%=row[:id].to_guid%>' <%=ids.include?(row[:id].to_guid) ? 'checked' : ''%> /></th>
+                    <td class="fix" title="<%=row[:first_name].to_s.encode_html%>"><a href='/emails/addresses/<%=row[:id].to_guid%>/edit'><%=row[:first_name].to_s.encode_html%></a></td>
+                    <td class="fix" title="<%=row[:last_name].to_s.encode_html%>"><a href='/emails/addresses/<%=row[:id].to_guid%>/edit'><%=row[:last_name].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:address].to_s.encode_html%>"><a href='/emails/addresses/<%=row[:id].to_guid%>/edit'><%=row[:address].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:create_time].to_s.encode_html%>"><%=row[:create_time].to_s[0..9]%></td>
-                    <td class="fix" title="<%=shared%>"><span class='badge badge-<%=color%>'><%=shared%></span></td>
-                    <td class="fix" title="<%=enabled%>"><span class='badge badge-<%=color2%>'><%=enabled%></span></td>
-                    <td class="no-fix" style="text-align:right;" title="<%=row[:tags].to_i.to_label%>">
+                    <td class="fix" title="<%=value_shared%>"><span class='badge badge-<%=color%>'><%=value_shared%></span></td>
+                    <td class="fix" title="<%=value_enabled%>"><span class='badge badge-<%=color2%>'><%=value_enabled%></span></td>
+                    <td class="no-fix" style="text-align:right;">
                         <%
                         row[:stat_tags].to_s.split(",").each do |tag|
                             %>
@@ -122,6 +185,7 @@ q = "
                 %>
             </tbody>
         </table>
+        <div class="pagination"></div>
     </div>
 </section>
 
@@ -139,6 +203,20 @@ q = "
             <form action="/emails/filter_edit_addresses" method="post" id='edit_addresses_form' name='edit_addresses_form'>
                 <input type="hidden" id="selected_ids" name='selected_ids' class='selected-ids' value='<%=selected_ids.to_s%>'>
                 <input type="hidden" id="tags_selected" name='tags_selected' value='<%=tags_selected.to_s%>'>
+                <div class="radio">
+                    <label>
+                        <input type="checkbox" class='shared-input' data-input='shared' id="edit_shared" name="edit_shared" <%=edit_shared ? 'checked' : ''%>> 
+                        Shared
+                        <input type="checkbox" id="shared" name="shared" <%=shared ? 'checked' : ''%> />
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="checkbox" class='enable-input' data-input='enabled' id="edit_enabled" name="edit_enabled" <%=edit_enabled ? 'checked' : ''%>> 
+                        Enabled
+                        <input type="checkbox" id="enabled" name="enabled" <%=enabled ? 'checked' : ''%> />
+                    </label>
+                </div>
                 <div class="radio">
                     <label>
                         <input type="checkbox" class='enable-input' data-input='max_deliveries_per_day' id="edit_max_deliveries_per_day" name="edit_max_deliveries_per_day" <%=edit_max_deliveries_per_day ? 'checked' : ''%>> 
@@ -176,6 +254,8 @@ q = "
 </div>
 
 <script>
+    drawPagination($(".pagination"), <%=page_number%>, <%=total_pages%>);
+
     var tags_container = document.getElementById('tags_container');
 
     // for a checkbox .enable-input, enable or disable the inbout with the id in its field data-input, if such a checkbox is checked or unchecked.

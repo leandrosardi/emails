@@ -1,9 +1,13 @@
 <%
+edit_shared = @login.user.preference('emails.addresses.edit_shared', false, params[:edit_shared].to_s=='on')
+edit_enabled = @login.user.preference('emails.addresses.edit_enabled', false, params[:edit_enabled].to_s=='on')
 edit_max_deliveries_per_day = @login.user.preference('emails.addresses.edit_max_deliveries_per_day', false, params[:edit_max_deliveries_per_day].to_s=='on')
 edit_delivery_interval_min_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_min_minutes', false, params[:edit_delivery_interval_min_minutes].to_s=='on')
 edit_delivery_interval_max_minutes = @login.user.preference('emails.addresses.edit_delivery_interval_max_minutes', false, params[:edit_delivery_interval_max_minutes].to_s=='on')
 edit_tags = @login.user.preference('emails.addresses.edit_tags', false, params[:edit_tags].to_s=='on')
 
+shared = @login.user.preference('emails.addresses.shared', false, params[:shared].to_s=='on')
+enabled = @login.user.preference('emails.addresses.enabled', false, params[:enabled].to_s=='on')
 max_deliveries_per_day = @login.user.preference('emails.addresses.max_deliveries_per_day', 10, params[:max_deliveries_per_day].to_i)
 delivery_interval_min_minutes = @login.user.preference('emails.addresses.delivery_interval_min_minutes', 5, params[:delivery_interval_min_minutes].to_i)
 delivery_interval_max_minutes = @login.user.preference('emails.addresses.delivery_interval_max_minutes', 15, params[:delivery_interval_max_minutes].to_i)
@@ -75,6 +79,12 @@ begin
     # update delivery_interval_max_minutes
     q += "delivery_interval_max_minutes = #{delivery_interval_max_minutes.to_i}, " if edit_delivery_interval_max_minutes
 
+    # update shared
+    q += "shared = #{shared ? 'true' : 'false'}, " if edit_shared
+
+    # update enabled
+    q += "enabled = #{enabled ? 'true' : 'false'}, " if edit_enabled
+
     # update tags
     q += "stat_tags = '#{tags_selected.downcase}', " if edit_tags
 
@@ -124,7 +134,6 @@ begin
         GC.start
         DB.disconnect
     end
-
     # return
     redirect "/emails/addresses?msg="+ CGI::escape('Addresses updated.')
 rescue => e
