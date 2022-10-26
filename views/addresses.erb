@@ -88,7 +88,7 @@ q = "
                     <td class="fix" title="<%=row[:create_time].to_s.encode_html%>"><%=row[:create_time].to_s[0..9]%></td>
                     <td class="fix" title="<%=shared%>"><span class='badge badge-<%=color%>'><%=shared%></span></td>
                     <td class="fix" title="<%=enabled%>"><span class='badge badge-<%=color2%>'><%=enabled%></span></td>
-                    <td class="fix" style="text-align:right;" title="<%=row[:tags].to_i.to_label%>">
+                    <td class="no-fix" style="text-align:right;" title="<%=row[:tags].to_i.to_label%>">
                         <%
                         row[:stat_tags].to_s.split(",").each do |tag|
                             %>
@@ -133,7 +133,7 @@ q = "
         <p><i class='icon-info-sign'></i> Check the Parameters you Want to Edit.</p>
 
         <div>
-            <form action="/emails/filter_edit_addresses" method="post">
+            <form action="/emails/filter_edit_addresses" method="post" id='edit_addresses_form' name='edit_addresses_form'>
                 <input type="hidden" id="selected_ids" name='selected_ids' class='selected-ids' value='<%=selected_ids.to_s%>'>
                 <input type="hidden" id="tags_selected" name='tags_selected' value='<%=tags_selected.to_s%>'>
                 <div class="radio">
@@ -157,21 +157,18 @@ q = "
                         <input type="number" class='select-all-on-focus' id="delivery_interval_max_minutes" name="delivery_interval_max_minutes" placeholder="Write a number here." value='<%=delivery_interval_max_minutes.to_i.to_s%>' />
                     </label>
                 </div>
+                <div class="radio">
+                    <label>
+                        <input type="checkbox" class='enable-input' data-input='keyword'  id="edit_tags" name="edit_tags" <%=edit_tags ? 'checked' : ''%>> 
+                        Tags - <i class='icon-warning-sign'></i> Current tags will be removed from selected addresses <div id='tags_container'></div>
+                    </label>
+                </div>
             </form>
-
-            <div class="radio">
-                <label>
-                    <input type="checkbox" class='enable-input' data-input='keyword'  id="edit_tags" name="edit_tags" <%=edit_tags ? 'checked' : ''%>> 
-                    Tags - <i class='icon-warning-sign'></i> Current tags will be removed from selected addresses <div id='tags_container'></div>
-                </label>
-            </div>
-
-
         </div>    
     </div>
     <div class="modal-footer">
         <a href="#" data-dismiss="modal" class="btn btn-close">Close</a>
-        <button type="submit" id="edit_addresses" class="btn btn-primary">Save</button>
+        <button type="submit" id="edit_addresses_button" name="edit_addresses_button" class="btn btn-blue">Save</button>
     </div>
 </div>
 
@@ -226,9 +223,7 @@ q = "
             label: '',
             allowed_positive_keywords: true, // default value: true
             allowed_negative_keywords: false, // default value: false
-            allowed_values: [
-              <%=account_tags.size == 0 ? '' : "'"+account_tags.map { |t| t.name }.join("', '")+"'"%>
-            ],
+            allowed_values: [], // default value: []
             // catch event: update hidden textfield when filter is changed    
             on_add_value: function (value) {
               update_hidden_fields();
@@ -247,6 +242,11 @@ q = "
         <%
         }
         %>
+
+        // submit form #edit_addresses_form when button #edit_addresses_button is clicked
+        $('#edit_addresses_button').click(function() {
+            $('#edit_addresses_form').submit();
+        });
 
         // enable or disable inputs
         enableInputs();
