@@ -7,8 +7,6 @@ daynames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'S
 
 q = "
     select 
-        g.id as gid,
-        g.name as campaign_name,
         f.id, 
         f.name, 
         f.create_time,
@@ -18,7 +16,6 @@ q = "
         f.sequence_number,
         f.delay_days
     from eml_followup f
-    join eml_campaign g on g.id=f.id_campaign
     where f.id_campaign='#{gid}'
     and f.delete_time is null
     order by f.sequence_number, f.create_time desc
@@ -45,7 +42,6 @@ q = "
                 <th style="width:120px;">Name</th>
                 <th style="width:60px;">Creation</th>
                 <th style="width:auto;">Subject</th>
-                <th style="width:120px;">Campaign</th>
                 <th style="width:36px;">Type</th>
                 <th style="width:36px;">Status</th>
                 <th style="width:60px;text-align:right;">#<br/>Sequence</th>
