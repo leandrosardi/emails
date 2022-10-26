@@ -54,34 +54,21 @@ q = "
                 i = 0
                 DB[q].all do |row|
                     i += 1
+                    f = BlackStack::Emails::Followup.where(:id=>row[:id]).first
                 %>
                 <tr>
-                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><%=row[:name].to_s.encode_html%></td>
+                    <td class="fix" title="<%=row[:name].to_s.encode_html%>"><a href='/emails/campaigns/<%=gid%>/followups/<%=row[:id].to_guid%>/edit'><%=row[:name].to_s.encode_html%></a></td>
                     <td class="fix" title="<%=row[:create_time].to_s[0..9].encode_html%>"><%=row[:create_time].to_s[0..9].encode_html%></td>
-                    <td class="fix">
-                        <%
-                        7.times do |i|
-                            %>
-                            <span class="label label-<%=row["schedule_day_#{i}".to_sym] ? 'blue' : 'gray'%>" title='<%=daynames[i]%>'><%=daychars[i]%></span>
-                            <%
-                        end
-                        %>
-                    </td>
-                    <td class="fix">
-                        <%
-                        24.times do |i|
-                            %>
-                            <span class="label label-<%=row["schedule_hour_#{i}".to_sym] ? 'blue' : 'gray'%>" style='width:12px;text-align:center;'><%=i.to_s%></span>
-                            <%
-                            if i == 11
-                                %>
-                                <br/>
-                                <%
-                            end
-                        end
-                        %>
-                    </td>
-                    <td class="fix" style="text-align:right;"><a title='Delete' href='/emails/filter_delete_schedule?sid=<%=row[:id].to_guid%>'><i class='icon-trash'></i></a></td>
+                    <td class="fix" title="<%=row[:subject].to_s.encode_html%>"><a href='/emails/campaigns/<%=gid%>/followups/<%=row[:id].to_guid%>/edit'><%=row[:subject].to_s.encode_html%></a></td>
+                    
+                    <td class="fix" title="<%=f.type_name.encode_html%>"><a><%=f.type_name.encode_html%></a></td>
+                    <td class="fix" title="<%=f.status_name.encode_html%>"><a><%=f.status_name.encode_html%></a></td>
+                    
+                    <td class="fix" title="<%=row[:sequence_number].to_s.encode_html%>"><a><%=row[:sequence_number].to_label%></a></td>
+                    <td class="fix" title="<%=row[:delay_day].to_s.encode_html%>"><a><%=row[:delay_day].to_label%></a></td>
+
+                    <td class="fix" style="text-align:right;"><a title='Delete' href='/emails/campaigns/<%=gid%>/followups/<%=row[:id].to_guid%>/edit'><i class='icon-pencil'></i></a></td>
+                    <td class="fix" style="text-align:right;"><a title='Delete' href='/emails/filter_delete_followup?fid=<%=row[:id].to_guid%>'><i class='icon-trash'></i></a></td>
                 </tr>
                 <%
                 end

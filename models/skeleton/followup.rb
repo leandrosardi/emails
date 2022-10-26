@@ -15,9 +15,36 @@ module BlackStack
             STATUS_OFF = 2
             STATUS_ERROR = 3
 
+            # types
+            def self.types
+                [TYPE_TEXT, TYPE_HTML]
+            end
+
+            def type_name
+                case self.type
+                when TYPE_TEXT
+                    'Text'
+                when TYPE_HTML
+                    'HTML'
+                else
+                    'Unknown'
+                end
+            end
+
+            def type_color
+                case self.type
+                when TYPE_TEXT
+                    'blue'
+                when TYPE_HTML
+                    'green'
+                else
+                    'red'
+                end
+            end
+
             # statuses of email campaigns: draft, sent, etc.
             def self.statuses
-                [STATUS_DRAFT, STATUS_SENT, STATUS_ERROR]
+                [STATUS_DRAFT, STATUS_ON, STATUS_OFF, STATUS_ERROR]
             end
 
             def status_name
