@@ -2,14 +2,14 @@
 err = []
 begin
     # map parameters
-    gid = params[:gid]
+    fid = params[:fid]
     acc = BlackStack::Emails::Account.where(:id=>@login.user.id_account).first
 
-    # load campaign
-    campaign = BlackStack::Emails::Campaign.where(:id=>gid).first
+    # load followup
+    f = BlackStack::Emails::FollowUp.where(:id=>fid).first
 
     # choose a random lead
-    lead = campaign.export.fl_export_leads.sample.fl_lead
+    lead = f.campaign.export.fl_export_leads.sample.fl_lead
 
     # choose a random address
     # first choice: own addresses

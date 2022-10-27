@@ -2,21 +2,21 @@
 err = []
 begin
     # map parameters
-    gid = params[:gid]
+    fid = params[:fid]
 
     # load campaign
-    o = BlackStack::Emails::Campaign.where(:id=>gid).first
+    o = BlackStack::Emails::Followup.where(:id=>fid).first
 
     # edit
-    o.status = BlackStack::Emails::Campaign::STATUS_ON
+    o.status = BlackStack::Emails::Followup::STATUS_ON
 
     # save
     o.save
 
     # return
-    redirect "/emails/campaigns/#{o.id.to_guid}/edit?msg="+ CGI::escape('Campaign created.')
+    redirect "/emails/campaigns/#{o.id_campaign.to_guid}/followups/#{o.id.to_guid}/edit?msg="+ CGI::escape('FollowUp is ON.')
 rescue => e
     # return errors
-    redirect "/emails/campaigns/#{o.id.to_guid}/edit?err="+ CGI::escape(e.message)
+    redirect "/emails/campaigns/#{o.id_campaign.to_guid}/followups/#{o.id.to_guid}/edit?err="+ CGI::escape(e.message)
 end
 %>
