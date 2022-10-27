@@ -20,8 +20,8 @@ module BlackStack
                 [TYPE_TEXT, TYPE_HTML]
             end
 
-            def type_name
-                case self.type
+            def self.type_name(n)
+                case n
                 when TYPE_TEXT
                     'Text'
                 when TYPE_HTML
@@ -29,6 +29,10 @@ module BlackStack
                 else
                     'Unknown'
                 end
+            end
+
+            def type_name
+                BlackStack::Emails::Followup.type_name(self.type)
             end
 
             def type_color
@@ -47,17 +51,23 @@ module BlackStack
                 [STATUS_DRAFT, STATUS_ON, STATUS_OFF, STATUS_ERROR]
             end
 
-            def status_name
-                case self.status
+            def self.status_name(n)
+                case n
                 when STATUS_DRAFT
-                    'draft'
+                    'Draft'
                 when STATUS_ON
-                    'on'
+                    'On'
                 when STATUS_OFF
-                    'off'
+                    'Off'
                 when STATUS_ERROR
-                    'error'
+                    'Error'
+                else
+                    'Unknown'
                 end
+            end
+
+            def status_name
+                BlackStack::Emails::Followup.status_name(self.status)
             end
 
             def status_color

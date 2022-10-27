@@ -1,30 +1,21 @@
 <%
-# load preferences
-name = @login.user.preference('emails.campaign.new.name', '', nil)
-subject = @login.user.preference('emails.campaign.new.subject', '', nil)
-replyto = @login.user.preference('emails.campaign.new.replyto', '', '') #@login.user.email)
-fromname = @login.user.preference('emails.campaign.new.fromname', '', @login.user.name)
-body = @login.user.preference('emails.campaign.new.body', '', nil)
-id_export = @login.user.preference('emails.campaign.new.id_export', '', nil)
-%>
+gid = params[:gid]
+g = BlackStack::Emails::Campaign.where(:id=>gid).first
 
-<%
-q = "
-    select 
-        e.id as id,
-        e.filename as filename
-    from fl_export e
-    join \"user\" u on (u.id=e.id_user and u.id_account='#{@login.user.id_account}')
-    --where e.delete_time is null
-    order by e.filename
-"
+# load preferences
+name = @login.user.preference('emails.campaign.followup.new.name', '', nil)
+subject = @login.user.preference('emails.campaign.followup.new.subject', '', nil)
+body = @login.user.preference('emails.campaign.followup.new.body', '', nil)
+type = @login.user.preference('emails.campaign.followup.new.type', BlackStack::Emails::Followup::TYPE_TEXT, nil)
+sequence_number = @login.user.preference('emails.campaign.followup.new.sequence_number', 1, nil)
+delay_days = @login.user.preference('emails.campaign.followup.new.delay_days', 1, nil)
 %>
 
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span6">
-		<%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", "New")%>
+		<%=nav5("Emails", "/emails", "Campaigns", "/emails/campaigns", g.name, "/emails/campaigns/#{g.id.to_guid}", "FollowUps", "/emails/campaigns/#{g.id.to_guid}/followups", "New")%>
 		</div>
 	</section>
 </div>
@@ -32,49 +23,52 @@ q = "
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span12 box">
-		<form method='post' action='/emails/filter_new_campaign' class="form-horizontal">
+		<form method='post' action='/emails/filter_new_followup' class="form-horizontal">
+            <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
+            <!-- textfield for name -->
             <div class="control-group">
                 <label class="control-label" for="name">Name</label>
                 <div class="controls">
                     <input type="text" id="name" name='name' placeholder="Name" value='<%=name.to_s.encode_html%>' />
                 </div>
             </div>
+            <!-- dropdown list for type -->
+            <div class="control-group">
+                <label class="control-label" for="type">Type</label>
+                <div class="controls">
+                    <select id="type" name='type'>
+                        <%
+                        BlackStack::Emails::Followup.types.each do |t|
+                            %>
+                            <option value='<%=t%>'<%=(t==type ? ' selected="selected"' : '')%>><%=BlackStack::Emails::Followup.type_name(t)%></option>
+                            <%
+                        end
+                        %>
+                    </select>
+                </div>
+            </div>
+            <!-- dropdown list for sequence number -->
+            <div class="control-group">
+                <label class="control-label" for="sequence_number">Sequence Number</label>
+                <div class="controls">
+                    <input type="number" id="sequence_number" name='sequence_number' placeholder="Sequence Number" value='<%=sequence_number.to_s.encode_html%>' />
+                </div>
+            </div>
+            <!-- dropdown list for delay days -->
+            <div class="control-group">
+                <label class="control-label" for="delay_days">Delay Days</label>
+                <div class="controls">
+                    <input type="number" id="delay_days" name='delay_days' placeholder="Delay Days" value='<%=delay_days.to_s.encode_html%>' />
+                </div>
+            </div>
+            <!-- textfield for subject -->
             <div class="control-group">
                 <label class="control-label" for="subject">Subject</label>
                 <div class="controls">
                     <input class='input input-block-level' type="text" id="subject" name='subject' placeholder="subject" value='<%=subject.to_s.encode_html%>' />
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label" for="replyto">From Name</label>
-                <div class="controls">
-                    <input type="text" id="fromname" name='fromname' placeholder="from name..." value='<%=fromname.to_s.encode_html%>' />
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="replyto">Reply To</label>
-                <div class="controls">
-                    <input type="text" id="replyto" name='replyto' placeholder="reply to..." value='<%=replyto.to_s.encode_html%>' />
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="export">Export List</label>
-                <div class="controls">
-                    <select type="text" id="id_export" name='id_export' placeholder="Export List">
-                        <option value=''></option>
-                        <%
-                        DB[q].each { |row|
-                            selected = id_export.to_s == row[:id].to_s ? "selected" : ""
-                            %>
-                            <option value='<%=row[:id].to_s.to_guid%>' <%=selected%>><%=row[:filename].to_s.encode_html%></option>
-                            <%
-                            GC.start
-                            DB.disconnect
-                        }
-                        %>
-                    </select>
-                </div>
-            </div>
+            <!-- textarea for body -->
             <div class="control-group">
                 <label class="control-label" for="divbody">Body</label>
                 <div class="controls">

@@ -50,7 +50,7 @@ get "/emails/campaigns/:gid/edit", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/edit_campaign", :layout => :"/views/layouts/core"
 end
 
-
+# schedules
 get "/emails/campaigns/:gid/schedules", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/schedules", :layout => :"/views/layouts/core"
 end
@@ -64,7 +64,7 @@ get "/emails/filter_delete_schedule", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/filter_delete_schedule"
 end
 
-
+# followups
 get "/emails/campaigns/:gid/followups", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/followups", :layout => :"/views/layouts/core"
 end
@@ -84,7 +84,7 @@ post "/emails/filter_edit_followup", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/filter_edit_followup"
 end
 
-
+# activities - campaigns
 get "/emails/campaigns/:gid/sent", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign?report=sents", :layout => :"/views/layouts/core"
 end
@@ -101,6 +101,24 @@ get "/emails/campaigns/:gid/unsubscribes", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign?report=unsubscribes", :layout => :"/views/layouts/core"
 end
 
+# activities - followups
+get "/emails/campaigns/:gid/followups/:fid/sent", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=sents", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/followups/:fid/replies", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=replies", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/followups/:fid/opens", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=opens", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/followups/:fid/clicks", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=clicks", :layout => :"/views/layouts/core"
+end
+get "/emails/campaigns/:gid/followups/:fid/unsubscribes", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign?report=unsubscribes", :layout => :"/views/layouts/core"
+end
+
+# addresses
 get "/emails/addresses", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/addresses", :layout => :"/views/layouts/core"
 end

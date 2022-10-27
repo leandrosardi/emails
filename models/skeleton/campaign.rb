@@ -28,7 +28,7 @@ module BlackStack
 
             # if is ON if any followup is ON
             def status
-                self.followups.select { |f| !f.status == BlackStack::Emails::FollowUp::STATUS_ON }.first.nil? ? STATUS_OFF : STATUS_ON
+                self.followups.select { |f| f.status == BlackStack::Emails::Followup::STATUS_ON }.first.nil? ? STATUS_OFF : STATUS_ON
             end 
 
             # if is ON if any followup is ON

@@ -1,0 +1,81 @@
+<%
+err = []
+begin
+    # map parameters
+    gid = params[:gid]
+    g = BlackStack::Emails::Campaign.where(:id=>gid).first
+    
+    # load preferences
+    name = @login.user.preference('emails.campaign.followup.new.name', '', params[:name])
+    subject = @login.user.preference('emails.campaign.followup.new.subject', '', params[:subject])
+    body = @login.user.preference('emails.campaign.followup.new.body', '', params[:body])
+    type = @login.user.preference('emails.campaign.followup.new.type', BlackStack::Emails::Followup::TYPE_TEXT, params[:type])
+    sequence_number = @login.user.preference('emails.campaign.followup.new.sequence_number', 0, params[:sequence_number])
+    delay_days = @login.user.preference('emails.campaign.followup.new.delay_days', 0, params[:delay_days])
+    
+    # validate: campaign exists
+    err << "Campaign not found." if g.nil?
+
+    # validate: the name is not empty
+    err << "Name is required." if name.empty?
+
+    # validate: subject is not empty
+    err << "Subject is required." if subject.empty?
+
+    # validate: body is not empty
+    err << "Body is required." if body.empty?
+
+    # validate: type is valid
+    err << "Type is invalid." unless BlackStack::Emails::Followup.types.include?(type)
+
+    # validate: sequence number is a number
+    err << "Sequence Number is invalid." unless sequence_number.to_s =~ /^\d+$/
+
+    # validate: sequence number is valid
+    err << "Sequence number must be greater than 0." unless sequence_number.to_i > 0
+
+    # validate: delay_days is a number
+    err << "Delay days is invalid." unless delay_days.to_s =~ /^\d+$/
+
+    # validate: delay_days is valid
+    err << "Delay days must be greater than 0." unless delay_days.to_i > 0
+
+    # if any error happened, return to the edition screen
+    raise err.join("\n") if err.size > 0
+
+    # create the campaign
+    o = BlackStack::Emails::Followup.new
+    o.id = guid
+    o.id_user = @login.user.id
+    o.create_time = now
+    o.name = name
+    o.id_campaign = g.id
+    # parameters
+    o.subject = subject
+    o.body = body
+    o.type = type
+    o.status = BlackStack::Emails::Followup::STATUS_DRAFT
+    o.sequence_number = sequence_number
+    o.delay_days = delay_days
+    # stats
+    o.stat_replies = 0
+    o.stat_positive_replies = 0
+    o.stat_sents = 0
+    o.stat_opens = 0
+    o.stat_clicks = 0
+    o.stat_bounces = 0
+    o.stat_unsubscribes = 0
+    o.stat_complaints = 0
+    # stats
+    o.stat_subject_spintax_variations = 0
+    o.stat_body_spintax_variations = 0
+    # save
+    o.save
+
+    # return
+    redirect "/emails/campaigns/#{g.id.to_guid}/followups?msg="+ CGI::escape('FollowUp created.')
+rescue => e
+    # return errors
+    redirect "/emails/campaigns/#{g.id.to_guid}/followups/new?err="+ CGI::escape(e.message)
+end
+%>
