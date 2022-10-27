@@ -39,14 +39,29 @@ while (true)
 
     # for each job
     jobs.each { |j|
+        l.logs "Ingest job #{j.id}... "
         # 
         j.ingest_start_time = now
         j.save
         # 
-        j.ingest(l)
-        # 
-        j.ingest_end_time = now
-        j.save
+        begin
+            j.ingest(l)
+            # 
+            j.ingest_end_time = now
+            j.ingest_success= true
+            j.ingest_error_description = nil
+            j.save
+            #
+            l.done
+        rescue => e
+            #
+            j.ingest_end_time = now
+            j.ingest_success= false
+            j.ingest_error_description = e.to_s
+            j.save
+            #
+            l.logf e.to_s
+        end
     }
 
     l.logs 'Sleeping... '

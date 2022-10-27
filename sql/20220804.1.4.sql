@@ -428,3 +428,10 @@ alter table eml_address add column if not exists "enabled" boolean not null defa
 
 -- correction: CSV content is stored in the storage folder of the account.
 alter table eml_upload_leads_job drop column if exists content;
+
+-- this is necessary to upload CSV files to the cockroach cloud server.
+CREATE DATABASE IF NOT EXISTS defaultdb;
+SET CLUSTER SETTING sql.telemetry.query_sampling.enabled = false;
+
+-- this is necessary to import records into the table, and just then iterate them and assign the line number.
+alter table eml_upload_leads_row alter column line_number DROP NOT NULL;

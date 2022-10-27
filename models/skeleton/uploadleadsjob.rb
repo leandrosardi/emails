@@ -24,13 +24,16 @@ module BlackStack
                 # TODO: vaidate the file has not more than `batchsize` lines.
 
                 log.logs "Upload CSV to CRDB Cloud..."
-                command = "cockroach userfile upload #{self.user.account.storage_sub_folder('emails.leads.uploads')}/#{self.id.to_guid}.csv /#{self.id.to_guid}.csv --url \"#{BlackStack::CRDB.connection_string}\""
-puts
-puts
-puts command
-exit(0)
+                command = "
+                    cockroach userfile upload #{self.user.account.storage_sub_folder('emails.leads.uploads')}/#{self.id.to_guid}.csv /#{self.id.to_guid}.csv --url \"#{BlackStack::CRDB.connection_string_2}\"
+                "
                 res = `#{command}`
-                log.logs res
+                if res =~ /successfully uploaded/ || res =~ /destination file already exists/
+                    log.done
+                else
+                    log.logf "ERROR: #{res}"
+                    raise 'Error uploading CSV to CRDB Cloud: ' + res
+                end
 
                 # import all files to the database,
                 # making the 3 queries below in a single transaction.
@@ -40,7 +43,7 @@ exit(0)
                     truncate table eml_upload_leads_row_aux;
                     import into eml_upload_leads_row_aux (\"line\") DELIMITED data('userfile:///#{self.id.to_guid}.csv') with fields_terminated_by=E'\\b', fields_enclosed_by='';
                     update eml_upload_leads_row_aux set id=gen_random_uuid(), id_upload_leads_job='#{self.id.to_sql}';
-                    insert into eml_upload_leads_row (id, id_upload_leads_job, \"line\") select id, id_file, value from eml_upload_leads_row_aux;
+                    insert into eml_upload_leads_row (id, id_upload_leads_job, \"line\") select id, id_upload_leads_job, \"line\" from eml_upload_leads_row_aux;
                     truncate table eml_upload_leads_row_aux;
                 ")
                 log.done
@@ -49,7 +52,7 @@ exit(0)
                 log.logs "Updating row numbers (may take some minutes)... "
                 rownum = 0
                 DB["select id from eml_upload_leads_row where \"line_number\" is null and id_upload_leads_job = '#{self.id.to_guid}'"].all { |r|
-                    DB["update eml_upload_leads_row set \"line_number\" = #{rownum.to_s} where id='#{r[:id]}' and \"number\" is null limit 1"].all
+                    DB["update eml_upload_leads_row set \"line_number\" = #{rownum.to_s} where id='#{r[:id]}' and \"line_number\" is null limit 1"].all
                     rownum += 1
                     #print '.'
                 }
