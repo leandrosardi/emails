@@ -382,3 +382,6 @@ SET CLUSTER SETTING sql.telemetry.query_sampling.enabled = false;
 
 -- this is necessary to import records into the table, and just then iterate them and assign the line number.
 alter table eml_upload_leads_row alter column line_number DROP NOT NULL;
+
+-- date and time when the delivery is scheduled to be sent.
+--alter table eml_delivery add schedule_time timestamp NOT null;

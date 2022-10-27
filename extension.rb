@@ -105,3 +105,207 @@ BlackStack::Extensions::add ({
         '/emails/css/inboxes.css',
     ],
 })
+
+# ----------------------------------------
+# Pricing Model
+# 
+# Free Plan
+# - 5,000 deliveries
+# - Unlimited email verifications
+# - Unlimited leads uploads
+# - Unlimited sending addresses
+# 
+# Paid add-ons
+# - DFY Databases
+# - DFY Outreach
+#
+
+# setup the I2P product description here
+BlackStack::I2P::add_services([
+    { 
+        :code=>'emails', 
+        :name=>'Mail Merging & Tracking Service', 
+        :unit_name=>'deliveries', 
+        :consumption=>BlackStack::I2P::CONSUMPTION_BY_TIME, 
+        # formal description to show in the list of products
+        :description=>'CS Emails helps you scale your outreach campaigns through unlimited email sending accounts',
+        # persuasive description to show in the sales letter
+        :title=>'Scale Your Outreach Campaigns Through Unlimited Email Sending Accounts',
+        # larger persuasive description to show in the sales letter
+        :summary=>'CS Emails helps you scale your outreach campaigns through unlimited email sending accounts.',
+        :thumbnail=>CS_HOME_WEBSITE+'/emails/images/logo.png',
+        :return_path=>CS_HOME_WEBSITE+'/emails/leads',
+        # what is the life time of this product or service?
+        :credits_expiration_period => 'month',
+        :credits_expiration_units => 1,
+        # free tier configuration
+        :free_tier=>{
+            # add 10 records per month, for free
+            :credits=>5000,
+            :period=>'month',
+            :units=>1,
+        },
+        # most popular plan configuratioon
+        :most_popular_plan => 'emails.growth',
+    },
+])
+
+# setup the I2P plans descriptors here
+BlackStack::I2P::add_plans([
+    {
+        # which product is this plan belonging
+        :service_code=>'emails', 
+        # recurrent billing plan or one-time payments
+        :type=>BlackStack::I2P::PAYMENT_SUBSCRIPTION,  
+        # show this plan in the UI
+        :public=>true,
+        # is this a One-Time Offer?
+        # true: this plan is available only if the account has not any invoice using this plan
+        # false: this plan can be purchased many times
+        :one_time_offer=>false,  
+        # plan description
+        :item_number=>'emails.growth', 
+        :name=>'Growth Plan', 
+        # billing details
+        :credits=>100000, 
+        :normal_fee=>99, # cognitive bias: expensive fee to show it strikethrough, as the normal price. But it's a lie. 
+        :fee=>49, # this is the fee that your will charge to the account, as a special offer price.
+        :period=>'month',
+        :units=>1, # billed monthy
+        # Force credits expiration in the moment when the client 
+        # renew with a new payment from the same subscription.
+        # Activate this option for every allocation service.
+        :expiration_on_next_payment => true, # default true
+        # Additional period after the billing cycle - Extend 2 weeks after the billing cycle - Referemce: https://github.com/ExpandedVenture/ConnectionSphere/issues/283.
+        :expiration_lead_period => 'day', #'M', # default day
+        :expiration_lead_units => 14, #3, # default 0
+        # bonus
+        :bonus_plans=>[
+            { :item_number => "ces.lifetime", :period => 1 },
+        ],
+  }
+])
+
+# ----------------------------------------
+
+# setup the I2P product description here
+BlackStack::I2P::add_services([
+    { 
+        :code=>'dfy-databases', 
+        :name=>'DFY Databases', 
+        :unit_name=>'bind-record', 
+        :consumption=>BlackStack::I2P::CONSUMPTION_BY_TIME, 
+        # formal description to show in the list of products
+        :description=>'Access our leads databases for cheap. Use them for your campaigns in our <b>Emails</b> service. Unlock the contact information just once the lead have replied positively.',
+        # persuasive description to show in the sales letter
+        :title=>'Access our leads databases for cheap. Unlock the contact information of those leads who replied positivly only.',
+        # larger persuasive description to show in the sales letter
+        :summary=>'Access our leads databases for cheap. Use them for your campaigns in our <b>Emails</b> service. Unlock the contact information just once the lead have replied positively.',
+        :thumbnail=>CS_HOME_WEBSITE+'/dfy-databases/images/logo.png',
+        :return_path=>CS_HOME_WEBSITE+'/dfy-databases/leads',
+        # what is the life time of this product or service?
+        :credits_expiration_period => 'month',
+        :credits_expiration_units => 1,
+        # no free tier configuration
+        # most popular plan configuratioon
+        :most_popular_plan => 'dfy-databases.bite',
+    },
+])
+
+# setup the I2P plans descriptors here
+BlackStack::I2P::add_plans([
+    {
+        # which product is this plan belonging
+        :service_code=>'dfy-databases', 
+        # recurrent billing plan or one-time payments
+        :type=>BlackStack::I2P::PAYMENT_SUBSCRIPTION,  
+        # show this plan in the UI
+        :public=>true,
+        # is this a One-Time Offer?
+        # true: this plan is available only if the account has not any invoice using this plan
+        # false: this plan can be purchased many times
+        :one_time_offer=>false,  
+        # plan description
+        :item_number=>'dfy-databases.bite', 
+        :name=>'A Bite of Our Data', 
+        # billing details
+        :credits=>50, 
+        :normal_fee=>5, # cognitive bias: expensive fee to show it strikethrough, as the normal price. But it's a lie. 
+        :fee=>1, # this is the fee that your will charge to the account, as a special offer price.
+        :period=>'month',
+        :units=>1, # billed monthy
+        # Force credits expiration in the moment when the client 
+        # renew with a new payment from the same subscription.
+        # Activate this option for every allocation service.
+        :expiration_on_next_payment => true, # default true
+        # Additional period after the billing cycle - Extend 2 weeks after the billing cycle - Referemce: https://github.com/ExpandedVenture/ConnectionSphere/issues/283.
+        :expiration_lead_period => 'day', #'M', # default day
+        :expiration_lead_units => 14, #3, # default 0
+        # bonus
+        :bonus_plans=>[
+            { :item_number => "ces.lifetime", :period => 1 },
+        ],
+  }
+])
+
+# ----------------------------------------
+
+# setup the I2P product description here
+BlackStack::I2P::add_services([
+    { 
+        :code=>'dfy-outreach', 
+        :name=>'DFY Outreach', 
+        :unit_name=>'crowd-deliveries', 
+        :consumption=>BlackStack::I2P::CONSUMPTION_BY_TIME, 
+        # formal description to show in the list of products
+        :description=>'Deliver your email campaigns from our crowd of sending accounts. Save time and money building your own sending infrastructure.',
+        # persuasive description to show in the sales letter
+        :title=>'Deliver your email campaigns from our crowd of sending accounts. Save time and money building your own sending infrastructure.',
+        # larger persuasive description to show in the sales letter
+        :summary=>'Deliver your email campaigns from our crowd of sending accounts. Save time and money building your own sending infrastructure.',
+        :thumbnail=>CS_HOME_WEBSITE+'/dfy-outreach/images/logo.png',
+        :return_path=>CS_HOME_WEBSITE+'/dfy-outreach/leads',
+        # what is the life time of this product or service?
+        :credits_expiration_period => 'month',
+        :credits_expiration_units => 1,
+        # no free tier configuration
+        # most popular plan configuratioon
+        :most_popular_plan => 'dfy-outreach.batch',
+    },
+])
+
+# setup the I2P plans descriptors here
+BlackStack::I2P::add_plans([
+    {
+        # which product is this plan belonging
+        :service_code=>'dfy-databases', 
+        # recurrent billing plan or one-time payments
+        :type=>BlackStack::I2P::PAYMENT_SUBSCRIPTION,  
+        # show this plan in the UI
+        :public=>true,
+        # is this a One-Time Offer?
+        # true: this plan is available only if the account has not any invoice using this plan
+        # false: this plan can be purchased many times
+        :one_time_offer=>false,  
+        # plan description
+        :item_number=>'dfy-outreach.batch', 
+        :name=>'A Bite to Our Outreach System', 
+        # billing details
+        :credits=>50, 
+        :normal_fee=>5, # cognitive bias: expensive fee to show it strikethrough, as the normal price. But it's a lie. 
+        :fee=>1, # this is the fee that your will charge to the account, as a special offer price.
+        :period=>'month',
+        :units=>1, # billed monthy
+        # Force credits expiration in the moment when the client 
+        # renew with a new payment from the same subscription.
+        # Activate this option for every allocation service.
+        :expiration_on_next_payment => true, # default true
+        # Additional period after the billing cycle - Extend 2 weeks after the billing cycle - Referemce: https://github.com/ExpandedVenture/ConnectionSphere/issues/283.
+        :expiration_lead_period => 'day', #'M', # default day
+        :expiration_lead_units => 14, #3, # default 0
+        # bonus
+        :bonus_plans=>[
+            { :item_number => "ces.lifetime", :period => 1 },
+        ],
+  }
+])

@@ -231,52 +231,73 @@ module BlackStack
                 self.save
             end
 
-            # return true if there is a delivery for the given lead
+            # return true if 
+            # - the lead sent a delivery for a followup with sequence_number-1, delivery_days before or ago
+            # and
+            # - the lead has not a delivery for a followup with same sequence_number;
             # otherwise return false
-            def include?(lead)
-                DB["
+            def allowed_for?(lead)
+                raise "sequence_number must be >= 1" if self.sequence_number < 1
+                a = true
+                b = true
+
+                # the lead has not a delivery for a followup with same sequence_number
+                a = DB["
                     SELECT COUNT(*) AS n
-                    FROM eml_job j
-                    JOIN eml_delivery d ON (
-                        j.id = d.id_job AND 
+                    FROM eml_delivery d 
+                    JOIN eml_followup f ON f.delivery_id = d.id
+                    WHERE
                         d.id_lead='#{lead.id.to_guid}' AND 
-                        d.delivery_start_time IS NULL -- delivery should not be started yet
-                    )
-                    WHERE j.id_campaign = '#{self.id}'
-                "].first[:n] > 0
+                        f.id_campaign = '#{self.id_campaign.to_guid}' AND
+                        f.sequence_number = #{self.sequence_number}
+                "].first[:n] == 0
+
+                if self.sequence_number > 1
+                    # the lead sent a delivery for a followup with sequence_number-1, delivery_days before or ago
+                    b = DB["
+                        SELECT COUNT(*) AS n
+                        FROM eml_delivery d 
+                        JOIN eml_followup f ON f.delivery_id = d.id
+                        WHERE
+                            d.id_lead='#{lead.id.to_guid}' AND 
+                            f.id_campaign = '#{self.id_campaign.to_guid}' AND
+                            f.sequence_number = #{self.sequence_number} - 1 AND
+                            d.delivery_end_time IS NOT NULL AND
+                            d.delivery_end_time < CURRENT_TIMESTAMP - INTERVAL '#{self.delay_days} DAYS'
+                    "].first[:n] == 0
+                end # if sequence_number > 1
+
+                # return 
+                a && b
             end
 
-            # create a job to deliver an email to all the leads in the array `leads`, thru the address in `address`
-            def create_jobs(leads, address)
-                # create the job
-                j = BlackStack::Emails::Job.new
-                j.id = guid
-                j.id_campaign = self.id
-                j.create_time = now
-                j.planning_id_address = address.id
-                j.planning_time = address.next_available_day
-                j.save
-                
-                # create deliveries for each lead
-                leads.each { |lead|
-                    d = BlackStack::Emails::Delivery.new
-                    d.id = guid
-                    d.id_job = j.id
-                    d.id_lead = lead.id
-                    d.create_time = now
-                    d.email = lead.emails.first.value
-                    d.subject = self.merged_subject(lead)
-                    d.body = self.merged_body(lead)
-                    d.id_user = self.id_user # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
-                    d.id_address = address.id # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
-                    d.save
-                    # release resources
-                    GC.start
-                    DB.disconnect
-                }
-
-                # return the job
-                j
+            # create a deliver
+            # return the delivery
+            # 
+            # choice 1, use the first VERIFIED email address of the lead.
+            # choice 2, use ANY email address of the lead.
+            # 
+            def create_delivery(lead, address)
+                email = lead.emails.select { |e| !e.verify_success.nil? && e.verify_success }.first.value
+                email = lead.emails.first.value if email.nil?
+                d = BlackStack::Emails::Delivery.new
+                d.id = guid
+                d.id_followup = self.id
+                d.id_address = address.id
+                d.id_lead = lead.id
+                d.create_time = now
+                # parameters
+                d.email = email
+                d.subject = self.merged_subject(lead).spin
+                d.body = self.merged_body(lead).spin
+                d.id_user = self.id_user # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
+                d.id_address = address.id # this parameter is replicated (unnormalized), because the `eml_delivery` table is use to register manually sent (individual) emails too.
+                d.save
+                # release resources
+                GC.start
+                DB.disconnect
+                #
+                d
             end
 
             # return an array of active followups with jobs pending delivery

@@ -39,48 +39,55 @@ BlackStack::Extensions.append :emails
 l = BlackStack::LocalLogger.new('./planner.log')
 
 while (true)
-    # active campaigns pending planning
-    l.logs 'load active campaigns pending planning... '
-    campaigns = BlackStack::Emails::Campaign.where(
+    # TODO: restart followup planning unless every lead has a delivery for such a followup.
+    # BlackStack::Emails::Followup.all.select { |f| f.need_planning? }.each do |f| .....
+
+    # get list of active followups pending planning
+    l.logs 'load active followups pending planning... '
+    followups = BlackStack::Emails::Followup.where (
         :delete_time=>nil,
         :status=>BlackStack::Emails::Campaign::STATUS_ON, 
         :planning_start_time=>nil
     ).all
-    l.logf "done (#{campaigns.size})"
+    l.logf "done (#{followups.size})"
 
     # shared addresses by any user
     l.logs 'load shared addresses by any user... '
-    shared_addresses = BlackStack::Emails::Address.where(
+    shared_addresses = BlackStack::Emails::Address.where (
         :delete_time=>nil, 
         :shared=>true,
         :enabled=>true
     ).all.freeze
     l.logf "done (#{shared_addresses.size})"
-
+    
     # TODO: Use case: If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
+    # move backward all the further delivereries assigned to the addresses of the abandoned campaign.
 
     # TODO: restart abandoned jobs
-    # If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
+    # - If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
 
     # Use case: Each `eml_job` record has one and only one address assigned.
     # For each active campaign pending planning, I have to create the jobs.
-    campaigns.each { |campaign|
-        l.logs "#{campaign.id}..."
+    followups.each { |followup|
+        l.logs "#{followup.id}..."
             l.logs "Flag planning start... "
-            campaign.start_planning
+            followup.start_planning
             l.done
 
             begin
                 # it is VERY important to sort leads, in order to reach them in the same order in a further followup
                 l.logs "Load leads... "
-                leads = campaign.export.fl_export_leads.map { |el| el.fl_lead }.sort_by {|l| l.id}
+                leads = followup.campaign.export.fl_export_leads.map { |el| el.fl_lead }.sort_by {|l| l.id}
                 l.logf "done (#{leads.size})"
 
-                # remove leads who already have a delivery created for this campaign
+                # remove leads who already have a delivery created for a followup of the same campaign, with the same sequence_number
                 # that is important for cases when a job is being reprocessed, because an address has been deprecated.
-                l.logs "Remove leads who already have a delivery created for this campaign... "
+                #
+                # remove leads who didn't send a delivery for a followup with sequence_number-1, delivery_days before or ago.
+                # 
+                l.logs "Remove leads who already have a delivery created for same followup... "
                 leads.dup.each { |lead|
-                    leads.reject! { |x| x.id.to_guid==lead.id.to_guid } if campaign.include?(lead)
+                    leads.reject! { |x| x.id.to_guid==lead.id.to_guid } if followup.allowed_for?(lead)
                 }
                 l.logf "done (#{leads.size} left)"
 
@@ -88,41 +95,44 @@ while (true)
                 n = leads.size
                 l.logf "done (#{n})"
 
-                l.logs "Load campaign user... "
-                user = BlackStack::Emails::User.where(:id=>campaign.id_user).first
+                l.logs "Load user owner of the followup... "
+                user = BlackStack::Emails::User.where(:id=>followup.id_user).first
                 l.done
 
-                l.logs "Load campaign account... "
+                l.logs "Load account owner of the followup... "
                 account = BlackStack::Emails::Account.where(:id=>user.id_account).first
                 l.done
 
-                # first choice, I plan using dedicated addresses of the account owner of the campaign.
+                # choice 1, use the dedicated addesses assigned to the campaign
+                # choice 2, use crowd-sourced addresses if the account has credits
                 # second choice, I plan using crowd-shared addresses.
                 # TODO: give the user the choice to use both: shared and owned accounts.
-                addresses = account.addresses.select { |a| a.enabled && a.delete_time.nil? }
-                addresses = shared_addresses if addresses.size == 0
-                
-                # round-robin the accounts for running the planning - run the planning
-                while leads.size > 0
-                    addresses.each { |addr|
-                        l.logs "#{addr.address}... "
-                            # grab the first leads and drop them from the array
-                            i = addr.max_deliveries_per_day
-                            my_leads = leads.first(i)
-                            leads = leads.drop(i)
-                            # exit if there are no more leads into the array
-                            if my_leads.size == 0
-                                l.logf "done (no more leads)"
-                                break
-                            end
-                            # create job with grabbed leads
-                            campaign.create_jobs(my_leads, addr)
-                        l.logf "done (#{my_leads.size.to_s})"
-                        # release resources
-                        GC.start
-                        DB.disconnect
-                    }
-                end # while
+                addresses = followup.campaign.addresses
+                if addresses.size==0 && account.credits('emails.dfy-outreach')>0
+                    addresses = shared_addresses
+                end
+
+                # sort addresses randomly
+                addresses.shuffle!
+
+                # round-robin the addresses for running the planning - run the planning
+                addresses.each { |addr|
+                    l.logs "#{addr.address}... "
+                        # exit if there are no more leads into the array
+                        if leads.size == 0
+                            l.logf "done (no more leads)"
+                            break
+                        end
+                        # pop the next lead from the array
+                        lead = leads.first(0)
+                        leads = leads.drop(0)
+                        # create job with grabbed leads
+                        d = followup.create_delivery(lead, addr)
+                    l.logf "done (#{my_leads.size.to_s})"
+                    # release resources
+                    GC.start
+                    DB.disconnect
+                }
 
                 l.logs "Flag planning end... "
                 campaign.end_planning
