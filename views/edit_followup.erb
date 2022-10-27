@@ -1,44 +1,30 @@
 <%
 # load preferences
 gid = params[:gid]
-o = BlackStack::Emails::Campaign.where(:id=>gid).first
-name = o.name
-id_export = o.id_export
-# put fields in readonly mode ?
-disabled = o.can_edit? ? '' : 'disabled'
-%>
-
-<%
-q = "
-    select 
-        e.id as id,
-        e.filename as filename
-    from fl_export e
-    join \"user\" u on (u.id=e.id_user and u.id_account='#{@login.user.id_account}')
-    --where e.delete_time is null
-    order by e.filename
-"
+fid = params[:fid]
+g = BlackStack::Emails::Campaign.where(:id=>gid).first
+f = BlackStack::Emails::Followup.where(:id=>fid).first
 %>
 
 <!-- NavBar -->
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span6">
-		    <%=nav3("Emails", "/emails", "Campaigns", "/emails/campaigns", name)%>
+    		<%=nav6("Emails", "/emails", "Campaigns", "/emails/campaigns", g.name, "/emails/campaigns/#{g.id.to_guid}", "FollowUps", "/emails/campaigns/#{g.id.to_guid}/followups", f.name, "/emails/campaigns/#{g.id.to_guid}/followups/#{f.id.to_guid}", 'Edit')%>
 		</div>
 		<div class="span6" style='text-align:right;'>
             <%
-            if o.can_play?
+            if f.can_play?
                 %>
-                <a class="btn btn-green" href='/emails/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
+                <a class="btn btn-green" href='/emails/filter_play_followup?gid=<%=fid%>'><i class='icon-play'></i> Play</a>
                 <%
-            elsif o.can_pause?
+            elsif f.can_pause?
                 %>
-                <a class="btn btn-gray" href='/emails/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Pause</a>
+                <a class="btn btn-gray" href='/emails/filter_pause_followup?gid=<%=fid%>'><i class='icon-pause'></i> Pause</a>
                 <%
             end
             %>
-		    <a class='btn btn-blue' href='/emails/campaigns/new'><i class='icon-plus'></i> New</a>
+		    <a class='btn btn-blue' href='/emails/campaigns/#{g.id.to_guid}/followups/new'><i class='icon-plus'></i> New</a>
 		</div>
 	</section>
 </div>
@@ -46,54 +32,63 @@ q = "
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span12 box">
-		<form method='post' action='/emails/filter_edit_campaign' class="form-horizontal">
-            <input type='hidden' id='gid' name='gid' value='<%=gid%>'/>
-
-            <div class="control-group">
-                <label class="control-label" for="status"><b>Status</b></label>
-                <div class="controls">
-                    <span class='badge badge-<%=o.status_color%>'><%=o.status_name%></span>
-                </div>
-            </div>
+		<form method='post' action='/emails/filter_edit_followup' class="form-horizontal">
+            <input type='hidden' id='fid' name='fid' value='<%=fid%>'/>
+            <!-- textfield for name -->
             <div class="control-group">
                 <label class="control-label" for="name">Name</label>
                 <div class="controls">
-                    <input type="text" id="name" name='name' placeholder="Name" value='<%=name.to_s.encode_html%>' />
+                    <input type="text" id="name" name='name' placeholder="Name" value='<%=f.name.to_s.encode_html%>' />
                 </div>
             </div>
+            <!-- dropdown list for type -->
             <div class="control-group">
-                <label class="control-label" for="export">Export List</label>
+                <label class="control-label" for="type">Type</label>
                 <div class="controls">
-                    <select type="text" id="id_export" name='id_export' placeholder="Export List" <%=disabled%> >
-                        <option value=''></option>
+                    <select id="type" name='type'>
                         <%
-                        DB[q].each { |row|
-                            selected = id_export.to_s == row[:id].to_s ? "selected" : ""
+                        BlackStack::Emails::Followup.types.each do |t|
                             %>
-                            <option value='<%=row[:id].to_s.to_guid%>' <%=selected%>><%=row[:filename].to_s.encode_html%></option>
+                            <option value='<%=t%>'<%=(t==f.type ? ' selected="selected"' : '')%>><%=BlackStack::Emails::Followup.type_name(t)%></option>
                             <%
-                            GC.start
-                            DB.disconnect
-                        }
+                        end
                         %>
                     </select>
+                </div>
+            </div>
+            <!-- dropdown list for sequence number -->
+            <div class="control-group">
+                <label class="control-label" for="sequence_number">Sequence Number</label>
+                <div class="controls">
+                    <input type="number" id="sequence_number" name='sequence_number' placeholder="Sequence Number" value='<%=f.sequence_number.to_s.encode_html%>' />
+                </div>
+            </div>
+            <!-- dropdown list for delay days -->
+            <div class="control-group">
+                <label class="control-label" for="delay_days">Delay Days</label>
+                <div class="controls">
+                    <input type="number" id="delay_days" name='delay_days' placeholder="Delay Days" value='<%=f.delay_days.to_s.encode_html%>' />
+                </div>
+            </div>
+            <!-- textfield for subject -->
+            <div class="control-group">
+                <label class="control-label" for="subject">Subject</label>
+                <div class="controls">
+                    <input class='input input-block-level' type="text" id="subject" name='subject' placeholder="subject" value='<%=f.subject.to_s.encode_html%>' />
+                </div>
+            </div>
+            <!-- textarea for body -->
+            <div class="control-group">
+                <label class="control-label" for="divbody">Body</label>
+                <div class="controls">
+                    <textarea id="body" name='body' placeholder="Body" rows=5 style='width:100%;' maxlength=4000>
+                        <%=f.body%>
+                    </textarea>
                 </div>
             </div>
             <div class="control-group">
                 <div class="controls">
                     <button type="submit" class="btn btn-blue">Save</button>
-                    <%
-                    if o.can_play?
-                        %>
-                        <a class="btn btn-green" href='/emails/filter_play_campaign?gid=<%=gid%>'><i class='icon-play'></i> Play</a>
-                        <%
-                    elsif o.can_pause?
-                        %>
-                        <a class="btn btn-gray" href='/emails/filter_pause_campaign?gid=<%=gid%>'><i class='icon-pause'></i> Pause</a>
-                        <%
-                    end
-                    %>
-                    <a class="btn btn-gray" href='/emails/filter_test_campaign?gid=<%=gid%>' title='You will receive a test email in your inbox <%=@login.user.email.encode_html%>'><i class='icon-envelope'></i> Send Test Email to Me</a>
                 </div>
             </div>
         </form>
@@ -127,7 +122,7 @@ q = "
         toolbar_location: 'bottom',
         menubar: false,
         statusbar: false,
-        readonly: <%=o.can_edit? ? 'false' : 'true'%>,
+        readonly: <%=f.can_edit? ? 'false' : 'true'%>,
         setup: function (editor) {
             <%
             BlackStack::Emails::mergetags.map { |tag| tag.gsub('{','').gsub('}','') }.each { |tag|

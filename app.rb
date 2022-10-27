@@ -170,25 +170,25 @@ get "/emails/filter_delete_campaign", :auth => true do
     erb :"/extensions/emails/views/filter_delete_campaign"
 end
 
-post "/emails/filter_test_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_test_campaign"
+post "/emails/filter_test_followup", :auth => true do
+    erb :"/extensions/emails/views/filter_test_followup"
 end
-get "/emails/filter_test_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_test_campaign"
-end
-
-post "/emails/filter_play_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_play_campaign"
-end
-get "/emails/filter_play_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_play_campaign"
+get "/emails/filter_test_followup", :auth => true do
+    erb :"/extensions/emails/views/filter_test_followup"
 end
 
-post "/emails/filter_pause_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_pause_campaign"
+post "/emails/filter_play_followup", :auth => true do
+    erb :"/extensions/emails/views/filter_play_followup"
 end
-get "/emails/filter_pause_campaign", :auth => true do
-    erb :"/extensions/emails/views/filter_pause_campaign"
+get "/emails/filter_play_followup", :auth => true do
+    erb :"/extensions/emails/views/filter_play_followup"
+end
+
+post "/emails/filter_pause_followup", :auth => true do
+    erb :"/extensions/emails/views/filter_pause_followup"
+end
+get "/emails/filter_pause_followup", :auth => true do
+    erb :"/extensions/emails/views/filter_pause_followup"
 end
 
 post "/emails/filter_new_address", :auth => true do
