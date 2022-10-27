@@ -39,6 +39,7 @@ module BlackStack
 
         # verify an email address
         def self.verify(email)
+            email.strip!
             domain = email.split('@').last
             EmailVerifier.config do |config|
                 config.verifier_email = "leandro.sardi@expandedventure.com"

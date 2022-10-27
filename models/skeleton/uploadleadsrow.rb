@@ -11,6 +11,8 @@ module BlackStack
                 h['datas'] = []
                 i = 0
                 vals.each { |val|
+                    # 
+                    val.strip!
                     # get the mapping definition
                     m = job.uploadleadsmappings.select { |m| m.column == i }.first
                     # map the value to the lead
