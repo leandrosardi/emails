@@ -17,7 +17,6 @@ require 'extensions/emails/models/skeleton/click'
 require 'extensions/emails/models/skeleton/open'
 require 'extensions/emails/models/skeleton/unsubscribe'
 require 'extensions/emails/models/skeleton/delivery'
-require 'extensions/emails/models/skeleton/job'
 require 'extensions/emails/models/skeleton/link'
 require 'extensions/emails/models/skeleton/user'
 

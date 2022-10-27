@@ -267,29 +267,17 @@ alter table eml_schedule add column if not exists delete_time timestamp null;
 -- filter for tracking clicks receive 2 parameters: id of the link and id of the lead.
 create table IF NOT EXISTS eml_link (
     id uuid not null primary key,
-    id_campaign uuid not null references eml_campaign(id), 
+    id_followup uuid not null references eml_followup(id), 
     create_time TIMESTAMP NOT NULL,
     link_number int NOT NULL, -- the number of the link in the body
     "url" VARCHAR(8000) NOT NULL, -- the url to redirect.
-    CONSTRAINT uk_link UNIQUE (id_campaign, "link_number")
+    CONSTRAINT uk_link UNIQUE (id_followup, "link_number")
 );
-
-create table IF NOT EXISTS eml_job (
-    id uuid not null primary key,
-    id_followup uuid not null references eml_followup(id), 
-    create_time TIMESTAMP NOT NULL,
-    delivery_start_time TIMESTAMP NULL,
-    delivery_end_time TIMESTAMP NULL,
-    delivery_success boolean null,
-    delivery_error_description varchar(8000) null
-);
-
-alter table eml_job add column IF NOT EXISTS planning_id_address uuid not null references eml_address(id);
-alter table eml_job add column IF NOT EXISTS planning_time timestamp not null; 
 
 create table IF NOT EXISTS eml_delivery (
     id uuid not null primary key,
-    id_job uuid not null references eml_job(id), 
+    id_followup uuid not null references eml_followup(id),
+    id_address uuid not null references eml_address(id), 
     id_lead uuid not null references fl_lead(id),
     create_time TIMESTAMP NOT NULL,
     -- pampa fields
@@ -310,16 +298,14 @@ create table IF NOT EXISTS eml_delivery (
     id_conversation uuid null,
     -- record responses from leads in the delivery table
     is_response boolean not null default false,
-    -- deliveries from manually written emails need to register the id_user
-    id_user uuid references "user"(id) null,
-    -- deliveries from manually written emails need to register the id_address
-    id_address uuid references eml_address(id) null,
     -- incoming messages (replies) include the name of the sender
     "name" varchar(500) null,
-    -- track if an email is single email
+    -- track if an email is single email - that means: an email sent to a lead manually by a user.
     is_single boolean not null default false,
-    -- record in in_reply_to for both: sent and received emails.
-    in_reply_to varchar(500) null
+    -- deliveries from manually written emails (single) need to register the id_user
+    id_user uuid references "user"(id) null,
+    --
+    unique(id_followup, id_address, id_lead)
 );
 
 create table IF NOT EXISTS eml_open (
@@ -342,11 +328,11 @@ create table IF NOT EXISTS eml_unsubscribe (
 );
 
 -- timeline snapshot of deliveries.
-create table IF NOT EXISTS eml_campaign_timeline (
+create table IF NOT EXISTS eml_timeline (
     id uuid not null primary key,
     id_campaign uuid not null references eml_campaign(id), 
-    id_job uuid not null references eml_job(id), 
     id_followup uuid not null references eml_followup(id), 
+    id_address uuid not null references eml_address(id),
     create_time TIMESTAMP NOT NULL,
     -- 
     year int not null,
@@ -362,29 +348,7 @@ create table IF NOT EXISTS eml_campaign_timeline (
     stat_bounces bigint not null,
     stat_unsubscribes bigint not null,
     stat_complaints bigint not null,
-    CONSTRAINT uk_timeline UNIQUE (id_campaign, id_job, id_followup, year, month, day, hour, minute)
-);
-
--- timeline snapshot of deliveries.
--- use this snapshot to research service degradation at an address-level.
-create table IF NOT EXISTS eml_address_timeline (
-    id uuid not null primary key,
-    id_address uuid not null references eml_address(id), 
-    id_campaign uuid not null references eml_campaign(id), 
-    create_time TIMESTAMP NOT NULL,
-    year int not null,
-    month int not null,
-    day int not null,
-    hour int not null,
-    minute int not null,
-    stat_sents bigint not null,
-    stat_opens bigint not null,
-    stat_clicks bigint not null,
-    stat_replies bigint not null, -- how many emails were replied
-    stat_bounces bigint not null,
-    stat_unsubscribes bigint not null,
-    stat_complaints bigint not null,
-    CONSTRAINT uk_timeline UNIQUE (id_address, id_campaign, year, month, day, hour, minute)
+    UNIQUE (id_campaign, id_followup, id_address, year, month, day, hour, minute)
 );
 
 -- deliveries event tracking.
@@ -392,29 +356,12 @@ create table IF NOT EXISTS eml_address_timeline (
 create table IF NOT EXISTS eml_log (
     id uuid not null primary key,
     create_time TIMESTAMP NOT NULL,
-    "type" varchar(50) not null, -- 'planned', 'failed', 'sent', 'opened', 'clicked', 'unsubscribed'
+    "type" varchar(50) not null, -- 'planned', 'failed', 'sent', 'opened', 'clicked', 'unsubscribed', 'replied'
     "color" varchar(50) not null, -- 'gray', 'red', 'green', 'opened', 'pink', 'orange'
-    id_lead uuid not null references fl_lead(id),
     id_delivery uuid not null references eml_delivery(id), 
-    id_job uuid not null references eml_job(id), 
-    id_followup uuid not null references eml_followup(id),
-    id_campaign uuid not null references eml_campaign(id),
-    lead_name varchar(8000) not null,
     planning_time timestamp not null, -- useful for for pending deliveries
     "url" varchar(8000) null -- this is the URL for when the event is a click.
 );
-
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS planning_id_address uuid NOT NULL REFERENCES eml_address(id);
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "address" VARCHAR(8000) NOT NULL;
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS campaign_name VARCHAR(8000) NOT NULL;
-
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "subject" VARCHAR(8000) NOT NULL;
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "body" TEXT NOT NULL;
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS "error_description" TEXT NULL;
-
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS id_account uuid NOT NULL REFERENCES account(id);
-
-ALTER TABLE eml_log ADD COLUMN IF NOT EXISTS lead_email varchar(8000) NOT NULL DEFAULT '';
 
 -- add support to delete objects
 alter table eml_address add column if not exists delete_time timestamp null;
