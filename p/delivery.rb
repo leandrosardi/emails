@@ -30,42 +30,21 @@ BlackStack::Extensions.append :emails
 l = BlackStack::LocalLogger.new('./delivery.log')
 
 while (true)
-    # active campaigns with jobs pending delivery
-    l.logs "Get array of actiive campaigns with jobs pending to delivery... "
-    campaigns = BlackStack::Emails::Campaign.pendings
-    l.logf "done (#{campaigns.size})"
 
-    # for each campaign
-    campaigns.each { |campaign|
-        l.logs "Process campaign #{campaign.id}... "
-            l.logs "Get next job to deliver... "
-            job = campaign.next_job
-            l.logf "done (#{job.id})"
+    # get the while list of addresses (shared and owned by the user)
+    addresses = BlackStack::Emails::Address.where(:delete_time=>nil).all
 
-            begin
-                # start job delivery
-                l.logs "Flag delivery start... "
-                job.start_delivery
-                l.done
+    # itereate each address, looking for the next deliver to process
+    addresses.each do |address|
+        # get the next job to deliver
+        job = address.next_job_to_deliver
+        next if job.nil?
 
-                l.logs "Deliver... "
-                job.deliver
-                l.done
+        # deliver the job
+        job.deliver
+    end
 
-                l.logs "Flag delivery end... "
-                job.end_delivery
-                l.done
-            rescue => e
-                l.logf "Error: #{e.message}"
+    # sleep for 5 seconds
+    sleep 5
 
-                l.logs "Flag delivery error... "
-                job.end_delivery(e.message)
-                l.done
-            end
-        l.done
-    }
-
-    l.logs 'Sleeping... '
-    sleep(10)
-    l.done
-  end # while (true)
+end # while (true)

@@ -109,9 +109,8 @@ module BlackStack
             def total_deliveries
                 DB["
                     SELECT COUNT(*) AS n 
-                    FROM eml_job j
-                    JOIN eml_delivery d on j.id=d.id_job 
-                    WHERE j.id_followup = '#{self.id}'
+                    FROM eml_delivery d 
+                    WHERE d.id_followup = '#{self.id}'
                 "].first[:n]
             end
 
@@ -325,23 +324,6 @@ module BlackStack
                 ret
             end
 
-            # return the next job to deliver
-            def next_job
-                row = DB["
-                    SELECT j.id
-                    FROM eml_job j
-                    WHERE j.id_campaign='#{self.id}'
-                    AND j.delivery_start_time IS NULL -- job should not be started yet
-                    AND j.planning_time < current_timestamp -- job should be planned to be started
-                    ORDER BY j.planning_time ASC
-                "].first
-                if row.nil?
-                    nil
-                else
-                    BlackStack::Emails::Job.where(:id=>row[:id]).first
-                end
-            end
-
             # delete all the record in the table `eml_link` regarding this campaign.
             # create new record in the table `eml_link` for each anchor in the body.
             # call the `save` method of the parent class to save the changes.
@@ -351,7 +333,7 @@ module BlackStack
                 # number of URL in the body
                 n = 0
                 # delete all the record in the table `eml_link` regarding this campaign.
-                BlackStack::Emails::Link.where(:id_campaign=>self.id).all { |link|
+                BlackStack::Emails::Link.where(:id_followup=>self.id).all { |link|
                     DB.execute("DELETE FROM eml_link WHERE id='#{link.id}'")
                     GC.start
                     DB.disconnect
@@ -366,7 +348,7 @@ module BlackStack
                     # create and save the object BlackStack::Emails::Link
                     o = BlackStack::Emails::Link.new
                     o.id = guid
-                    o.id_campaign = self.id
+                    o.id_followup = self.id
                     o.create_time = now
                     o.link_number = n
                     o.url = link['href']

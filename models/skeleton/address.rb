@@ -275,25 +275,6 @@ module BlackStack
                 })
             end
 
-            # return the next day when it is available to deliver the number of emails configured on its `max_deliveries_per_day` parameters.
-            def next_available_day
-                ret = DB["
-                    select max(planning_time) as dt
-                    from eml_job j
-                    where j.planning_id_address='#{self.id.to_guid}'
-                "].first[:dt]
-
-                if ret.nil?
-                    return now
-                else
-                    return DB["
-                        select max(planning_time)+interval '1 day' as dt
-                        from eml_job j
-                        where j.planning_id_address='#{self.id.to_guid}'
-                    "].first[:dt]
-                end
-            end
-
             # connect the address via IMAP.
             # find the new incoming emails, using the last ID processed.
             # for each email, if it is a reply to a previous email sent by the system, then insert it in the delivery table.

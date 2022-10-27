@@ -61,8 +61,7 @@ module BlackStack
                 DB["
                     SELECT COUNT(*) AS n 
                     FROM eml_followup f
-                    JOIN eml_job j ON f.id=j.id_followup
-                    JOIN eml_delivery d on j.id=d.id_job 
+                    JOIN eml_delivery d on f.id=d.id_followup 
                     WHERE f.id_campaign = '#{self.id}'
                 "].first[:n]
             end

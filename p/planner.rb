@@ -128,7 +128,7 @@ while (true)
                         leads = leads.drop(0)
                         # create job with grabbed leads
                         d = followup.create_delivery(lead, addr)
-                    l.logf "done (#{my_leads.size.to_s})"
+                    l.done
                     # release resources
                     GC.start
                     DB.disconnect
