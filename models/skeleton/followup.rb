@@ -299,31 +299,6 @@ module BlackStack
                 d
             end
 
-            # return an array of active followups with jobs pending delivery
-            def self.pendings
-                ret = []
-                q = "
-                    SELECT DISTINCT c.id
-                    FROM eml_followup c
-                    JOIN eml_job j ON (
-                        c.id = j.id_followup AND
-                        j.delivery_start_time IS NULL AND -- job should not be started yet
-                        j.planning_time < current_timestamp -- job should be planned to be started
-                    )
-                    WHERE c.status = #{STATUS_ON.to_s}
-                    AND c.planning_success = true
-                    AND c.planning_end_time IS NOT NULL
-                "
-                DB[q].all { |row|
-                    ret << BlackStack::Emails::Campaign.where(:id=>row[:id]).first
-                    # release resources
-                    GC.start
-                    DB.disconnect
-                }
-                # return the array of campaigns
-                ret
-            end
-
             # delete all the record in the table `eml_link` regarding this campaign.
             # create new record in the table `eml_link` for each anchor in the body.
             # call the `save` method of the parent class to save the changes.
