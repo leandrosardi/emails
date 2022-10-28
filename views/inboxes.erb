@@ -18,9 +18,8 @@ q = "
         d.body
         
     from eml_delivery d
-    left join eml_job j on d.id_job = j.id
-    left join eml_campaign c on j.id_campaign = c.id
-    
+    join eml_followup f on d.id_followup = d.id
+    join eml_campaign c on c.id=f.id_campaign
     join \"user\" u on (d.id_user=u.id and u.id_account='#{@login.user.id_account}')
     join fl_lead l on (d.id_lead = l.id)
     where d.is_response = true

@@ -6,15 +6,6 @@
 #
 # Authors: Leandro Daniel Sardi (https://github.com/leandrosardi)
 #
-# Use Cases:
-# - Same address can't deliver more than X emails per day. Such a limit is defined on its field `max_deliveries_per_day`.
-# - Each `eml_job` record has one and only one address assigned.
-# - If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
-# - If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
-# 
-# - TODO: Same Lead cannot receive more than 1 email every Y days. Such a limit is defined on the parameters BlackStack::Emails::lead_rest_days.
-# - TODO: The account owner of the campaign, can use the pool of shared addresses if he has `email` credits.
-# - TODO: If the account owner of the campaign has no `email` credits, he can use his own addresses only.
 
 # load gem and connect database
 require 'mysaas'
@@ -60,14 +51,13 @@ while (true)
     ).all.freeze
     l.logf "done (#{shared_addresses.size})"
     
-    # TODO: Use case: If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
+    # TODO: If a campaign has been paused or deleted, unassign addresses for all its pending jobs, and mark the job as pending for planning.
     # move backward all the further delivereries assigned to the addresses of the abandoned campaign.
 
     # TODO: restart abandoned jobs
     # - If an addresses has been deleted, or it is no longer shared, assign a new address to all pending jobs linked to such an address. 
 
-    # Use case: Each `eml_job` record has one and only one address assigned.
-    # For each active campaign pending planning, I have to create the jobs.
+    # For each active followup pending planning, I have to create the jobs.
     followups.each { |followup|
         l.logs "#{followup.id}..."
             l.logs "Flag planning start... "
