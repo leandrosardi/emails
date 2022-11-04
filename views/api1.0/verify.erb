@@ -1,0 +1,23 @@
+<%
+return_message = {}
+email = params['email']
+#apikey = params['api_key']
+
+# validate parameters
+if email.nil? || email.empty?
+    return_message[:status] = 'email address is required'
+    return return_message.to_json    
+end
+
+begin
+    # verify email address
+    res = BlackStack::Emails.verify(email)
+    raise 'email address is invalid' if !res
+rescue => e
+    return_message[:status] = e.message
+    return return_message.to_json    
+end 
+
+return_message[:status] = 'success'
+return return_message.to_json
+%>

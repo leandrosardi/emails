@@ -23,6 +23,11 @@ post "/emails/filter_verify", :agent => /(.*)/ do
     erb :"/extensions/emails/views/filter_verify"
 end
 
+# email verification API
+get '/api1.0/emails/verify.json' do #, :api_key=>true do
+    erb :'/extensions/emails/views/api1.0/verify'
+end
+
 # public screens (signup/landing page)
 get "/emails/signup", :agent => /(.*)/ do
     erb :"/extensions/emails/views/signup", :layout => :"/views/layouts/public"
