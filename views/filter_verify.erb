@@ -1,0 +1,27 @@
+<%
+err = []
+begin
+    # map parameters
+    email = params[:email]
+
+    # validate parameters
+    if email.nil? || email.empty?
+        err << "Email address is required."
+    end
+
+    # raise exception if any validation failed
+    raise err.join("\n") if !err.empty?
+        
+    # verify email address
+    res = BlackStack::Emails.verify(email)
+
+    # raise exception if email address is invalid
+    raise "#{email} is not valid." if !res
+
+    # return
+    redirect "/emails/verify/#{email}?msg="+ CGI::escape("#{email} is valid.")
+rescue => e
+    # return errors
+    redirect "/emails/verify/#{email}?err="+ CGI::escape(e.message)
+end
+%>

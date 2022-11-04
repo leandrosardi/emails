@@ -6,6 +6,23 @@ get "/emails/", :agent => /(.*)/ do
     redirect2 "/emails/campaigns", params
 end
 
+# public email verification screen
+get "/emails/verify", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/verify", :layout => :"/views/layouts/public"
+end
+get "/emails/verify/", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/verify", :layout => :"/views/layouts/public"
+end
+get "/emails/verify/:email", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/verify", :layout => :"/views/layouts/public"
+end
+get "/emails/verify/:email/", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/verify", :layout => :"/views/layouts/public"
+end
+post "/emails/filter_verify", :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_verify"
+end
+
 # public screens (signup/landing page)
 get "/emails/signup", :agent => /(.*)/ do
     erb :"/extensions/emails/views/signup", :layout => :"/views/layouts/public"
