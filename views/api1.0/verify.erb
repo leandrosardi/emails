@@ -13,7 +13,23 @@ begin
     # verify email address
     res = BlackStack::Emails.verify(email)
     raise 'email address is invalid' if !res
+
+    # register the verification
+    DB.execute("
+        INSERT INTO eml_verification 
+        (id, create_time, request_ip, email, verify_success, verify_error_description)
+        VALUES
+        ('#{guid}', '#{now}', '#{request.ip}', '#{email}', #{res.to_s}, NULL)
+    ")
 rescue => e
+    # register the verification
+    DB.execute("
+        INSERT INTO eml_verification 
+        (id, create_time, request_ip, email, verify_success, verify_error_description)
+        VALUES
+        ('#{guid}', '#{now}', '#{request.ip}', '#{email}', false, '#{e.message.to_sql}')
+    ")
+
     return_message[:status] = e.message
     return return_message.to_json    
 end 
@@ -21,3 +37,4 @@ end
 return_message[:status] = 'success'
 return return_message.to_json
 %>
+
