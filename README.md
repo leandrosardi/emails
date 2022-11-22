@@ -35,30 +35,7 @@ git clone https://github.com/leandrosardi/emails/
 BlackStack::Extensions.append :emails
 ```
 
-**Step 4:** Setup the extension in your configuration file
-
-```ruby
-# setup google api certificate - Remember to add it to the .gitignore file! 
-BlackStack::Emails.set_google_api_certificate(LOCALW ? '/home/leandro/code/mysaas/google-api.json' : '/home/ubuntu/code/mysaas/google-api.json')
-```
-
-**Step 5:** Add certificates and tokens to your `.gitignore` file. _(optional)_
-
-We recommend you also add `google-api.json` to the `.gitignore` file of your **MySaaS** project.
-
-```ruby
-# ignore google-api credentials
-google-api.json
-```
-
-Also, add all authorization tokens of end-users.
-
-```ruby
-# ignore google-api access tokens
-*.token.yaml
-```
-
-**Step 6:** Setup **Emails** as an [I2P](https://github.com/leandrosardi/i2p) product with plans. _(optional)_
+**Step 4:** Setup **Emails** as an [I2P](https://github.com/leandrosardi/i2p) product with plans. _(optional)_
 
 Some screens of the **Emails** extensions are assuming that there is an I2P product called `'emails'`, with some plans defined too.
 

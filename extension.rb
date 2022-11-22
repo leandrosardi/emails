@@ -57,20 +57,7 @@ BlackStack::Extensions::add ({
             ",
             :sudo => true,
         }],
-    }, {
-        :name => 'upload-google-api-certificate',
-        :commands => [{ 
-            # back up old configuration file
-            # upload configuration file from local working directory to remote server
-            :command => "
-                cd ~/code/mysaas;
-                mv ./google-api.json ./google-api.%timestamp%.json;
-                echo '%google_api_json_file%' > ./google-api.json;
-            ",
-            #:matches => [ /^$/, /mv: cannot stat '\.\/config.rb': No such file or directory/ ],
-            #:nomatches => [ { :nomatch => /.+/, :error_description => 'No output expected.' } ],
-            :sudo => false,
-        }],
+=begin
     }, {
         :name => 'start-planning-process',
         :commands => [{ 
@@ -99,6 +86,7 @@ BlackStack::Extensions::add ({
             :sudo => true,
             :background => true,
         }],
+=end
     }],
 
     # define CSS files to add
