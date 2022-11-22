@@ -17,8 +17,8 @@ module BlackStack
             end
 
             # return array of address objects, connected to this campaign thru the :outreaches attribute
-            def tags()
-                # TODO: Code Me!
+            def addresses()
+                self.outreaches.map { |o| o.tag }.uniq.map { |t| t.addresses }.flatten.uniq
             end
 
             # statuses of email campaigns: draft, sent, etc.

@@ -16,11 +16,11 @@ BlackStack::Extensions::add ({
     # what is the section to add this extension in either the top-bar, the footer, the dashboard.
     :services_section => 'Services',
     # show this extension as a service in the top bar?
-    :show_in_top_bar => false,
+    :show_in_top_bar => true,
     # show this extension as a service in the footer?
-    :show_in_footer => false,
+    :show_in_footer => true,
     # show this extension as a service in the dashboard?
-    :show_in_dashboard => false,
+    :show_in_dashboard => true,
 
     # what are the screens to add in the leftbar
     :leftbar_icons => [

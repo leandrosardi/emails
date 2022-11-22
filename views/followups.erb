@@ -79,27 +79,27 @@ q = "
                     <td class="fix" style='text-align:right;' title="<%=row[:delay_days].to_s.encode_html%>"><span class='label label-black'><%=row[:delay_days].to_label%></span></td>
 
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_sents].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/sent'><%=row[:stat_sents].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/report/sent'><%=row[:stat_sents].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=f.sent_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_opens].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/opens'><%=row[:stat_opens].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/report/opens'><%=row[:stat_opens].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=f.opens_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_clicks].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/clicks'><%=row[:stat_clicks].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/report/clicks'><%=row[:stat_clicks].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=f.clicks_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_unsubscribes].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/unsubscribes'><%=row[:stat_unsubscribes].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/report/unsubscribes'><%=row[:stat_unsubscribes].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=f.unsubscribes_ratio.to_i.to_label%>%</span>
                     </td>
                     <td class="fix" style="text-align:right;" title="<%=row[:stat_sents].to_i.to_label%>">
-                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/replies'><%=row[:stat_sents].to_i.to_label%></a>
+                        <a href='/emails/campaigns/<%=row[:id].to_guid%>/followups/<%=f.id.to_guid%>/report/replies'><%=row[:stat_sents].to_i.to_label%></a>
                         <br/>
                         <span style='color:gray;'><%=f.replies_ratio.to_i.to_label%>%</span>
                     </td>

@@ -28,17 +28,49 @@ get '/api1.0/emails/verify.json' do #, :api_key=>true do
     erb :'/extensions/emails/views/api1.0/verify'
 end
 
-# public screens (signup/landing page)
+# public screens (signup, login)
 get "/emails/signup", :agent => /(.*)/ do
     erb :"/extensions/emails/views/signup", :layout => :"/views/layouts/public"
 end
 
-# public screens (login page)
 get "/emails/login", :agent => /(.*)/ do
     erb :"/extensions/emails/views/login", :layout => :"/views/layouts/public"
 end
 
-# internal app screens - leads upload
+# internal app screens - wizard
+get "/emails/wizard/step1", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/step1", :layout => :"/views/layouts/core"
+end
+
+get "/emails/wizard/step2", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/step1", :layout => :"/views/layouts/core"
+end
+
+get "/emails/wizard/step3", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/step1", :layout => :"/views/layouts/core"
+end
+
+post "/emails/filter_step1", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_step1"
+end
+
+post "/emails/filter_step2", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_step2"
+end
+
+post "/emails/filter_step3", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_step3"
+end
+
+# internal app screens - leads, leads upload and lists
+get "/emails/leads", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/leads/views/results", :layout => :"/views/layouts/core"
+end
+
+get "/emails/lists", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/leads/views/exports", :layout => :"/views/layouts/core"
+end
+
 get "/emails/leads/uploads/new", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/new_upload_leads", :layout => :"/views/layouts/core"
 end
@@ -48,7 +80,7 @@ post "/emails/leads/uploads/mapping", :auth => true, :agent => /(.*)/ do
 end
 
 post "/emails/filter_new_upload_job", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/filter_new_upload_job"
+    erb :"/extensions/emails/views/filter_new_upload_leads_job"
 end
 
 get "/emails/leads/uploads", :auth => true, :agent => /(.*)/ do
@@ -57,6 +89,43 @@ end
 
 get "/emails/leads/uploads/:id", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/upload_leads_job", :layout => :"/views/layouts/core"
+end
+
+# addresses
+get "/emails/addresses", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/addresses", :layout => :"/views/layouts/core"
+end
+
+get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
+end
+
+get "/emails/addresses/new/gmail", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_gmail_address", :layout => :"/views/layouts/core"
+end
+
+get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
+end
+
+get "/emails/addresses/uploads/new", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/new_upload_addresses", :layout => :"/views/layouts/core"
+end
+
+post "/emails/addresses/uploads/mapping", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/mapping_upload_addresses", :layout => :"/views/layouts/core"
+end
+
+post "/emails/filter_new_upload_addresses_job", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/filter_new_upload_addresses_job"
+end
+
+get "/emails/addresses/uploads", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/upload_addresses_jobs", :layout => :"/views/layouts/core"
+end
+
+get "/emails/addresses/uploads/:id", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/upload_addresses_job", :layout => :"/views/layouts/core"
 end
 
 # internal app screens - campaigns
@@ -107,76 +176,22 @@ post "/emails/filter_edit_followup", :auth => true, :agent => /(.*)/ do
 end
 
 # activities - campaigns
-get "/emails/campaigns/:gid/sent", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=sents", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/replies", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=replies", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/opens", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=opens", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/clicks", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=clicks", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/unsubscribes", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=unsubscribes", :layout => :"/views/layouts/core"
-end
-
-# activities - followups
-get "/emails/campaigns/:gid/followups/:fid/sent", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=sents", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/followups/:fid/replies", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=replies", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/followups/:fid/opens", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=opens", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/followups/:fid/clicks", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=clicks", :layout => :"/views/layouts/core"
-end
-get "/emails/campaigns/:gid/followups/:fid/unsubscribes", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/report_campaign?report=unsubscribes", :layout => :"/views/layouts/core"
-end
-
-# addresses
-get "/emails/addresses", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/addresses", :layout => :"/views/layouts/core"
-end
-
-get "/emails/addresses/new", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/new_address", :layout => :"/views/layouts/core"
-end
-
-get "/emails/addresses/new/gmail", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/new_gmail_address", :layout => :"/views/layouts/core"
-end
-
-get "/emails/addresses/new/hotmail", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/new_hotmail_address", :layout => :"/views/layouts/core"
-end
-
-get "/emails/addresses/:aid/edit", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/edit_address", :layout => :"/views/layouts/core"
-end
-
-get "/emails/leads", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/leads/views/results", :layout => :"/views/layouts/core"
-end
-
-get "/emails/lists", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/leads/views/exports", :layout => :"/views/layouts/core"
-end
-
-
-
-get "/emails/activity", :auth => true, :agent => /(.*)/ do
+get "/emails/campaigns/:gid/report/:report", :auth => true, :agent => /(.*)/ do
     erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
 end
 
-get "/emails/inboxes", :auth => true, :agent => /(.*)/ do
-    erb :"/extensions/emails/views/inboxes", :layout => :"/views/layouts/core"
+# activities - followups
+get "/emails/campaigns/:gid/followups/:fid/report/:report", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/report_campaign", :layout => :"/views/layouts/core"
+end
+
+# unibox
+get "/emails/unibox", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/unibox", :layout => :"/views/layouts/core"
+end
+
+get "/emails/campaign/:gid/unibox", :auth => true, :agent => /(.*)/ do
+    erb :"/extensions/emails/views/unibox", :layout => :"/views/layouts/core"
 end
 
 # filters
