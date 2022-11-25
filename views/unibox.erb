@@ -1,5 +1,5 @@
 <%
-filter_keyword = @login.user.preference('emails.inboxes.filter.keyword', "", params[:keyword])
+filter_keyword = @login.user.preference('emails.unibox.filter.keyword', "", params[:keyword])
 
 q = "
     select 
@@ -33,10 +33,10 @@ q = "
 <div class="mynavbar mysticky">
 	<section class="row-fluid">	
 		<div class="span6">
-		    <%=nav2("Emails", "/emails", "Inboxes")%>
+		    <%=nav2("Emails", "/emails", "unibox")%>
 		</div>
 		<div class="span6">
-            <form action="/emails/inboxes" method="get">
+            <form action="/emails/unibox" method="get">
             <div class="pull-right">
                 <div class="span8">
                     <input type='text' class='input-block-level select-all-on-focus' id='keyword' name='keyword' value='<%=filter_keyword.encode_html%>'/>
@@ -54,7 +54,7 @@ q = "
 <!-- Single Panel -->
 <section class="row-fluid">
 	<div class="span4 box widget-support-tickets inbox-contaier">
-        <div class='inboxes'>
+        <div class='unibox'>
             <%
             i = 0
             DB[q].all { |row|

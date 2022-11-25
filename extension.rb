@@ -27,7 +27,7 @@ BlackStack::Extensions::add ({
         { :label => 'leads', :icon => :heart, :screen => :leads, },
         { :label => 'lists', :icon => :list, :screen => :lists, },
         { :label => 'addresses', :icon => :envelope, :screen => :addresses, },
-        { :label => 'inboxes', :icon => :inbox, :screen => :inboxes, },
+        { :label => 'unibox', :icon => :inbox, :screen => :unibox, },
         { :label => 'campaigns', :icon => :beaker, :screen => :campaigns, },
 #        { :label => 'jobs', :icon => :tasks, :screen => :jobs, },
         { :label => 'activity', :icon => :tasks, :screen => :activity, },
@@ -91,7 +91,7 @@ BlackStack::Extensions::add ({
 
     # define CSS files to add
     :css_files => [
-        '/emails/css/inboxes.css',
+        '/emails/css/unibox.css',
     ],
 })
 
