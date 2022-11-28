@@ -95,6 +95,95 @@ BlackStack::Extensions::add ({
     ],
 })
 
+# defining Pampa jobs
+BlackStack::Pampa.add_job({
+  :name => 'emails.upload_leads_job.ingest',
+
+  # Minimum number of tasks that a worker must have in queue.
+  # Default: 5
+  :queue_size => 5, 
+  
+  # Maximum number of minutes that a task should take to process.
+  # If a tasks didn't finish X minutes after it started, it is restarted and assigned to another worker.
+  # Default: 15
+  :max_job_duration_minutes => 10,  
+  
+  # Maximum number of times that a task can be restarted.
+  # Default: 3
+  :max_try_times => 3,
+
+  # Define the tasks table: each record is a task.
+  # The tasks table must have some specific fields for handling the tasks dispatching.
+  :table => :eml_upload_leads_job, # Note, that we are sending a class object here
+  :field_primary_key => :id,
+  :field_id => :ingest_reservation_id,
+  :field_time => :ingest_reservation_time, 
+  :field_times => :ingest_reservation_times,
+  :field_start_time => :ingest_start_time,
+  :field_end_time => :ingest_end_time,
+  :field_success => :ingest_success,
+  :field_error_description => :ingest_error_description,
+
+  # Function to execute for each task.
+  :processing_function => Proc.new do |task, l, job, worker, *args|
+    l.logs 'Loading the upload row object... '
+    job = BlackStack::Emails::UploadLeadsJob.where(:id => task[:id]).first
+    l.done
+
+    l.logs "Processing export #{export.id}"
+    job.ingest(l)
+    l.done
+  end
+})
+
+# defining Pampa jobs
+BlackStack::Pampa.add_job({
+  :name => 'emails.upload_leads_row.import',
+
+  # Minimum number of tasks that a worker must have in queue.
+  # Default: 5
+  :queue_size => 5, 
+  
+  # Maximum number of minutes that a task should take to process.
+  # If a tasks didn't finish X minutes after it started, it is restarted and assigned to another worker.
+  # Default: 15
+  :max_job_duration_minutes => 45,  
+  
+  # Maximum number of times that a task can be restarted.
+  # Default: 3
+  :max_try_times => 3,
+
+  # Define the tasks table: each record is a task.
+  # The tasks table must have some specific fields for handling the tasks dispatching.
+  :table => :eml_upload_leads_row, # Note, that we are sending a class object here
+  :field_primary_key => :id,
+  :field_id => :import_reservation_id,
+  :field_time => :import_reservation_time, 
+  :field_times => :import_reservation_times,
+  :field_start_time => :import_start_time,
+  :field_end_time => :import_end_time,
+  :field_success => :import_success,
+  :field_error_description => :import_error_description,
+
+  # Function to execute for each task.
+  :processing_function => Proc.new do |task, l, job, worker, *args|
+    l.logs 'Loading the upload row object... '
+    row = BlackStack::Emails::UploadLeadsRow.where(:id => task[:id]).first
+    l.done
+
+    colcount = 0
+    if rows.size > 0
+        l.logs "Get number of columns that each line must have... "
+        colcount = rows[0].line.split("\t").size
+        l.logf "done (#{colcount})"
+    end
+
+    l.logs "Processing export #{export.id}"
+    row.import(colcount, l)
+    l.done
+  end
+})
+
 # ----------------------------------------
 # Pricing Model
 # 
