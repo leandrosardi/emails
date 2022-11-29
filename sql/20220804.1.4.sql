@@ -48,7 +48,7 @@ create table if not exists eml_upload_leads_mapping (
     id_upload_leads_job uuid not null references eml_upload_leads_job(id), -- who registered this account
     create_time timestamp not null, -- when registered this account
     "column" int not null, -- the column number
-    data_type int not null, -- the data type from BlackStack::LeadsData
+    data_type int not null, -- the data type from BlackStack::Leads::Data
     custom_field_name varchar(500) not null, -- the name of the column for custom fields
     unique(id_upload_leads_job, "column")
 );

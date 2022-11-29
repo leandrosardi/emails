@@ -20,7 +20,7 @@ begin
     # validate custom fields are not using reserved words for standard fields
     i = 0
     fields.each { |field| 
-        if field.to_i == BlackStack::LeadsData::TYPE_CUSTOM && BlackStack::LeadsData::MERGETAGS.include?(custom_field_names[i])
+        if field.to_i == BlackStack::Leads::Data::TYPE_CUSTOM && BlackStack::Leads::Data::MERGETAGS.include?(custom_field_names[i])
             err << "Custom field name '#{custom_field_names[i]}' is a reserved word for standard fields."
         end
         i+=1
