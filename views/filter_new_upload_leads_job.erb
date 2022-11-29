@@ -32,9 +32,9 @@ begin
     # create/load the export
     export = nil
     if !id_export.to_s.empty?
-        export = BlackStack::LeadsExport.where(:id=>id_export.to_s).first
+        export = BlackStack::Leads::Export.where(:id=>id_export.to_s).first
     else
-        export = BlackStack::LeadsExport.new
+        export = BlackStack::Leads::Export.new
         export.id = guid
         export.id_user = @login.id_user
         export.id_search = nil

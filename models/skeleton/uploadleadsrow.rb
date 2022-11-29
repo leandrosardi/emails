@@ -92,7 +92,7 @@ module BlackStack
 
                 # create the lead object
                 # save the lead
-                l = BlackStack::LeadsLead.new(self.to_hash)
+                l = BlackStack::Leads::Lead.new(self.to_hash)
                 l.id = guid
                 l.id_user = row.uploadleadsjob.id_user
                 l.public = false # TODO: parametrize this in the form

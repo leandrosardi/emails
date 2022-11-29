@@ -2,7 +2,7 @@ module BlackStack
     module Emails
         class Campaign < Sequel::Model(:eml_campaign)
             many_to_one :user, :class=>:'BlackStack::MySaaS::User', :key=>:id_user
-            many_to_one :export, :class=>:'BlackStack::LeadsExport', :key=>:id_export      
+            many_to_one :export, :class=>:'BlackStack::Leads::Export', :key=>:id_export      
             one_to_many :followups, :class=>"BlackStack::Emails::Followup", :key=>:id_campaign
             one_to_many :schedules, :class=>"BlackStack::Emails::Schedule", :key=>:id_campaign
             one_to_many :outreaches, :class=>"BlackStack::Emails::Outreach", :key=>:id_campaign
