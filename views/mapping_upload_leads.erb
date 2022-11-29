@@ -52,7 +52,7 @@ redirect "/emails/leads/uploads/new?err=#{CGI.escape(err.join('<br/>'))}" unless
 
 		<br/>
 		<br/>
-		<p><b>Export Lists</b>: <%= id_export.to_s.empty? ? "#{filename.encode_html} <i style='color:blue;'>(new)</i>" : Leads::FlExport.where(:id=>id_export).first.filename.encode_html %></p>
+		<p><b>Export Lists</b>: <%= id_export.to_s.empty? ? "#{filename.encode_html} <i style='color:blue;'>(new)</i>" : BlackStack::LeadsExport.where(:id=>id_export).first.filename.encode_html %></p>
 		<form method='post' action='/emails/filter_new_upload_job'>
 			<table class="table">
 				<tr>
@@ -71,9 +71,9 @@ redirect "/emails/leads/uploads/new?err=#{CGI.escape(err.join('<br/>'))}" unless
 							<select id='field_<%=index%>' name='field_<%=index%>' class='field' data-index='<%=index%>'>
 								<option value='' <%=fields%> <%= fields[index].to_s.empty? ? 'select' : '' %>>--</option>
 								<%
-								Leads::FlData.types.each do |type|
+								BlackStack::LeadsData.types.each do |type|
 									%>
-									<option value='<%=type.to_s%>'><%=Leads::FlData::type_merge_tag(type)%></option>
+									<option value='<%=type.to_s%>'><%=BlackStack::LeadsData::type_merge_tag(type)%></option>
 									<%
 								end
 								%>
@@ -119,7 +119,7 @@ redirect "/emails/leads/uploads/new?err=#{CGI.escape(err.join('<br/>'))}" unless
 		$('.field').change(function(){
 			var index = $(this).data('index');
 			var value = $(this).val();
-			if(value == <%=Leads::FlData::TYPE_CUSTOM.to_s%>) {
+			if(value == <%=BlackStack::LeadsData::TYPE_CUSTOM.to_s%>) {
 				// enable custom field name
 				$('.cutom-field-name[data-index="'+index+'"]').prop('disabled', false);
 				$('.cutom-field-name[data-index="'+index+'"]').focus();

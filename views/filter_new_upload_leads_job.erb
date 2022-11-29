@@ -20,7 +20,7 @@ begin
     # validate custom fields are not using reserved words for standard fields
     i = 0
     fields.each { |field| 
-        if field.to_i == Leads::FlData::TYPE_CUSTOM && Leads::FlData::MERGETAGS.include?(custom_field_names[i])
+        if field.to_i == BlackStack::LeadsData::TYPE_CUSTOM && BlackStack::LeadsData::MERGETAGS.include?(custom_field_names[i])
             err << "Custom field name '#{custom_field_names[i]}' is a reserved word for standard fields."
         end
         i+=1
@@ -32,9 +32,9 @@ begin
     # create/load the export
     export = nil
     if !id_export.to_s.empty?
-        export = Leads::FlExport.where(:id=>id_export.to_s).first
+        export = BlackStack::LeadsExport.where(:id=>id_export.to_s).first
     else
-        export = Leads::FlExport.new
+        export = BlackStack::LeadsExport.new
         export.id = guid
         export.id_user = @login.id_user
         export.id_search = nil

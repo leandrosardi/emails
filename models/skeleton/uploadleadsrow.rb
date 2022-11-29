@@ -16,29 +16,29 @@ module BlackStack
                     # get the mapping definition
                     m = job.uploadleadsmappings.select { |m| m.column == i }.first
                     # map the value to the lead
-                    if m.data_type.to_i == ::Leads::FlData::TYPE_CUSTOM
+                    if m.data_type.to_i == BlackStack::LeadsData::TYPE_CUSTOM
                         h['datas'] << { 'type' => m.data_type, 'custom_field_name' => m.custom_field_name, 'value' => val }
-                    elsif m.data_type.to_i == ::Leads::FlData::TYPE_COMPANY_NAME                       
+                    elsif m.data_type.to_i == BlackStack::LeadsData::TYPE_COMPANY_NAME                       
                         h['company'] = { 'name' => val }
                     elsif (
-                        m.data_type.to_i == ::Leads::FlData::TYPE_FIRST_NAME ||
-                        m.data_type.to_i == ::Leads::FlData::TYPE_LAST_NAME
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_FIRST_NAME ||
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_LAST_NAME
                     )
-                        fname_mapping = job.uploadleadsmappings.select { |m| m.data_type.to_i == ::Leads::FlData::TYPE_FIRST_NAME }.first
-                        lname_mapping = job.uploadleadsmappings.select { |m| m.data_type.to_i == ::Leads::FlData::TYPE_LAST_NAME }.first
+                        fname_mapping = job.uploadleadsmappings.select { |m| m.data_type.to_i == BlackStack::LeadsData::TYPE_FIRST_NAME }.first
+                        lname_mapping = job.uploadleadsmappings.select { |m| m.data_type.to_i == BlackStack::LeadsData::TYPE_LAST_NAME }.first
                         fname = vals[fname_mapping.column]
                         lname = vals[lname_mapping.column]
                         h['name']  = "#{fname} #{lname}"
-                    elsif m.data_type.to_i == ::Leads::FlData::TYPE_LOCATION
+                    elsif m.data_type.to_i == BlackStack::LeadsData::TYPE_LOCATION
                         h['location']  = val
-                    elsif m.data_type.to_i == ::Leads::FlData::TYPE_INDUSTRY
+                    elsif m.data_type.to_i == BlackStack::LeadsData::TYPE_INDUSTRY
                         h['industry'] = val
                     elsif ( 
-                        m.data_type.to_i == ::Leads::FlData::TYPE_PHONE ||
-                        m.data_type.to_i == ::Leads::FlData::TYPE_EMAIL ||
-                        m.data_type.to_i == ::Leads::FlData::TYPE_FACEBOOK ||
-                        m.data_type.to_i == ::Leads::FlData::TYPE_TWITTER ||
-                        m.data_type.to_i == ::Leads::FlData::TYPE_LINKEDIN
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_PHONE ||
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_EMAIL ||
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_FACEBOOK ||
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_TWITTER ||
+                        m.data_type.to_i == BlackStack::LeadsData::TYPE_LINKEDIN
                     )
                         # create the data
                         h['datas'] << { 'type' => m.data_type, 'value' => val }
@@ -53,7 +53,7 @@ module BlackStack
                 log = BlackStack::DummyLogger.new if log.nil?
                 # find all the mappings for an email address
                 log.logs "Getting list of email mappings... "
-                mappings = self.uploadleadsjob.uploadleadsmappings.select { |m| m.data_type == ::Leads::FlData::TYPE_EMAIL }
+                mappings = self.uploadleadsjob.uploadleadsmappings.select { |m| m.data_type == BlackStack::LeadsData::TYPE_EMAIL }
                 log.logf "done (#{mappings.size})"
 
                 mappings.each { |m|
@@ -92,7 +92,7 @@ module BlackStack
 
                 # create the lead object
                 # save the lead
-                l = ::Leads::FlLead.new(self.to_hash)
+                l = BlackStack::LeadsLead.new(self.to_hash)
                 l.id = guid
                 l.id_user = row.uploadleadsjob.id_user
                 l.public = false # TODO: parametrize this in the form

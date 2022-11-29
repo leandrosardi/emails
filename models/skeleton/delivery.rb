@@ -2,7 +2,7 @@ module BlackStack
     module Emails
         class Delivery < Sequel::Model(:eml_delivery)
             many_to_one :job, :class=>:'BlackStack::Emails::Job', :key=>:id_job
-            many_to_one :lead, :class=>:'Leads::FlLead', :key=>:id_lead
+            many_to_one :lead, :class=>:'BlackStack::LeadsLead', :key=>:id_lead
             many_to_one :user, :class=>:'BlackStack::Emails::User', :key=>:id_user
             many_to_one :address, :class=>:'BlackStack::Emails::Address', :key=>:id_address
 
