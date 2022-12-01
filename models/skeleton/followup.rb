@@ -277,7 +277,7 @@ module BlackStack
             # choice 2, use ANY email address of the lead.
             # 
             def create_delivery(lead, address)
-                email = lead.emails.select { |e| !e.verify_success.nil? && e.verify_success }.first.value
+                email = lead.emails.select { |e| !e.verified.nil? && e.verified }.first.value
                 email = lead.emails.first.value if email.nil?
                 d = BlackStack::Emails::Delivery.new
                 d.id = guid
