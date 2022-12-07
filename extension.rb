@@ -1,6 +1,6 @@
 BlackStack::Extensions::add ({
     # descriptive name and descriptor
-    :name => 'Emails',
+    :name => 'emails',
     :description => 'Convert your GMail accounts into an Email Marketing platform.',
 
     # setup the url of the repository for installation and updates
